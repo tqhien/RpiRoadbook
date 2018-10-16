@@ -9,7 +9,7 @@ Created on Mon Oct 15 08:58:53 2018
 # Pour masquer le message de la version de pygame
 import contextlib
 with contextlib.redirect_stdout(None):
-    import pygame
+    import pygame.display
 
 # Pour l'affichage sur le framebuffer
 from pygame.locals import *
@@ -21,9 +21,10 @@ import time
 import os
 import re
 import configparser
+import serial
 
 # Pour la lecture des fichiers pdf et conversion en image
-from pdf2image import convert_from_path, page_count
+from pdf2image import page_count,convert_from_path
 
 class SceneBase:
     def __init__(self, fname = ''):
@@ -45,7 +46,7 @@ class SceneBase:
     def Terminate(self):
         self.SwitchToScene(None)
 
-def run_game(width, height, fps, starting_scene):
+def run_RpiRoadbook(width, height, fps, starting_scene):
     pygame.display.init() ;
     pygame.mouse.set_visible(False)
     screen = pygame.display.set_mode((width, height))
@@ -91,6 +92,7 @@ def run_game(width, height, fps, starting_scene):
 class TitleScene(SceneBase):
     def __init__(self):
         SceneBase.__init__(self)
+        
         pygame.font.init()
         self.maconfig = configparser.ConfigParser()
 
@@ -111,7 +113,6 @@ class TitleScene(SceneBase):
 	      # On le charge
         self.maconfig.read('RpiRoadbook.cfg')
 
-        self.j = time.time()
         self.countdown = 6 ;
         self.iscountdown = True ;
         self.selection= 0 ;
@@ -119,6 +120,7 @@ class TitleScene(SceneBase):
         self.font = pygame.font.SysFont("cantarell", 30)
         self.filenames = [f for f in os.listdir('./../Roadbooks/') if re.search('.pdf$', f)]
         self.filename = self.saved if self.saved in self.filenames  else ''
+        self.j = time.time()
     
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -154,7 +156,7 @@ class TitleScene(SceneBase):
         screen.blit(invite,(10,10))
         for i in range (len(self.filenames)) :
             couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
-            fond = (0,0,255) if i == self.selection else (0,0,0)
+            fond = (0,0,255) if i == self.selection else background
             text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
             screen.blit (text,(10,40+i*30))
         text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
@@ -164,6 +166,7 @@ class TitleScene(SceneBase):
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
         SceneBase.__init__(self,fname)
+        
         self.maconfig = configparser.ConfigParser()
 
 	      # Vérification de l'existence du fichier de config
@@ -209,6 +212,8 @@ class RoadbookScene(SceneBase):
         self.label_km = self.myfont_100.render("000.00", 1, (200,200,200))
         self.label_vi = self.myfont_70.render("000", 1, (200,200,200))
         self.label_vm = self.myfont_70.render("000", 1, (100,100,100))
+        self.ser=serial.Serial("/dev/ttyUSB0",9600)  #change USB number as found from ls /dev/tty*
+        self.ser.baudrate=9600
         
     
     def ProcessInput(self, events, pressed_keys):
@@ -245,13 +250,29 @@ class RoadbookScene(SceneBase):
     def Update(self):
         if self.case != self.oldcase :
             self.pages = convert_from_path('./../Roadbooks/'+self.filename, dpi=150 ,first_page=self.case, last_page=self.case+2, fmt='jpg')
-
             self.data1 = self.pages [0].tobytes()
             self.data2 = self.pages [1].tobytes()
-    
             self.image1 = pygame.image.fromstring (self.data1,self.size,self.mode)
             self.image2 = pygame.image.fromstring (self.data2,self.size,self.mode)
-    
+        read_ser=str((self.ser.readline()))
+        if read_ser [2] == "R" :
+            [dummy, affkm, affm,vmoy,affmin,affsec,vinstant, vmax] = read_ser.split(";");
+            vmax = vmax[:3]
+            #print(affmin+':'+affsec+' vinstant :'+vinstant+' vmax:'+vmax)
+        if read_ser [2] == "P" :
+            [dummy, affmin, affsec,affcent,vinstant,vmaxabsolue] = read_ser.split(";");
+            #print(affmin+':'+affsec)
+        if read_ser [2] == "B":
+            [dummy, affmin, affsec,affcent,afftour,affvmax] = read_ser.split(";");
+            #print(affmin+':'+affsec)
+        if read_ser [2] == "O" :
+            [dummy, affkm, affm, afftotalismkm, afftotaliskm,vinstant] = read_ser.split(";");
+            #print(affmin+':'+affsec)
+        self.label_tps = self.myfont_70.render("00:"+affmin+":"+affsec, 1, (200,200,200))
+        self.label_km = self.myfont_100.render(affkm+"."+affm, 1, (200,200,200))
+        self.label_vi = self.myfont_70.render(vinstant, 1, (200,200,200))
+        self.label_vm = self.myfont_70.render(vmax, 1, (100,100,100))
+
     def Render(self, screen):
         screen.fill(background)
 	    # Positionnement des différents éléments d'affichage
@@ -264,4 +285,4 @@ class RoadbookScene(SceneBase):
         
         
 
-run_game(800, 480, 60, TitleScene())
+run_RpiRoadbook(800, 480, 60, TitleScene())
