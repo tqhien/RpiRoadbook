@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 15 08:58:53 2018
@@ -46,6 +47,7 @@ class SceneBase:
 
 def run_game(width, height, fps, starting_scene):
     pygame.display.init() ;
+    pygame.mouse.set_visible(False)
     screen = pygame.display.set_mode((width, height))
     
     clock = pygame.time.Clock()  
@@ -185,6 +187,7 @@ class RoadbookScene(SceneBase):
         self.case = int(self.maconfig['Roadbooks']['case'])
         if self.case < 0 :
             self.case = self.nb_cases - 1 # on compte de 0 à longueur-1, on se place sur l'avant dernière case si 1ère ouverture
+        self.oldcase = self.case
         self.pages = convert_from_path('./../Roadbooks/'+self.filename, dpi=150 ,first_page=self.case, last_page=self.case+2, fmt='jpg')
 
         #on récupère les paramètres de l'image
@@ -194,6 +197,8 @@ class RoadbookScene(SceneBase):
         # Les 2 seules cases converties
         self.data1 = self.pages [0].tobytes()
         self.data2 = self.pages [1].tobytes()
+        self.image1 = pygame.image.fromstring (self.data1,self.size,self.mode)
+        self.image2 = pygame.image.fromstring (self.data2,self.size,self.mode)
 
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 72)
@@ -214,12 +219,16 @@ class RoadbookScene(SceneBase):
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()          
                 if event.key == pygame.K_UP:
+                    self.oldcase = self.case
                     self.case += 1
                 if event.key == pygame.K_DOWN:
+                    self.oldcase = self.case
                     self.case -= 1
                 if event.key == pygame.K_HOME:
+                    self.oldcase = self.case
                     self.case = self.nb_cases -1
                 if event.key == pygame.K_END:
+                    self.oldcase = self.case
                     self.case = 0
 
         # Action sur le dérouleur
@@ -234,13 +243,14 @@ class RoadbookScene(SceneBase):
             self.maconfig.write(configfile)
         
     def Update(self):
-        self.pages = convert_from_path('./../Roadbooks/'+self.filename, dpi=150 ,first_page=self.case, last_page=self.case+2, fmt='jpg')
+        if self.case != self.oldcase :
+            self.pages = convert_from_path('./../Roadbooks/'+self.filename, dpi=150 ,first_page=self.case, last_page=self.case+2, fmt='jpg')
 
-        self.data1 = self.pages [0].tobytes()
-        self.data2 = self.pages [1].tobytes()
+            self.data1 = self.pages [0].tobytes()
+            self.data2 = self.pages [1].tobytes()
     
-        self.image1 = pygame.image.fromstring (self.data1,self.size,self.mode)
-        self.image2 = pygame.image.fromstring (self.data2,self.size,self.mode)
+            self.image1 = pygame.image.fromstring (self.data1,self.size,self.mode)
+            self.image2 = pygame.image.fromstring (self.data2,self.size,self.mode)
     
     def Render(self, screen):
         screen.fill(background)
