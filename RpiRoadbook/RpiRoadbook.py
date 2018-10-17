@@ -22,6 +22,7 @@ import os
 import re
 import configparser
 import serial
+#import RPi.GPIO as GPIO
 
 # Pour la lecture des fichiers pdf et conversion en image
 from pdf2image import page_count,convert_from_path
@@ -87,7 +88,7 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
         pygame.display.flip()
         clock.tick(fps)
 
-# The rest is code where you implement your game using the Scenes model 
+# The rest is code where you implement your app using the Scenes model 
 
 class TitleScene(SceneBase):
     def __init__(self):
@@ -117,7 +118,7 @@ class TitleScene(SceneBase):
         self.iscountdown = True ;
         self.selection= 0 ;
         self.saved= self.maconfig['Roadbooks']['etape'] ;
-        self.font = pygame.font.SysFont("cantarell", 30)
+        self.font = pygame.font.SysFont("cantarell", 24)
         self.filenames = [f for f in os.listdir('./../Roadbooks/') if re.search('.pdf$', f)]
         self.filename = self.saved if self.saved in self.filenames  else ''
         self.j = time.time()
@@ -127,14 +128,18 @@ class TitleScene(SceneBase):
             if event.type == pygame.KEYDOWN :
                 self.iscountdown = False ;
                 if event.key == pygame.K_RETURN:
-                # Move to the next scene when the user pressed Enter 
+                # Move to the next screen when the user pressed Enter 
                     if self.filename != self.filenames[self.selection] :
                         self.filename = self.filenames[self.selection]
                         self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection] 
                         self.maconfig['Roadbooks']['case'] = '-1'
                         with open('RpiRoadbook.cfg', 'w') as configfile:
                             self.maconfig.write(configfile)
-                        
+                    # Check s'il s'agit bien d'un roadbook 1 case par page, par la dimension d'une page...
+                    # TODO
+                    # Sinon, convertir, grâce au script python...
+                    # TODO
+
                     self.SwitchToScene(RoadbookScene(self.filename))
                 elif event.key == pygame.K_UP:
                     self.selection -= 1 ;
@@ -146,7 +151,6 @@ class TitleScene(SceneBase):
     def Update(self):
         if self.iscountdown:
             self.k = time.time();
-        #print(k-self.j) ;
             if (self.k-self.j>=self.countdown) :
                 self.SwitchToScene(RoadbookScene(self.filename))
     
@@ -212,9 +216,11 @@ class RoadbookScene(SceneBase):
         self.label_km = self.myfont_100.render("000.00", 1, (200,200,200))
         self.label_vi = self.myfont_70.render("000", 1, (200,200,200))
         self.label_vm = self.myfont_70.render("000", 1, (100,100,100))
-        self.ser=serial.Serial("/dev/ttyUSB0",9600)  #change USB number as found from ls /dev/tty*
-        self.ser.baudrate=9600
-        
+        self.vectorino=True
+        try :
+           self.ser=serial.Serial("/dev/ttyUSB0",115200); #change USB number as found from ls /dev/tty*
+        except:
+           self.vectorino=False
     
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -254,20 +260,26 @@ class RoadbookScene(SceneBase):
             self.data2 = self.pages [1].tobytes()
             self.image1 = pygame.image.fromstring (self.data1,self.size,self.mode)
             self.image2 = pygame.image.fromstring (self.data2,self.size,self.mode)
-        read_ser=str((self.ser.readline()))
-        if read_ser [2] == "R" :
-            [dummy, affkm, affm,vmoy,affmin,affsec,vinstant, vmax] = read_ser.split(";");
-            vmax = vmax[:3]
-            #print(affmin+':'+affsec+' vinstant :'+vinstant+' vmax:'+vmax)
-        if read_ser [2] == "P" :
-            [dummy, affmin, affsec,affcent,vinstant,vmaxabsolue] = read_ser.split(";");
-            #print(affmin+':'+affsec)
-        if read_ser [2] == "B":
-            [dummy, affmin, affsec,affcent,afftour,affvmax] = read_ser.split(";");
-            #print(affmin+':'+affsec)
-        if read_ser [2] == "O" :
-            [dummy, affkm, affm, afftotalismkm, afftotaliskm,vinstant] = read_ser.split(";");
-            #print(affmin+':'+affsec)
+        
+        # Ici, on est raccordé à un Vectorino
+        if self.vectorino == True :
+            # On vide le cache, le Vectorino pouvant envoyer bcp plus de données que ne peut traiter le Rpi
+            self.ser.flushinput()
+            read_ser=str((self.ser.readline()))
+            # Selon le mode...
+            if read_ser [2] == "R" :
+                [dummy, affkm, affm,vmoy,affmin,affsec,vinstant, vmax] = read_ser.split(";");
+                vmax = vmax[:3]
+            if read_ser [2] == "P" :
+                [dummy, affmin, affsec,affcent,vinstant,vmaxabsolue] = read_ser.split(";");
+            if read_ser [2] == "B":
+                [dummy, affmin, affsec,affcent,afftour,affvmax] = read_ser.split(";");
+            if read_ser [2] == "O" :
+                [dummy, affkm, affm, afftotalismkm, afftotaliskm,vinstant] = read_ser.split(";");
+        else:
+            affmin = "00"; affsec = "00"; aff_cent="0";
+            affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
+            vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"
         self.label_tps = self.myfont_70.render("00:"+affmin+":"+affsec, 1, (200,200,200))
         self.label_km = self.myfont_100.render(affkm+"."+affm, 1, (200,200,200))
         self.label_vi = self.myfont_70.render(vinstant, 1, (200,200,200))
