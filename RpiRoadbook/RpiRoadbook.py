@@ -20,7 +20,7 @@ import configparser
 import re
 import serial
 # Pour la lecture des fichiers pdf et conversion en image
-from pdf2image import page_count,convert_from_path
+from pdf2image import page_count,convert_from_path,page_size
 
 import RPi.GPIO as GPIO
 
@@ -126,8 +126,7 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
 #---------------------------------------- Ecran de sélection du Roadbook -------------------------------#
 #*******************************************************************************************************#
 class TitleScene(SceneBase):
-    def __init__(self):
-        
+    def __init__(self):       
         SceneBase.__init__(self)
         
         pygame.font.init()
@@ -152,7 +151,6 @@ class TitleScene(SceneBase):
 
         self.countdown = 6 ;
         self.iscountdown = True ;
-        self.isconversion = False ;
         self.selection= 0 ;
         self.saved= self.maconfig['Roadbooks']['etape'] ;
         self.font = pygame.font.SysFont("cantarell", 24)
@@ -173,21 +171,7 @@ class TitleScene(SceneBase):
                         self.maconfig['Roadbooks']['case'] = '-1'
                         with open('RpiRoadbook.cfg', 'w') as configfile:
                             self.maconfig.write(configfile)
-                    # Check s'il s'agit bien d'un roadbook 1 case par page, par la dimension d'une page...
-                    # TODO
-                    # Sinon, convertir, grâce au script python...
-                    # TODO
-                    #screen.fill((0, 0, 0))
-                    #text = self.font.render('Préparation du roadbook... Patience...', True, (0, 255, 0))
-                    #screen.blit(text,(10,200))
-                    filedir = os.path.splitext(self.filename)[0]
-                    if os.path.isdir('./../Roadbooks/'+filedir) == False:
-                        self.isconversion = True
-                        os.mkdir ('./../Roadbooks/'+filedir)
-                        self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir, dpi=150 , fmt='jpg')
-                    else :
-                        self.isconversion = False
-                    self.SwitchToScene(RoadbookScene(self.filename))
+                    self.SwitchToScene(ConversionScene(self.filename))
 
                 elif event.key == pygame.K_UP:
                     self.selection -= 1 ;
@@ -211,21 +195,7 @@ class TitleScene(SceneBase):
                         self.maconfig['Roadbooks']['case'] = '-1'
                         with open('RpiRoadbook.cfg', 'w') as configfile:
                             self.maconfig.write(configfile)
-                    # Check s'il s'agit bien d'un roadbook 1 case par page, par la dimension d'une page...
-                    # TODO
-                    # Sinon, convertir, grâce au script python...
-                    # TODO
-                    #screen.fill((0, 0, 0))
-                    #text = self.font.render('Préparation du roadbook... Patience...', True, (0, 255, 0))
-                    #screen.blit(text,(10,200))
-                    filedir = os.path.splitext(self.filename)[0]
-                    if os.path.isdir('./../Roadbooks/'+filedir) == False:
-                        self.isconversion = True
-                        os.mkdir('./../Roadbooks/'+filedir)
-                        self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir, dpi=150 , fmt='jpg')
-                    else:
-                        self.isconversion = False
-                    self.SwitchToScene(RoadbookScene(self.filename))
+                    self.SwitchToScene(ConversionScene(self.filename))
 
     def Update(self):
         if self.iscountdown:
@@ -246,33 +216,76 @@ class TitleScene(SceneBase):
         if self.iscountdown : 
             text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
             screen.blit(text,(10,450))
-        elif self.isconversion :
-            text = self.font.render('Conversion du fichier de Roadbook. Patience....', True, (0, 255, 0))
-            screen.blit(text,(10,450))
 
 #*******************************************************************************************************#
 #------------------------- La partie Conversion en Image d'un fichier ----------------------------------#
 #*******************************************************************************************************#
-class Conversion(SceneBase):
+class ConversionScene(SceneBase):
     def __init__(self, fname = ''):
         self.next = self
-        self.filename = fname     
+        self.filename = fname 
+        pygame.font.init()
+        self.font = pygame.font.SysFont("cantarell", 24)    
     
     def ProcessInput(self, events, pressed_keys):
-        print("uh-oh, you didn't override this in the child class")
+        pass
 
     def Update(self):
-        print("uh-oh, you didn't override this in the child class")
+        pass
 
     def Render(self, screen):
-        screen.fill((0, 0, 0))
-        text = self.font.render('Préparation du roadbook... Patience...', True, (0, 255, 0))
-        screen.blit(text,(10,200))
+        text1 = self.font.render('Préparation du roadbook... Patience...', True, (0, 255, 0))
+        
         filedir = os.path.splitext(self.filename)[0]
-        if not os.path.isdir('./../Roadbooks/'+filedir):
-            self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir+'/img', dpi=150 , fmt='jpg')
+        if os.path.isdir('./../Roadbooks/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
+            os.mkdir('./../Roadbooks/'+filedir)
+						# on vérifie le format de la page :
+            width, height = page_size ('./../Roadbooks/'+self.filename)
+            if width > height :
+                text2 = self.font.render('Conversion des cases en cours...', True, (0, 255, 0))
+                nb_pages = page_count ('./../Roadbooks/'+self.filename)
+                for i in range (nb_pages) :
+                    screen.fill((0, 0, 0))
+                    screen.blit(text1,(100,200))
+                    screen.blit(text2,(100,230))
+                    text = self.font.render('Case {}/{}'.format(i,nb_pages), True, (0, 255, 0))
+                    screen.blit(text,(100,260))
+                    self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                    pygame.display.flip()
+            else:
+                # conversion et découpage des cases
+                screen.fill((0, 0, 0))
+                screen.blit(text1,(100,200))
+                text2 = self.font.render('Format Tripy détecté. Pas encore de Conversion possible...', True, (0, 255, 0))
+                screen.blit(text2,(100,230))
+                #text = self.font.render('Case {}/{}'.format(i,nb_pages), True, (0, 255, 0))
+                #screen.blit(text,(100,260))
+                #self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                pygame.display.flip()
+                delay(1)
+        else:
+            print('On fait une vérification de cohérence')
+            filedir = os.path.splitext(self.filename)[0]
+            nb_pages = page_count ('./../Roadbooks/'+self.filename)
+            width, height = page_size ('./../Roadbooks/'+self.filename)
+            nb_images = len([f for f in os.listdir('./../Roadbooks/'+filedir) if re.search('.jpg$', f)])
+            if width > height :
+                if nb_pages != nb_images :
+                    text2 = self.font.render('Pas le même nombre de cases ! On vérifie...', True, (0, 255, 0))
+                    for i in range (nb_pages) :
+                        screen.fill((0, 0, 0))
+                        screen.blit(text1,(100,200))
+                        screen.blit(text2,(100,230))
+                        text = self.font.render('Case {}/{}'.format(i,nb_pages), True, (0, 255, 0))
+                        screen.blit(text,(100,260))
+                        self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                        pygame.display.flip()
+            else :
+                # Format Tripy
+                print('Vérification cohérence Format Tripy à faire')
+						
         self.SwitchToScene(RoadbookScene(self.filename))
-
+ 
 
 #*******************************************************************************************************#
 #------------------------- La partie Dérouleur ---------------------------------------------------------#
@@ -364,8 +377,10 @@ class RoadbookScene(SceneBase):
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             self.maconfig['Roadbooks']['case'] = str(self.case)
-            with open('RpiRoadbook.cfg', 'w') as configfile:
+            try:
+              with open('RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
+            except: pass
         affmin = "00"; affsec = "00"; aff_cent="0";
         affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
         vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"

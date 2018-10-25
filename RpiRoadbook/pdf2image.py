@@ -48,7 +48,9 @@ def convert_from_path(pdf_path, dpi=200, output_folder=None, first_page=None, la
     processes = []
     for _ in range(thread_count):
         # A unique identifier for our files if the directory is not empty
-        uid = str(uuid.uuid4())
+        #uid = str(uuid.uuid4())
+        head,tail = os.path.split(pdf_path)
+        uid = os.path.splitext(tail)[0]
         # Get the number of pages the thread will be processing
         thread_page_count = p_count // thread_count + int(reminder > 0)
         # Build the command accordingly
@@ -168,6 +170,25 @@ def page_count(pdf_path, userpw=None):
         return int(re.search(r'Pages:\s+(\d+)', out.decode("utf8", "ignore")).group(1))
     except:
         raise Exception('Unable to get page count. %s' % err.decode("utf8", "ignore"))
+				
+def page_size(pdf_path, userpw=None):
+    try:
+        if userpw is not None:
+            proc = Popen(["pdfinfo", pdf_path, '-upw', userpw], stdout=PIPE, stderr=PIPE)
+        else:
+            proc = Popen(["pdfinfo", pdf_path], stdout=PIPE, stderr=PIPE)
+
+        out, err = proc.communicate()
+    except:
+        raise Exception('Unable to get page size. Is poppler installed and in PATH?')
+
+
+    try:
+        # This will throw if we are unable to get page count
+        st = re.search(r'Page size:\s+(\d+.?\d+)\s+[x]\s+(\d+.?\d+)', out.decode("utf8", "ignore"))
+        return float(st.group(1)),float(st.group(2))
+    except:
+        raise Exception('Unable to get page size. %s' % err.decode("utf8", "ignore"))
 
 def __load_from_output_folder(output_folder, uid):
     return [Image.open(os.path.join(output_folder, f)) for f in sorted(os.listdir(output_folder)) if uid in f]
