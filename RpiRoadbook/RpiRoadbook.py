@@ -152,6 +152,7 @@ class TitleScene(SceneBase):
         self.countdown = 6 ;
         self.iscountdown = True ;
         self.selection= 0 ;
+        self.fenetre = 0 ;
         self.saved= self.maconfig['Roadbooks']['etape'] ;
         self.font = pygame.font.SysFont("cantarell", 24)
         self.filenames = [f for f in os.listdir('./../Roadbooks/') if re.search('.pdf$', f)]
@@ -172,21 +173,26 @@ class TitleScene(SceneBase):
                         with open('RpiRoadbook.cfg', 'w') as configfile:
                             self.maconfig.write(configfile)
                     self.SwitchToScene(ConversionScene(self.filename))
-
                 elif event.key == pygame.K_UP:
                     self.selection -= 1 ;
                     if self.selection < 0: self.selection = 0 ;
+                    if self.selection < self.fenetre: self.fenetre -= 1
+                    if self.fenetre < 0 : self.fenetre = 0
                 elif event.key == pygame.K_DOWN:
                     self.selection += 1 ;
                     if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;   
+                    if self.selection >= self.fenetre+10: self.fenetre+=1 
             elif event.type == BOUTON21 :
-                  self.iscountdown = False ;
-                  self.selection -=1 ;                   
-                  if self.selection < 0: self.selection = 0 ;
+                    self.iscountdown = False ;
+                    self.selection -= 1 ;
+                    if self.selection < 0: self.selection = 0 ;
+                    if self.selection < self.fenetre: self.fenetre -= 1
+                    if self.fenetre < 0 : self.fenetre = 0
             elif event.type == BOUTON26 :
-                  self.iscountdown = False ;
-                  self.selection += 1 ;
-                  if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;   
+                    self.iscountdown = False ;
+                    self.selection += 1 ;
+                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;   
+                    if self.selection >= self.fenetre+10: self.fenetre+=1 
             elif event.type == BOUTON20 :
                     self.iscountdown = False ;
                     if self.filename != self.filenames[self.selection] :
@@ -207,11 +213,18 @@ class TitleScene(SceneBase):
         screen.fill((0, 0, 0))
         invite = self.font.render ('Sélectionnez le roadbook à charger :',0,(255,255,255))
         screen.blit(invite,(10,10))
+        if self.fenetre > 0 :
+            fleche_up = self.font.render('(moins)',0,(100,100,100))
+            screen.blit (fleche_up,(10,50))
         for i in range (len(self.filenames)) :
-            couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
-            fond = (0,0,255) if i == self.selection else (0,0,0)
-            text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
-            screen.blit (text,(10,50+i*30))
+            if i >= self.fenetre and i <self.fenetre+10 :
+                couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
+                fond = (0,0,255) if i == self.selection else (0,0,0)
+                text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
+                screen.blit (text,(10,80+(i-self.fenetre)*30))
+        if self.fenetre+10<len(self.filenames):
+            fleche_up = self.font.render('(plus)',0,(100,100,100))
+            screen.blit (fleche_up,(10,380))
             # TODO : Limiter le nombre de lignes affichées et faire un scroll si trop de lignes.
         if self.iscountdown : 
             text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
@@ -429,7 +442,7 @@ class RoadbookScene(SceneBase):
                 self.oldcase = self.case
                 self.case -= 1
             elif event.type == BOUTON20:
-                self.Terminate()
+                self.SwitchToScene(TitleScene())
         
         # Action sur le dérouleur
         if self.case > self.nb_cases - 2 :
