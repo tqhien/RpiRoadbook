@@ -12,7 +12,7 @@ from io import BytesIO
 from subprocess import Popen, PIPE
 from PIL import Image
 
-def convert_from_path(pdf_path, dpi=200, output_folder=None, first_page=None, last_page=None, fmt='ppm', thread_count=1, userpw=None):
+def convert_from_path(pdf_path, dpi=200, output_folder=None, first_page=None, last_page=None, x=None, y=None,w=None, h=None, singlefile=None, fmt='ppm', thread_count=1, userpw=None):
     """
         Description: Convert PDF to Image will throw whenever one of the condition is reached
         Parameters:
@@ -54,7 +54,7 @@ def convert_from_path(pdf_path, dpi=200, output_folder=None, first_page=None, la
         # Get the number of pages the thread will be processing
         thread_page_count = p_count // thread_count + int(reminder > 0)
         # Build the command accordingly
-        args, parse_buffer_func = __build_command(['pdftoppm', '-r', str(dpi), pdf_path], output_folder, current_page, current_page + thread_page_count - 1, fmt, uid, userpw)
+        args, parse_buffer_func = __build_command(['pdftoppm', '-r', str(dpi), pdf_path], output_folder, current_page, current_page + thread_page_count - 1, x, y, w, h,singlefile, fmt, uid, userpw)
         # Update page values
         current_page = current_page + thread_page_count
         reminder -= int(reminder > 0)
@@ -66,13 +66,16 @@ def convert_from_path(pdf_path, dpi=200, output_folder=None, first_page=None, la
         data, _ = proc.communicate()
 
         if output_folder is not None:
-            images += __load_from_output_folder(output_folder, uid)
+            if singlefile is None :
+                images += __load_from_output_folder(output_folder, uid)
+            else: 
+                images += __load_from_output_folder(output_folder, uid+'_'+singlefile)
         else:
             images += parse_buffer_func(data)
 
     return images
 
-def convert_from_bytes(pdf_file, dpi=200, output_folder=None, first_page=None, last_page=None, fmt='ppm', thread_count=1, userpw=None):
+def convert_from_bytes(pdf_file, dpi=200, output_folder=None, first_page=None, last_page=None, x=None, y=None, w=None, h=None, singlefile=None, fmt='ppm', thread_count=1, userpw=None):
     """
         Description: Convert PDF to Image will throw whenever one of the condition is reached
         Parameters:
@@ -89,14 +92,29 @@ def convert_from_bytes(pdf_file, dpi=200, output_folder=None, first_page=None, l
     with tempfile.NamedTemporaryFile('wb') as f:
         f.write(pdf_file)
         f.flush()
-        return convert_from_path(f.name, dpi=dpi, output_folder=output_folder, first_page=first_page, last_page=last_page, fmt=fmt, thread_count=thread_count, userpw=userpw)
+        return convert_from_path(f.name, dpi=dpi, output_folder=output_folder, first_page=first_page, last_page=last_page, x=x, y=y, w=w, h=h,singlefile=singlefile, fmt=fmt, thread_count=thread_count, userpw=userpw)
 
-def __build_command(args, output_folder, first_page, last_page, fmt, uid, userpw):
+def __build_command(args, output_folder, first_page, last_page, x, y, w, h,singlefile, fmt, uid, userpw):
     if first_page is not None:
         args.extend(['-f', str(first_page)])
 
     if last_page is not None:
         args.extend(['-l', str(last_page)])
+        
+    if x is not None:
+        args.extend(['-x', str(x)])
+
+    if y is not None:
+        args.extend(['-y', str(y)])
+        
+    if w is not None:
+        args.extend(['-W', str(w)])
+        
+    if h is not None:
+        args.extend(['-H', str(h)])
+        
+    if singlefile is not None:
+        args.append('-singlefile')
 
     parsed_format, parse_buffer_func = __parse_format(fmt)
 
@@ -104,11 +122,12 @@ def __build_command(args, output_folder, first_page, last_page, fmt, uid, userpw
         args.append('-' + parsed_format)
 
     if output_folder is not None:
-        args.append(os.path.join(output_folder, uid))
-
+        if singlefile is not None :
+            args.append(os.path.join(output_folder, uid+'_'+singlefile))
+        else:
+            args.append(os.path.join(output_folder, uid))
     if userpw is not None:
         args.extend(['-upw', userpw])
-
     return args, parse_buffer_func
 
 def __parse_format(fmt):

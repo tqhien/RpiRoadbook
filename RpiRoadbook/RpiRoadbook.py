@@ -256,13 +256,38 @@ class ConversionScene(SceneBase):
                 # conversion et découpage des cases
                 screen.fill((0, 0, 0))
                 screen.blit(text1,(100,200))
-                text2 = self.font.render('Format Tripy détecté. Pas encore de Conversion possible...', True, (0, 255, 0))
+                text2 = self.font.render('Format Tripy détecté. Conversion en cours...', True, (0, 255, 0))
                 screen.blit(text2,(100,230))
-                #text = self.font.render('Case {}/{}'.format(i,nb_pages), True, (0, 255, 0))
-                #screen.blit(text,(100,260))
-                #self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
-                pygame.display.flip()
-                delay(1)
+                nb_pages = page_count ('./../Roadbooks/'+self.filename)
+                #Marge supperieur (pix)
+                marge_up = 178
+                #Hauteur d'une case (pix)
+                hauteur = 177
+                #Largeur d'une case (mm)
+                largeur = 610
+                #Milieu de page (mm)
+                milieu = 615
+                #Nombre de ligne par page
+                nb_ligne = 8
+                #Nombre de case par page
+                nb_cases = nb_ligne * 2
+                total = nb_pages * nb_cases
+                
+                w = round(largeur)
+                h = round(hauteur)
+                
+                for i in range (nb_pages) :
+                    for j in range (nb_cases):
+                        if j < nb_ligne :
+                            x = round(0)
+                            y = round(marge_up+(nb_ligne-j-1)*hauteur)
+                        else :
+                            x = round(milieu)
+                            y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
+                        text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
+                        screen.blit(text,(100,260))
+                        self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
+                    pygame.display.flip()
         else:
             print('On fait une vérification de cohérence')
             filedir = os.path.splitext(self.filename)[0]
@@ -282,7 +307,46 @@ class ConversionScene(SceneBase):
                         pygame.display.flip()
             else :
                 # Format Tripy
-                print('Vérification cohérence Format Tripy à faire')
+                print('Vérification cohérence Format Tripy')
+                nb_ligne = 8
+                #Nombre de case par page
+                nb_cases = nb_ligne * 2
+                total = nb_pages * nb_cases
+                nb_images = len([f for f in os.listdir('./../Roadbooks/'+filedir) if re.search('.jpg$', f)])
+                if total != nb_images :
+                    text2 = self.font.render('Pas le même nombre de cases ! On vérifie...', True, (0, 255, 0))
+                    #Marge supperieur (pix)
+                    marge_up = 178
+                    #Hauteur d'une case (pix)
+                    hauteur = 177
+                    #Largeur d'une case (mm)
+                    largeur = 610
+                    #Milieu de page (mm)
+                    milieu = 615
+                    #Nombre de ligne par page
+                    nb_ligne = 8
+                    #Nombre de case par page
+                    nb_cases = nb_ligne * 2
+                    total = nb_pages * nb_cases
+                    
+                    w = round(largeur)
+                    h = round(hauteur)
+                    
+                    for i in range (nb_pages) :
+                        for j in range (nb_cases):
+                            if j < nb_ligne :
+                                x = round(0)
+                                y = round(marge_up+(nb_ligne-j-1)*hauteur)
+                            else :
+                                x = round(milieu)
+                                y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
+                            screen.fill((0, 0, 0))
+                            screen.blit(text1,(100,200))
+                            screen.blit(text2,(100,230))
+                            text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
+                            screen.blit(text,(100,260))
+                            self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
+                            pygame.display.flip()
 						
         self.SwitchToScene(RoadbookScene(self.filename))
  
