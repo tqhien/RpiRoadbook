@@ -38,7 +38,7 @@ GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #*******************************************************************************************************#
 def input_20_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON20))
-    
+
 
 def input_21_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON21))
@@ -59,7 +59,7 @@ class SceneBase:
     def __init__(self, fname = ''):
         self.next = self
         self.filename = fname
-    
+
     def ProcessInput(self, events, pressed_keys):
         print("uh-oh, you didn't override this in the child class")
 
@@ -71,7 +71,7 @@ class SceneBase:
 
     def SwitchToScene(self, next_scene):
         self.next = next_scene
-    
+
     def Terminate(self):
         self.SwitchToScene(None)
 
@@ -82,16 +82,16 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
     pygame.display.init() ;
     pygame.mouse.set_visible(False)
     screen = pygame.display.set_mode((width, height))
-    
-    clock = pygame.time.Clock()  
 
-    active_scene = starting_scene  
+    clock = pygame.time.Clock()
+
+    active_scene = starting_scene
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
-        
-        # Event filtering 
-        filtered_events = []      
+
+        # Event filtering
+        filtered_events = []
         for event in pygame.event.get():
             quit_attempt = False
             if event.type == pygame.QUIT:
@@ -103,18 +103,18 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
                     quit_attempt = True
                 elif event.key == pygame.K_F4 and alt_pressed:
                     quit_attempt = True
-            
+
             if quit_attempt:
                 active_scene.Terminate()
             else:
                 filtered_events.append(event)
-        
+
         active_scene.ProcessInput(filtered_events, pressed_keys)
         active_scene.Update()
         active_scene.Render(screen)
-            
+
         active_scene = active_scene.next
-        
+
         pygame.display.flip()
         clock.tick(fps)
     GPIO.cleanup()
@@ -126,9 +126,9 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
 #---------------------------------------- Ecran de sélection du Roadbook -------------------------------#
 #*******************************************************************************************************#
 class TitleScene(SceneBase):
-    def __init__(self):       
+    def __init__(self):
         SceneBase.__init__(self)
-        
+
         pygame.font.init()
         self.maconfig = configparser.ConfigParser()
 
@@ -141,6 +141,30 @@ class TitleScene(SceneBase):
                 self.maconfig['Parametres_Odometre']['roue'] = '1860'
                 self.maconfig['Parametres_Odometre']['nb_aimants'] = '1'
                 self.maconfig['Parametres_Odometre']['totalisateur'] = '0'
+                self.maconfig['Paysage']['l_tps_x'] = '10'
+                self.maconfig['Paysage']['l_tps_y'] = '5'
+                self.maconfig['Paysage']['l_km_x'] = '440'
+                self.maconfig['Paysage']['l_km_y'] = '-10'
+                self.maconfig['Paysage']['l_vi_x'] = '650'
+                self.maconfig['Paysage']['l_vi_y'] = '150'
+                self.maconfig['Paysage']['l_vm_x'] = '650'
+                self.maconfig['Paysage']['l_vm_y'] = '350'
+                self.maconfig['Paysage']['l_case1_x'] = '0'
+                self.maconfig['Paysage']['l_case1_y'] = '100'
+                self.maconfig['Paysage']['l_case2_x'] = '0'
+                self.maconfig['Paysage']['l_case2_y'] = '300'
+                self.maconfig['Portrait']['l_tps_x'] = '10'
+                self.maconfig['Portrait']['l_tps_y'] = '5'
+                self.maconfig['Portrait']['l_km_x'] = '440'
+                self.maconfig['Portrait']['l_km_y'] = '-10'
+                self.maconfig['Portrait']['l_vi_x'] = '650'
+                self.maconfig['Portrait']['l_vi_y'] = '150'
+                self.maconfig['Portrait']['l_vm_x'] = '650'
+                self.maconfig['Portrait']['l_vm_y'] = '350'
+                self.maconfig['Portrait']['l_case1_x'] = '0'
+                self.maconfig['Portrait']['l_case1_y'] = '100'
+                self.maconfig['Portrait']['l_case2_x'] = '0'
+                self.maconfig['Portrait']['l_case2_y'] = '300'
                 self.maconfig['Roadbooks'] = {}
                 self.maconfig['Roadbooks']['etape'] = ''
                 self.maconfig['Roadbooks']['case'] = '-1'
@@ -158,17 +182,17 @@ class TitleScene(SceneBase):
         self.filenames = [f for f in os.listdir('./../Roadbooks/') if re.search('.pdf$', f)]
         self.filename = self.saved if self.saved in self.filenames  else ''
         self.j = time.time()
-        
-    
+
+
     def ProcessInput(self, events, pressed_keys):
         for event in events:
             if event.type == pygame.KEYDOWN :
                 self.iscountdown = False ;
                 if event.key == pygame.K_RETURN:
-                # Move to the next screen when the user pressed Enter 
+                # Move to the next screen when the user pressed Enter
                     if self.filename != self.filenames[self.selection] :
                         self.filename = self.filenames[self.selection]
-                        self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection] 
+                        self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
                         self.maconfig['Roadbooks']['case'] = '-1'
                         with open('RpiRoadbook.cfg', 'w') as configfile:
                             self.maconfig.write(configfile)
@@ -180,8 +204,8 @@ class TitleScene(SceneBase):
                     if self.fenetre < 0 : self.fenetre = 0
                 elif event.key == pygame.K_DOWN:
                     self.selection += 1 ;
-                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;   
-                    if self.selection >= self.fenetre+10: self.fenetre+=1 
+                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;
+                    if self.selection >= self.fenetre+10: self.fenetre+=1
             elif event.type == BOUTON21 :
                     self.iscountdown = False ;
                     self.selection -= 1 ;
@@ -191,13 +215,13 @@ class TitleScene(SceneBase):
             elif event.type == BOUTON26 :
                     self.iscountdown = False ;
                     self.selection += 1 ;
-                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;   
-                    if self.selection >= self.fenetre+10: self.fenetre+=1 
+                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;
+                    if self.selection >= self.fenetre+10: self.fenetre+=1
             elif event.type == BOUTON20 :
                     self.iscountdown = False ;
                     if self.filename != self.filenames[self.selection] :
                         self.filename = self.filenames[self.selection]
-                        self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection] 
+                        self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
                         self.maconfig['Roadbooks']['case'] = '-1'
                         with open('RpiRoadbook.cfg', 'w') as configfile:
                             self.maconfig.write(configfile)
@@ -208,7 +232,7 @@ class TitleScene(SceneBase):
             self.k = time.time();
             if (self.k-self.j>=self.countdown) :
                 self.SwitchToScene(RoadbookScene(self.filename))
-    
+
     def Render(self, screen):
         screen.fill((0, 0, 0))
         invite = self.font.render ('Sélectionnez le roadbook à charger :',0,(255,255,255))
@@ -226,7 +250,7 @@ class TitleScene(SceneBase):
             fleche_up = self.font.render('(plus)',0,(100,100,100))
             screen.blit (fleche_up,(10,380))
             # TODO : Limiter le nombre de lignes affichées et faire un scroll si trop de lignes.
-        if self.iscountdown : 
+        if self.iscountdown :
             text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
             screen.blit(text,(10,450))
 
@@ -236,10 +260,10 @@ class TitleScene(SceneBase):
 class ConversionScene(SceneBase):
     def __init__(self, fname = ''):
         self.next = self
-        self.filename = fname 
+        self.filename = fname
         pygame.font.init()
-        self.font = pygame.font.SysFont("cantarell", 24)    
-    
+        self.font = pygame.font.SysFont("cantarell", 24)
+
     def ProcessInput(self, events, pressed_keys):
         pass
 
@@ -248,7 +272,7 @@ class ConversionScene(SceneBase):
 
     def Render(self, screen):
         text1 = self.font.render('Préparation du roadbook... Patience...', True, (0, 255, 0))
-        
+        self.maconfig = configparser.ConfigParser()
         filedir = os.path.splitext(self.filename)[0]
         if os.path.isdir('./../Roadbooks/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
             os.mkdir('./../Roadbooks/'+filedir)
@@ -256,12 +280,12 @@ class ConversionScene(SceneBase):
             width, height = page_size ('./../Roadbooks/'+self.filename)
             if width > height :
                 text2 = self.font.render('Conversion des cases en cours...', True, (0, 255, 0))
-                nb_pages = page_count ('./../Roadbooks/'+self.filename)
-                for i in range (nb_pages) :
+                total = page_count ('./../Roadbooks/'+self.filename)
+                for i in range (total) :
                     screen.fill((0, 0, 0))
                     screen.blit(text1,(100,200))
                     screen.blit(text2,(100,230))
-                    text = self.font.render('Case {}/{}'.format(i,nb_pages), True, (0, 255, 0))
+                    text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                     screen.blit(text,(100,260))
                     self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
                     pygame.display.flip()
@@ -285,10 +309,10 @@ class ConversionScene(SceneBase):
                 #Nombre de case par page
                 nb_cases = nb_ligne * 2
                 total = nb_pages * nb_cases
-                
+
                 w = round(largeur)
                 h = round(hauteur)
-                
+
                 for i in range (nb_pages) :
                     for j in range (nb_cases):
                         if j < nb_ligne :
@@ -301,6 +325,12 @@ class ConversionScene(SceneBase):
                         screen.blit(text,(100,260))
                         self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
                     pygame.display.flip()
+          # On charge le fichier de configuration
+          self.maconfig.read('RpiRoadbook.cfg')
+          # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
+          self.maconfig['Roadbooks']['case'] = str(total-2)
+          with open('RpiRoadbook.cfg', 'w') as configfile:
+            self.maconfig.write(configfile)
         else:
             print('On fait une vérification de cohérence')
             filedir = os.path.splitext(self.filename)[0]
@@ -308,13 +338,14 @@ class ConversionScene(SceneBase):
             width, height = page_size ('./../Roadbooks/'+self.filename)
             nb_images = len([f for f in os.listdir('./../Roadbooks/'+filedir) if re.search('.jpg$', f)])
             if width > height :
-                if nb_pages != nb_images :
+                total = nb_pages
+                if total != nb_images :
                     text2 = self.font.render('Pas le même nombre de cases ! On vérifie...', True, (0, 255, 0))
-                    for i in range (nb_pages) :
+                    for i in range (total) :
                         screen.fill((0, 0, 0))
                         screen.blit(text1,(100,200))
                         screen.blit(text2,(100,230))
-                        text = self.font.render('Case {}/{}'.format(i,nb_pages), True, (0, 255, 0))
+                        text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                         screen.blit(text,(100,260))
                         self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
                         pygame.display.flip()
@@ -341,10 +372,10 @@ class ConversionScene(SceneBase):
                     #Nombre de case par page
                     nb_cases = nb_ligne * 2
                     total = nb_pages * nb_cases
-                    
+
                     w = round(largeur)
                     h = round(hauteur)
-                    
+
                     for i in range (nb_pages) :
                         for j in range (nb_cases):
                             if j < nb_ligne :
@@ -360,20 +391,27 @@ class ConversionScene(SceneBase):
                             screen.blit(text,(100,260))
                             self.pages = convert_from_path('./../Roadbooks/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
                             pygame.display.flip()
-						
+            # On charge le fichier de configuration
+            self.maconfig.read('RpiRoadbook.cfg')
+            if self.maconfig['Roadbooks']['case'] < 0 or self.maconfig['Roadbooks']['case'] > total -2 :
+              # Pb avec la position sauvegardée. On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
+              self.maconfig['Roadbooks']['case'] = str(total-2)
+              with open('RpiRoadbook.cfg', 'w') as configfile:
+                self.maconfig.write(configfile)
+
         self.SwitchToScene(RoadbookScene(self.filename))
- 
+
 
 #*******************************************************************************************************#
 #------------------------- La partie Dérouleur ---------------------------------------------------------#
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
-    def __init__(self, fname = ''):        
+    def __init__(self, fname = ''):
         SceneBase.__init__(self,fname)
-        
+
         self.maconfig = configparser.ConfigParser()
 
-	# Vérification de l'existence du fichier de config
+	    # Vérification de l'existence du fichier de config
         try:
             with open('RpiRoadbook.cfg'): pass
         except IOError:
@@ -415,14 +453,14 @@ class RoadbookScene(SceneBase):
            self.ser=serial.Serial("/dev/ttyUSB0",9600); #change USB number as found from ls /dev/tty*
         except:
            self.vectorino=False
-   
+
     def ProcessInput(self, events, pressed_keys):
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.Terminate()          
+                    self.Terminate()
                 if event.key == pygame.K_UP:
                     self.oldcase = self.case
                     self.case += 1
@@ -443,13 +481,13 @@ class RoadbookScene(SceneBase):
                 self.case -= 1
             elif event.type == BOUTON20:
                 self.SwitchToScene(TitleScene())
-        
+
         # Action sur le dérouleur
         if self.case > self.nb_cases - 2 :
             self.case = self.nb_cases -2
         if self.case < 0 :
             self.case = 0
-        
+
     def Update(self):
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
@@ -461,7 +499,7 @@ class RoadbookScene(SceneBase):
         affmin = "00"; affsec = "00"; aff_cent="0";
         affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
         vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"
-        
+
         # Ici, on est raccordé à un Vectorino
         if self.vectorino == True :
             # On vide le cache, le Vectorino pouvant envoyer bcp plus de données que ne peut traiter le Rpi
@@ -488,7 +526,7 @@ class RoadbookScene(SceneBase):
 
     def Render(self, screen):
         screen.fill((0,0,0))
-	# Positionnement des différents éléments d'affichage
+	    # Positionnement des différents éléments d'affichage
         screen.blit(self.label_tps, (10, 5))
         screen.blit(self.label_km, (440, -10))
         screen.blit(self.label_vi, (650, 150))
@@ -497,7 +535,7 @@ class RoadbookScene(SceneBase):
         screen.blit (self.pages[self.case+1],(0,300))
 
 
-        
+
 # Pour optimisation
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
