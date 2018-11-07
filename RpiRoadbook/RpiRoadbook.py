@@ -21,14 +21,22 @@ import re
 import serial
 # Pour la lecture des fichiers pdf et conversion en image
 from pdf2image import page_count,convert_from_path,page_size
+import subprocess
 
 import RPi.GPIO as GPIO
 
-BOUTON20 = USEREVENT+1
-BOUTON21 = USEREVENT+2
-BOUTON26 = USEREVENT+3
+BOUTON13 = USEREVENT+1 # Odometre
+BOUTON16 = USEREVENT+2 # Bouton left (tout en haut)
+BOUTON19 = USEREVENT+3 # Bouton right (tout en bas)
+BOUTON20 = USEREVENT+4 # Bouton OK/select (au milieu)
+BOUTON21 = USEREVENT+5 # Bouton Up (2eme en haut)
+BOUTON26 = USEREVENT+6 # Bouton Down (2eme en bas)
+GMASSSTORAGE = USEREVENT+7 # Event branchement en mode cle usb
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -36,9 +44,17 @@ GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO  ---------------------------------------#
 #*******************************************************************************************************#
+def input_13_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON13))
+
+def input_16_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON16))
+
+def input_19_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON19))
+
 def input_20_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON20))
-
 
 def input_21_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON21))
@@ -46,7 +62,13 @@ def input_21_callback(channel):
 def input_26_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON26))
 
+def g_mass_storage_callback(channel):
+    pygame.event.post(pygame.event.Event(GMASSSTORAGE))
+
 #On définit les interruptions sur les GPIO des commandes
+GPIO.add_event_detect(13, GPIO.FALLING, callback=input_13_callback, bouncetime=200)
+GPIO.add_event_detect(16, GPIO.FALLING, callback=input_16_callback, bouncetime=200)
+GPIO.add_event_detect(19, GPIO.FALLING, callback=input_19_callback, bouncetime=200)
 GPIO.add_event_detect(20, GPIO.FALLING, callback=input_20_callback, bouncetime=200)
 GPIO.add_event_detect(21, GPIO.FALLING, callback=input_21_callback, bouncetime=200)
 GPIO.add_event_detect(26, GPIO.FALLING, callback=input_26_callback, bouncetime=200)
@@ -173,13 +195,14 @@ class TitleScene(SceneBase):
 	      # On le charge
         self.maconfig.read('RpiRoadbook.cfg')
 
-        self.countdown = 6 ;
+        self.countdown = 4 ;
         self.iscountdown = True ;
         self.selection= 0 ;
         self.fenetre = 0 ;
         self.saved= self.maconfig['Roadbooks']['etape'] ;
         self.font = pygame.font.SysFont("cantarell", 24)
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
+        if len(self.file) == 0 : self.SwitchToScene(NoneScene())
         self.filename = self.saved if self.saved in self.filenames  else ''
         self.j = time.time()
 
@@ -253,6 +276,78 @@ class TitleScene(SceneBase):
         if self.iscountdown :
             text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
             screen.blit(text,(10,450))
+
+#*******************************************************************************************************#
+#---------------------------------------- La partie Pas de Roadbooks présents --------------------------#
+#*******************************************************************************************************#
+class NoneScene(SceneBase):
+    def __init__(self, fname = ''):
+        self.next = self
+        self.filename = fname
+        pygame.font.init()
+        self.font = pygame.font.SysFont("cantarell", 24)
+        self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
+        self.text1 = self.font.render('Aucun roadbook présent.', True, (0, 255, 0))
+        self.text2 = self.font.render('Appuyez sur OK pour revenir', True, (0, 255, 0))
+        self.text3 = self.font.render('au menu après téléversement', True, (0, 255, 0))
+
+    def ProcessInput(self, events, pressed_keys):
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.Terminate()
+            if event.type == BOUTON20:
+                self.SwitchToScene(TitleScene())
+
+    def Update(self):
+        pass
+
+    def Render(self, screen):
+        screen.fill((0,0,0))
+        screen.blit(self.text1, (100, 200))
+        screen.blit(self.text2, (100, 230))
+        screen.blit(self.text3, (100, 260))
+        pygame.display.flip()
+
+#*******************************************************************************************************#
+#---------------------------------------- La partie Réglage de l'horloge -------------------------------#
+#*******************************************************************************************************#
+class SetClockScene(SceneBase):
+    def __init__(self, fname = ''):
+        self.next = self
+        self.filename = fname
+        pygame.font.init()
+        self.font = pygame.font.SysFont("cantarell", 24)
+
+    def ProcessInput(self, events, pressed_keys):
+        pass
+
+    def Update(self):
+        pass
+
+    def Render(self, screen):
+        print("uh-oh, you didn't override this in the child class")
+
+
+#*******************************************************************************************************#
+#---------------------------------------- La partie Gadget Mass Storage --------------------------------#
+#*******************************************************************************************************#
+class G_MassStorageScene(SceneBase):
+    def __init__(self, fname = ''):
+        self.next = self
+        self.filename = fname
+        pygame.font.init()
+        self.font = pygame.font.SysFont("cantarell", 24)
+
+    def ProcessInput(self, events, pressed_keys):
+        pass
+
+    def Update(self):
+        pass
+
+    def Render(self, screen):
+        print("uh-oh, you didn't override this in the child class")
+
+
 
 #*******************************************************************************************************#
 #------------------------- La partie Conversion en Image d'un fichier ----------------------------------#
@@ -515,11 +610,13 @@ class RoadbookScene(SceneBase):
                 [dummy, affmin, affsec,affcent,afftour,affvmax] = read_ser.split(";");
             if read_ser [2] == "O" :
                 [dummy, affkm, affm, afftotalismkm, afftotaliskm,vinstant] = read_ser.split(";");
+            self.label_tps = self.myfont_70.render(''.join(['00:',affmin,':',affsec]), 1, (200,200,200))
         else:
+            print()
             affmin = "00"; affsec = "00"; aff_cent="0";
             affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
             vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"
-        self.label_tps = self.myfont_70.render(''.join(['00:',affmin,':',affsec]), 1, (200,200,200))
+            self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.gmtime()), 1, (200,200,200))
         self.label_km = self.myfont_100.render(''.join([affkm,'.',affm,'km']), 1, (200,200,200))
         self.label_vi = self.myfont_70.render(''.join([vinstant,'km/h']), 1, (200,200,200))
         self.label_vm = self.myfont_70.render(''.join([vmax,'km/h']), 1, (100,100,100))
