@@ -25,8 +25,15 @@ import subprocess
 
 import RPi.GPIO as GPIO
 
-totaliskm = 0.0
-roue = 1.864
+distance = 0
+speed = 0.00
+roue = 186
+vmax = 0.00
+vmoy = 0.0
+tps = 0.0
+tpsinit=0.0
+j = 0
+cmavant = 0
 
 BOUTON13 = USEREVENT+1 # Odometre
 BOUTON16 = USEREVENT+2 # Bouton left (tout en haut)
@@ -37,7 +44,7 @@ BOUTON26 = USEREVENT+6 # Bouton Down (2eme en bas)
 GMASSSTORAGE = USEREVENT+7 # Event branchement en mode cle usb
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
 GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -48,8 +55,8 @@ GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #------------------------- Les callbacks des interruptions GPIO  ---------------------------------------#
 #*******************************************************************************************************#
 def input_13_callback(channel):
-    global totaliskm
-    totaliskm += roue
+    global distance
+    distance += roue
 
 def input_16_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON16))
@@ -70,7 +77,7 @@ def g_mass_storage_callback(channel):
     pygame.event.post(pygame.event.Event(GMASSSTORAGE))
 
 #On définit les interruptions sur les GPIO des commandes
-GPIO.add_event_detect(13, GPIO.FALLING, callback=input_13_callback, bouncetime=200)
+GPIO.add_event_detect(13, GPIO.FALLING, callback=input_13_callback, bouncetime=20)
 GPIO.add_event_detect(16, GPIO.FALLING, callback=input_16_callback, bouncetime=200)
 GPIO.add_event_detect(19, GPIO.FALLING, callback=input_19_callback, bouncetime=200)
 GPIO.add_event_detect(20, GPIO.FALLING, callback=input_20_callback, bouncetime=200)
@@ -545,6 +552,7 @@ class RoadbookScene(SceneBase):
 
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 72)
+        self.myfont_36 = pygame.font.SysFont("cantarell", 36)
         self.myfont_70 = pygame.font.SysFont("cantarell", 70)
         self.myfont_100 = pygame.font.SysFont("cantarell", 100)
 
@@ -552,13 +560,9 @@ class RoadbookScene(SceneBase):
         self.label_km = self.myfont_100.render("000.00", 1, (200,200,200))
         self.label_vi = self.myfont_70.render("000", 1, (200,200,200))
         self.label_vm = self.myfont_70.render("000", 1, (100,100,100))
-        self.vectorino=True
-        try :
-           self.ser=serial.Serial("/dev/ttyUSB0",9600); #change USB number as found from ls /dev/tty*
-        except:
-           self.vectorino=False
 
     def ProcessInput(self, events, pressed_keys):
+        global distance,tpsinit,cmavant,j,vmoy,vmax
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -577,14 +581,28 @@ class RoadbookScene(SceneBase):
                 if event.key == pygame.K_END:
                     self.oldcase = self.case
                     self.case = 1
+            elif event.type == BOUTON16:
+                distance+=1000
+                cmavant=distance
+                j = time.time()
             elif event.type == BOUTON26:
                 self.oldcase = self.case
                 self.case -= 1
             elif event.type == BOUTON21:
                 self.oldcase = self.case
                 self.case += 1
+            elif event.type == BOUTON19:
+                distance-=1000
+                if distance <= 0 : distance = 0
+                cmavant = distance
+                j = time.time();
             elif event.type == BOUTON20:
-                self.SwitchToScene(TitleScene())
+                distance = 0.0
+                cmavant = distance 
+                vmoy = 0
+                speed = 0
+                tpsinit = time.time()/1000
+                vmax = 0;
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - 2 :
@@ -593,6 +611,7 @@ class RoadbookScene(SceneBase):
             self.case = 0
 
     def Update(self):
+        global distance,speed,vmax,cmavant,tps,j,vmoy
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             self.maconfig['Roadbooks']['case'] = str(self.case)
@@ -600,42 +619,36 @@ class RoadbookScene(SceneBase):
               with open('RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
             except: pass
-        affmin = "00"; affsec = "00"; aff_cent="0";
-        affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
-        vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"
 
-        # Ici, on est raccordé à un Vectorino
-        if self.vectorino == True :
-            # On vide le cache, le Vectorino pouvant envoyer bcp plus de données que ne peut traiter le Rpi
-            self.ser.flushInput()
-            read_ser=str((self.ser.readline()))
-            # Selon le mode...
-            if read_ser [2] == "R" :
-                [dummy, affkm, affm,vmoy,affmin,affsec,vinstant, vmax] = read_ser.split(";");
-                vmax = vmax[:3]
-            if read_ser [2] == "P" :
-                [dummy, affmin, affsec,affcent,vinstant,vmaxabsolue] = read_ser.split(";");
-            if read_ser [2] == "B":
-                [dummy, affmin, affsec,affcent,afftour,affvmax] = read_ser.split(";");
-            if read_ser [2] == "O" :
-                [dummy, affkm, affm, afftotalismkm, afftotaliskm,vinstant] = read_ser.split(";");
-            self.label_tps = self.myfont_70.render(''.join(['00:',affmin,':',affsec]), 1, (200,200,200))
+        if distance < 2000 or tps < 2 : 
+            vmoy = 0 # On maintient la vitesse moyenne à 0 sur les 20 premiers mètres ou les 2 premières secondes
         else:
-            affmin = "00"; affsec = "00"; aff_cent="0";
-            affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
-            vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"
-            self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.localtime()), 1, (200,200,200))
-        self.label_km = self.myfont_100.render(''.join([affkm,'.',affm]), 1, (200,200,200))
-        self.label_vi = self.myfont_70.render(''.join([vinstant]), 1, (200,200,200))
-        self.label_vm = self.myfont_70.render(''.join([vmax]), 1, (100,100,100))
+            vmoy = ((distance/(time.time()-tpsinit))*3600/100000);
+
+        if ((time.time()-2) >= j) : 
+            speed = (distance*36-cmavant*36); 
+            speed = speed/2000; 
+            j = time.time()
+            cmavant = distance
+
+        if speed > vmax : vmax = speed
+
+        self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.localtime()), 1, (200,200,200))
+        self.label_km = self.myfont_100.render('{0:.2f}'.format(distance/100000), 1, (200,200,200))
+        self.label_t_vi = self.myfont_36.render('Vitesse',1,(200,0,0))
+        self.label_vi = self.myfont_70.render('{0:.0f}'.format(speed), 1, (200,200,200))
+        self.label_t_vm = self.myfont_36.render('VMax',1,(200,0,0))
+        self.label_vm = self.myfont_70.render('{0:.0f}'.format(vmax), 1, (100,100,100))
 
     def Render(self, screen):
         screen.fill((0,0,0))
 	    # Positionnement des différents éléments d'affichage
         screen.blit(self.label_tps, (10, 5))
-        screen.blit(self.label_km, (440, -10))
-        screen.blit(self.label_vi, (650, 150))
-        screen.blit(self.label_vm, (650, 350))
+        screen.blit(self.label_km, (600, -10))
+        screen.blit(self.label_t_vi,(630,120))
+        screen.blit(self.label_vi, (700, 200))
+        screen.blit(self.label_t_vm, (630,320))
+        screen.blit(self.label_vm, (700, 400))
         screen.blit (self.pages[self.case],(0,100))
         screen.blit (self.pages[self.case+1],(0,300))
 
