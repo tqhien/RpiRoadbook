@@ -25,6 +25,9 @@ import subprocess
 
 import RPi.GPIO as GPIO
 
+totaliskm = 0.0
+roue = 1.864
+
 BOUTON13 = USEREVENT+1 # Odometre
 BOUTON16 = USEREVENT+2 # Bouton left (tout en haut)
 BOUTON19 = USEREVENT+3 # Bouton right (tout en bas)
@@ -45,7 +48,8 @@ GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #------------------------- Les callbacks des interruptions GPIO  ---------------------------------------#
 #*******************************************************************************************************#
 def input_13_callback(channel):
-    pygame.event.post(pygame.event.Event(BOUTON13))
+    global totaliskm
+    totaliskm += roue
 
 def input_16_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON16))
@@ -163,6 +167,7 @@ class TitleScene(SceneBase):
                 self.maconfig['Parametres_Odometre']['roue'] = '1860'
                 self.maconfig['Parametres_Odometre']['nb_aimants'] = '1'
                 self.maconfig['Parametres_Odometre']['totalisateur'] = '0'
+                self.maconfig['Paysage']={}
                 self.maconfig['Paysage']['l_tps_x'] = '10'
                 self.maconfig['Paysage']['l_tps_y'] = '5'
                 self.maconfig['Paysage']['l_km_x'] = '440'
@@ -175,6 +180,7 @@ class TitleScene(SceneBase):
                 self.maconfig['Paysage']['l_case1_y'] = '100'
                 self.maconfig['Paysage']['l_case2_x'] = '0'
                 self.maconfig['Paysage']['l_case2_y'] = '300'
+                self.maconfig['Portrait']={}
                 self.maconfig['Portrait']['l_tps_x'] = '10'
                 self.maconfig['Portrait']['l_tps_y'] = '5'
                 self.maconfig['Portrait']['l_km_x'] = '440'
@@ -202,7 +208,7 @@ class TitleScene(SceneBase):
         self.saved= self.maconfig['Roadbooks']['etape'] ;
         self.font = pygame.font.SysFont("cantarell", 24)
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
-        if len(self.file) == 0 : self.SwitchToScene(NoneScene())
+        if len(self.filenames) == 0 : self.SwitchToScene(NoneScene())
         self.filename = self.saved if self.saved in self.filenames  else ''
         self.j = time.time()
 
@@ -408,8 +414,8 @@ class ConversionScene(SceneBase):
                 w = round(largeur)
                 h = round(hauteur)
 
-                for i in range (nb_pages) :
-                    for j in range (nb_cases):
+                for i in reversed(range (nb_pages)) :
+                    for j in reversed(range (nb_cases)):
                         if j < nb_ligne :
                             x = round(0)
                             y = round(marge_up+(nb_ligne-j-1)*hauteur)
@@ -417,9 +423,12 @@ class ConversionScene(SceneBase):
                             x = round(milieu)
                             y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
                         text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
+                        screen.fill((0, 0, 0))
+                        screen.blit(text1,(100,200))
+                        screen.blit(text2,(100,230))
                         screen.blit(text,(100,260))
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
-                    pygame.display.flip()
+                        pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('RpiRoadbook.cfg')
             # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
@@ -427,7 +436,7 @@ class ConversionScene(SceneBase):
             with open('RpiRoadbook.cfg', 'w') as configfile:
               self.maconfig.write(configfile)
         else:
-            print('On fait une vérification de cohérence')
+            print('On fait une verification de coherence')
             filedir = os.path.splitext(self.filename)[0]
             nb_pages = page_count ('/mnt/piusb/'+self.filename)
             width, height = page_size ('/mnt/piusb/'+self.filename)
@@ -446,7 +455,7 @@ class ConversionScene(SceneBase):
                         pygame.display.flip()
             else :
                 # Format Tripy
-                print('Vérification cohérence Format Tripy')
+                print('Verification coherence Format Tripy')
                 nb_ligne = 8
                 #Nombre de case par page
                 nb_cases = nb_ligne * 2
@@ -471,8 +480,8 @@ class ConversionScene(SceneBase):
                     w = round(largeur)
                     h = round(hauteur)
 
-                    for i in range (nb_pages) :
-                        for j in range (nb_cases):
+                    for i in reversed(range (nb_pages)) :
+                        for j in reversed(range (nb_cases)):
                             if j < nb_ligne :
                                 x = round(0)
                                 y = round(marge_up+(nb_ligne-j-1)*hauteur)
@@ -488,7 +497,7 @@ class ConversionScene(SceneBase):
                             pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('RpiRoadbook.cfg')
-            if self.maconfig['Roadbooks']['case'] < 0 or self.maconfig['Roadbooks']['case'] > total -2 :
+            if int(self.maconfig['Roadbooks']['case']) < 0 or int(self.maconfig['Roadbooks']['case']) > total -2 :
               # Pb avec la position sauvegardée. On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
               self.maconfig['Roadbooks']['case'] = str(total-2)
               with open('RpiRoadbook.cfg', 'w') as configfile:
@@ -570,10 +579,10 @@ class RoadbookScene(SceneBase):
                     self.case = 1
             elif event.type == BOUTON26:
                 self.oldcase = self.case
-                self.case += 1
+                self.case -= 1
             elif event.type == BOUTON21:
                 self.oldcase = self.case
-                self.case -= 1
+                self.case += 1
             elif event.type == BOUTON20:
                 self.SwitchToScene(TitleScene())
 
@@ -612,14 +621,13 @@ class RoadbookScene(SceneBase):
                 [dummy, affkm, affm, afftotalismkm, afftotaliskm,vinstant] = read_ser.split(";");
             self.label_tps = self.myfont_70.render(''.join(['00:',affmin,':',affsec]), 1, (200,200,200))
         else:
-            print()
             affmin = "00"; affsec = "00"; aff_cent="0";
             affkm = "000" ; affm = "00" ; afftotaismkm = "0" ; afftotaliskm = "0" ;
             vmoy = "000" ; vinstant = "000" ; vmax="000"; vmaxabsolue="000"; afftour = "00" ; affvmax = "000"
-            self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.gmtime()), 1, (200,200,200))
-        self.label_km = self.myfont_100.render(''.join([affkm,'.',affm,'km']), 1, (200,200,200))
-        self.label_vi = self.myfont_70.render(''.join([vinstant,'km/h']), 1, (200,200,200))
-        self.label_vm = self.myfont_70.render(''.join([vmax,'km/h']), 1, (100,100,100))
+            self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.localtime()), 1, (200,200,200))
+        self.label_km = self.myfont_100.render(''.join([affkm,'.',affm]), 1, (200,200,200))
+        self.label_vi = self.myfont_70.render(''.join([vinstant]), 1, (200,200,200))
+        self.label_vm = self.myfont_70.render(''.join([vmax]), 1, (100,100,100))
 
     def Render(self, screen):
         screen.fill((0,0,0))
