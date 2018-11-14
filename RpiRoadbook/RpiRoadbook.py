@@ -37,44 +37,51 @@ tpsinit=0.0
 j = 0
 cmavant = 0
 
-BOUTON13 = USEREVENT+1 # Odometre
-BOUTON16 = USEREVENT+2 # Bouton left (tout en haut)
-BOUTON19 = USEREVENT+3 # Bouton right (tout en bas)
-BOUTON20 = USEREVENT+4 # Bouton OK/select (au milieu)
-BOUTON21 = USEREVENT+5 # Bouton Up (2eme en haut)
-BOUTON26 = USEREVENT+6 # Bouton Down (2eme en bas)
+CAPTEUR_ROUE = USEREVENT+1 # Odometre
+BOUTON_LEFT = USEREVENT+2 # Bouton left (tout en haut)
+BOUTON_RIGHT = USEREVENT+3 # Bouton right (tout en bas)
+BOUTON_OK = USEREVENT+4 # Bouton OK/select (au milieu)
+BOUTON_UP = USEREVENT+5 # Bouton Up (2eme en haut)
+BOUTON_DOWN = USEREVENT+6 # Bouton Down (2eme en bas)
 GMASSSTORAGE = USEREVENT+7 # Event branchement en mode cle usb
 
+GPIO_ROUE = 17
+GPIO_LEFT = 27
+GPIO_RIGHT = 22
+GPIO_OK = 23
+GPIO_UP = 24
+GPIO_DOWN = 25
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
-GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
+GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO  ---------------------------------------#
 #*******************************************************************************************************#
-def input_13_callback(channel):
+def input_roue_callback(channel):
     global distance,distancetmp
     distance += roue
     distancetmp += roue
 
-def input_16_callback(channel):
-    pygame.event.post(pygame.event.Event(BOUTON16))
+def input_left_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON_LEFT))
 
-def input_19_callback(channel):
-    pygame.event.post(pygame.event.Event(BOUTON19))
+def input_right_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON_RIGHT))
 
-def input_20_callback(channel):
-    pygame.event.post(pygame.event.Event(BOUTON20))
+def input_ok_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON_OK))
 
-def input_21_callback(channel):
-    pygame.event.post(pygame.event.Event(BOUTON21))
+def input_up_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON_UP))
 
-def input_26_callback(channel):
-    pygame.event.post(pygame.event.Event(BOUTON26))
+def input_down_callback(channel):
+    pygame.event.post(pygame.event.Event(BOUTON_DOWN))
 
 def g_mass_storage_callback():
     r = subprocess.check_output ('cat /sys/class/udc/20980000.usb/state',shell=True)
@@ -83,12 +90,12 @@ def g_mass_storage_callback():
         pygame.event.post(pygame.event.Event(GMASSSTORAGE))
 
 #On définit les interruptions sur les GPIO des commandes
-GPIO.add_event_detect(13, GPIO.FALLING, callback=input_13_callback)
-GPIO.add_event_detect(16, GPIO.FALLING, callback=input_16_callback, bouncetime=200)
-GPIO.add_event_detect(19, GPIO.FALLING, callback=input_19_callback, bouncetime=200)
-GPIO.add_event_detect(20, GPIO.FALLING, callback=input_20_callback, bouncetime=200)
-GPIO.add_event_detect(21, GPIO.FALLING, callback=input_21_callback, bouncetime=200)
-GPIO.add_event_detect(26, GPIO.FALLING, callback=input_26_callback, bouncetime=200)
+GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=200)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=200)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=200)
+GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=200)
+GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=200)
 
 #----------------------------------------------------------------------------------------------#
 #-------------------------- Vérification configfile -------------------------------------------#
@@ -234,26 +241,26 @@ class TitleScene(SceneBase):
                     self.selection += 1 ;
                     if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;
                     if self.selection >= self.fenetre+10: self.fenetre+=1
-            elif event.type == BOUTON16 :
+            elif event.type == BOUTON_LEFT :
                 self.iscountdown = False
                 self.column += 1
                 if self.column > 2 : self.column = 2
-            elif event.type == BOUTON19 :
+            elif event.type == BOUTON_RIGHT :
                 self.iscountdown = False
                 self.column -= 1
                 if self.column < 1 : self.column = 1
-            elif event.type == BOUTON21 :
+            elif event.type == BOUTON_UP :
                     self.iscountdown = False ;
                     if self.column ==1 : self.selection -= 1 ;
                     if self.selection < 0: self.selection = 0 ;
                     if self.selection < self.fenetre: self.fenetre -= 1
                     if self.fenetre < 0 : self.fenetre = 0
-            elif event.type == BOUTON26 :
+            elif event.type == BOUTON_DOWN :
                     self.iscountdown = False ;
                     if self.column == 1 : self.selection += 1 ;
                     if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;
                     if self.selection >= self.fenetre+10: self.fenetre+=1
-            elif event.type == BOUTON20 :
+            elif event.type == BOUTON_OK :
                     self.iscountdown = False ;
                     if self.column == 1 :
                         if self.filename != self.filenames[self.selection] :
@@ -368,19 +375,19 @@ class ConfigScene(SceneBase):
                 if event.key == pygame.K_END:
                     self.oldcase = self.case
                     self.case = 1
-            elif event.type == BOUTON16:
+            elif event.type == BOUTON_RIGHT:
                 self.index+=1
                 if self.index > 7:
                     self.index = 0
-            elif event.type == BOUTON19:
+            elif event.type == BOUTON_LEFT:
                 self.index -= 1
                 if self.index < 0 :
                     self.index = 7    
-            elif event.type == BOUTON26:
+            elif event.type == BOUTON_DOWN:
                 self.data[self.index] -= 1
-            elif event.type == BOUTON21:
+            elif event.type == BOUTON_UP:
                 self.data[self.index] += 1
-            elif event.type == BOUTON20:
+            elif event.type == BOUTON_OK:
                 # validation
                 subprocess.call ('sudo rw')
                 subprocess.call ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
@@ -668,22 +675,22 @@ class RoadbookScene(SceneBase):
                 if event.key == pygame.K_END:
                     self.oldcase = self.case
                     self.case = 1
-            elif event.type == BOUTON16:
+            elif event.type == BOUTON_RIGHT:
                 distance+=10000
                 cmavant=distance
                 j = time.time()
-            elif event.type == BOUTON26:
-                self.oldcase = self.case
-                self.case -= 1
-            elif event.type == BOUTON21:
-                self.oldcase = self.case
-                self.case += 1
-            elif event.type == BOUTON19:
+            elif event.type == BOUTON_LEFT:
                 distance-=10000
                 if distance <= 0 : distance = 0
                 cmavant = distance
                 j = time.time();
-            elif event.type == BOUTON20:
+            elif event.type == BOUTON_DOWN:
+                self.oldcase = self.case
+                self.case -= 1
+            elif event.type == BOUTON_UP:
+                self.oldcase = self.case
+                self.case += 1
+            elif event.type == BOUTON_OK:
                 distance = 0.0
                 cmavant = distance 
                 vmoy = 0
