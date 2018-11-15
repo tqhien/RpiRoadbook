@@ -44,6 +44,7 @@ BOUTON_OK = USEREVENT+4 # Bouton OK/select (au milieu)
 BOUTON_UP = USEREVENT+5 # Bouton Up (2eme en haut)
 BOUTON_DOWN = USEREVENT+6 # Bouton Down (2eme en bas)
 GMASSSTORAGE = USEREVENT+7 # Event branchement en mode cle usb
+USB_DISCONNECTED = USEREVENT+8 # Event Cable usb debranche
 
 GPIO_ROUE = 17
 GPIO_LEFT = 27
@@ -84,10 +85,15 @@ def input_down_callback(channel):
     pygame.event.post(pygame.event.Event(BOUTON_DOWN))
 
 def g_mass_storage_callback():
-    r = subprocess.check_output ('cat /sys/class/udc/20980000.usb/state',shell=True)
-    print (r)
-    if r == b'Configured\n' :
-        pygame.event.post(pygame.event.Event(GMASSSTORAGE))
+    try:
+        rfile = open('/sys/class/udc/20980000.usb/state')
+        r = rfile.read()
+        if r == 'configured\n' :
+             pygame.event.post(pygame.event.Event(GMASSSTORAGE))
+        else:
+             pygame.event.post(pygame.event.Event(USB_DISCONNECTED))
+    except:
+        rfile.close()
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback)
@@ -148,7 +154,6 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
     clock = pygame.time.Clock()
 
     active_scene = starting_scene
-    old_scene = active_scene
     t_usb = time.time()
     check_configfile()
 
@@ -172,6 +177,8 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
                     quit_attempt = True
                 elif event.key == pygame.K_F4 and alt_pressed:
                     quit_attempt = True
+            elif event.type == GMASSSTORAGE:
+                active_scene.SwitchToScene(G_MassStorageScene())
 
             if quit_attempt:
                 active_scene.Terminate()
@@ -321,8 +328,10 @@ class NoneScene(SceneBase):
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
-            if event.type == BOUTON16 or event.type == BOUTON19 or event.type == BOUTON20 or event.type == BOUTON21 or event.type == BOUTON26 :
+            elif event.type == BOUTON_LEFT or event.type == BOUTON_RIGHT or event.type == BOUTON_OK or event.type == BOUTON_UP or event.type == BOUTON_DOWN :
                 self.SwitchToScene(TitleScene())
+            elif event.type == GMASSSTORAGE:
+                self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
         pass
@@ -458,15 +467,45 @@ class G_MassStorageScene(SceneBase):
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 24)
         self.usb_connected = pygame.image.load ('./../images/usb_connected_white.jpg')
+        self.text = self.font.render('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',True,(200,0,0))
+        #os.system('umount /mnt/piusb')
 
     def ProcessInput(self, events, pressed_keys):
-        pass
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.Terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.Terminate()
+                if event.key == pygame.K_UP:
+                    self.oldcase = self.case
+                    self.case += 1
+                if event.key == pygame.K_DOWN:
+                    self.oldcase = self.case
+                    self.case -= 1
+                if event.key == pygame.K_HOME:
+                    self.oldcase = self.case
+                    self.case = self.nb_cases -1
+                if event.key == pygame.K_END:
+                    self.oldcase = self.case
+                    self.case = 1
+            elif event.type == BOUTON_LEFT or event.type == BOUTON_RIGHT or event.type == BOUTON_OK or event.type == BOUTON_UP or event.type == BOUTON_DOWN :
+                os.system('modprobe -r g_mass_storage')
+                time.sleep(1)
+                os.system('modprobe g_mass_storage file=/home/rpi/piusb.bin stall=0 ro=0 removable=1')
+                time.sleep(1)
+                os.system('mount -t vfat /home/rpi/piusb.bin /mnt/piusb')
+                time.sleep(1)
+                self.SwitchToScene(TitleScene())
+        
 
     def Update(self):
         pass
 
     def Render(self, screen):
+        screen.fill((0, 0, 0))
         screen.blit(self.usb_connected, (0, 0))
+        screen.blit(self.text,(10,450))
         pygame.display.flip()
 
 
