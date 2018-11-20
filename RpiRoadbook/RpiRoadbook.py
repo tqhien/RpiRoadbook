@@ -25,7 +25,6 @@ from pdf2image import page_count,convert_from_path,page_size
 import subprocess
 
 import RPi.GPIO as GPIO
-
 distance = 0
 distancetmp = 0
 speed = 0.00
@@ -36,15 +35,17 @@ tps = 0.0
 tpsinit=0.0
 j = 0
 cmavant = 0
+bouton_time = time.time()
 
-CAPTEUR_ROUE = USEREVENT+1 # Odometre
-BOUTON_LEFT = USEREVENT+2 # Bouton left (tout en haut)
-BOUTON_RIGHT = USEREVENT+3 # Bouton right (tout en bas)
-BOUTON_OK = USEREVENT+4 # Bouton OK/select (au milieu)
-BOUTON_UP = USEREVENT+5 # Bouton Up (2eme en haut)
-BOUTON_DOWN = USEREVENT+6 # Bouton Down (2eme en bas)
-GMASSSTORAGE = USEREVENT+7 # Event branchement en mode cle usb
-USB_DISCONNECTED = USEREVENT+8 # Event Cable usb debranche
+CAPTEUR_ROUE    = USEREVENT # Odometre
+BOUTON_LEFT     = USEREVENT+1 # Bouton left (tout en haut)
+BOUTON_RIGHT    = USEREVENT+2 # Bouton right (2eme en haut)
+BOUTON_OK       = USEREVENT+3 # Bouton OK/select (au milieu)
+BOUTON_UP       = USEREVENT+4 # Bouton Up (1er en bas)
+BOUTON_DOWN     = USEREVENT+5 # Bouton Down (tout en bas)
+GMASSSTORAGE    = USEREVENT+6 # Event branchement en mode cle usb
+USB_DISCONNECTED = USEREVENT+7 # Event Cable usb debranche
+APPUI_LONG	= USEREVENT+8 # appui long
 
 GPIO_ROUE = 17
 GPIO_LEFT = 27
@@ -70,18 +71,43 @@ def input_roue_callback(channel):
     distancetmp += roue
 
 def input_left_callback(channel):
+    global bouton_time
+    b4_time = time.time()
+    while GPIO.input(channel) == 0 : # on attend le retour du bouton
+        pass
+    bouton_time = time.time() - b4_time
     pygame.event.post(pygame.event.Event(BOUTON_LEFT))
 
 def input_right_callback(channel):
+    global bouton_time
+    b4_time = time.time()
+    while GPIO.input(channel) == 0 : # on attend le retour du bouton
+        pass
+    bouton_time = time.time() - b4_time
     pygame.event.post(pygame.event.Event(BOUTON_RIGHT))
 
 def input_ok_callback(channel):
+    global bouton_time
+    b4_time = time.time()
+    while GPIO.input(channel) == 0 : # on attend le retour du bouton
+        pass
+    bouton_time = time.time() - b4_time
     pygame.event.post(pygame.event.Event(BOUTON_OK))
 
 def input_up_callback(channel):
+    global bouton_time
+    b4_time = time.time()
+    while GPIO.input(channel) == 0 : # on attend le retour du bouton
+        pass
+    bouton_time = time.time() - b4_time
     pygame.event.post(pygame.event.Event(BOUTON_UP))
 
 def input_down_callback(channel):
+    global bouton_time
+    b4_time = time.time()
+    while GPIO.input(channel) == 0 : # on attend le retour du bouton
+        pass
+    bouton_time = time.time() - b4_time
     pygame.event.post(pygame.event.Event(BOUTON_DOWN))
 
 def g_mass_storage_callback():
@@ -205,7 +231,7 @@ class TitleScene(SceneBase):
     def __init__(self):
         SceneBase.__init__(self)
         pygame.font.init()
-
+        check_configfile()
         # On charge le fichier de config
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('RpiRoadbook.cfg')
@@ -286,7 +312,10 @@ class TitleScene(SceneBase):
         if self.iscountdown:
             self.k = time.time();
             if (self.k-self.j>=self.countdown) :
-                self.SwitchToScene(RoadbookScene(self.filename))
+                self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
+                with open('RpiRoadbook.cfg', 'w') as configfile:
+                    self.maconfig.write(configfile)
+                self.SwitchToScene(ConversionScene(self.filename))
 
     def Render(self, screen):
         screen.fill((0, 0, 0))
@@ -306,7 +335,10 @@ class TitleScene(SceneBase):
             screen.blit (fleche_up,(10,380))
         screen.blit(self.menu_config_white,(750,430)) if self.column == 2 else screen.blit(self.menu_config,(750,430))    
         if self.iscountdown :
-            text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
+            if self.k-self.j>= self.countdown :
+                text = self.font.render('Chargement du roadbook... Veuillez patienter.',True,(0,255,0))
+            else :
+                text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
             screen.blit(text,(10,450))
         pygame.display.flip()
 
@@ -320,9 +352,9 @@ class NoneScene(SceneBase):
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 24)
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
-        self.text1 = self.font.render('Aucun roadbook présent.', True, (0, 255, 0))
-        self.text2 = self.font.render('Appuyez sur un boutont pour revenir', True, (0, 255, 0))
-        self.text3 = self.font.render('au menu après téléversement', True, (0, 255, 0))
+        self.text1 = self.font.render('Aucun roadbook present.', True, (200, 0, 0))
+        self.text2 = self.font.render('Appuyez sur un bouton pour revenir', True, (200, 0, 0))
+        self.text3 = self.font.render('au menu apres telechargement', True, (200, 0, 0))
 
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -527,12 +559,13 @@ class ConversionScene(SceneBase):
         pass
 
     def Render(self, screen):
-        text1 = self.font.render('Préparation du roadbook... Patience...', True, (0, 255, 0))
+        text1 = self.font.render('Preparation du roadbook... Patience...', True, (0, 255, 0))
         self.maconfig = configparser.ConfigParser()
         filedir = os.path.splitext(self.filename)[0]
         if os.path.isdir('./../Roadbooks/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
             os.mkdir('./../Roadbooks/'+filedir)
-						# on vérifie le format de la page :
+
+			# on vérifie le format de la page :
             width, height = page_size ('/mnt/piusb/'+self.filename)
             if width > height :
                 text2 = self.font.render('Conversion des cases en cours...', True, (0, 255, 0))
@@ -549,7 +582,7 @@ class ConversionScene(SceneBase):
                 # conversion et découpage des cases
                 screen.fill((0, 0, 0))
                 screen.blit(text1,(100,200))
-                text2 = self.font.render('Format Tripy détecté. Conversion en cours...', True, (0, 255, 0))
+                text2 = self.font.render('Format Tripy. Conversion en cours...', True, (0, 255, 0))
                 screen.blit(text2,(100,230))
                 nb_pages = page_count ('/mnt/piusb/'+self.filename)
                 #Marge supperieur (pix)
@@ -599,7 +632,7 @@ class ConversionScene(SceneBase):
             if width > height :
                 total = nb_pages
                 if total != nb_images :
-                    text2 = self.font.render('Pas le même nombre de cases ! On vérifie...', True, (0, 255, 0))
+                    text2 = self.font.render('Pas le meme nombre de cases ! On verifie...', True, (0, 255, 0))
                     for i in range (total) :
                         screen.fill((0, 0, 0))
                         screen.blit(text1,(100,200))
@@ -617,7 +650,7 @@ class ConversionScene(SceneBase):
                 total = nb_pages * nb_cases
                 nb_images = len([f for f in os.listdir('./../Roadbooks/'+filedir) if re.search('.jpg$', f)])
                 if total != nb_images :
-                    text2 = self.font.render('Pas le même nombre de cases ! On vérifie...', True, (0, 255, 0))
+                    text2 = self.font.render('Pas le meme nombre de cases ! On verifie...', True, (0, 255, 0))
                     #Marge supperieur (pix)
                     marge_up = 178
                     #Hauteur d'une case (pix)
@@ -695,7 +728,7 @@ class RoadbookScene(SceneBase):
         self.label_vm = self.myfont_70.render("000", 1, (100,100,100))
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,tpsinit,cmavant,j,vmoy,vmax
+        global distance,tpsinit,cmavant,j,vmoy,vmax,bouton_time
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -726,16 +759,23 @@ class RoadbookScene(SceneBase):
             elif event.type == BOUTON_DOWN:
                 self.oldcase = self.case
                 self.case -= 1
+                if bouton_time >= 2.0 :
+                    self.case = 0
             elif event.type == BOUTON_UP:
                 self.oldcase = self.case
                 self.case += 1
+                if bouton_time >= 2.0 :
+                    self.case = self.nb_cases - 2
             elif event.type == BOUTON_OK:
-                distance = 0.0
-                cmavant = distance 
-                vmoy = 0
-                speed = 0
-                tpsinit = time.time()/1000
-                vmax = 0;
+                if bouton_time >= 2.0 :
+                    self.SwitchToScene(TitleScene())
+                else:
+                    distance = 0.0
+                    cmavant = distance 
+                    vmoy = 0
+                    speed = 0
+                    tpsinit = time.time()/1000
+                    vmax = 0;
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - 2 :
@@ -758,9 +798,9 @@ class RoadbookScene(SceneBase):
         else:
             vmoy = ((distance/(time.time()-tpsinit))*3.6/1000);
         k = time.time() - j
-        if ( k >= 2) : # Vitesse moyenne sur 2 secondes
+        if ( k >= 1) : # Vitesse moyenne sur 1 secondes
             speed = (distance*3.6-cmavant*3.6); 
-            speed = speed/k/1000; 
+            speed = 1.0*speed/k/1000; 
             j = time.time()
             cmavant = distance
 
