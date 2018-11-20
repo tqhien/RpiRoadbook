@@ -25,6 +25,7 @@ from pdf2image import page_count,convert_from_path,page_size
 import subprocess
 
 import RPi.GPIO as GPIO
+
 distance = 0
 distancetmp = 0
 speed = 0.00
@@ -36,6 +37,7 @@ tpsinit=0.0
 j = 0
 cmavant = 0
 bouton_time = time.time()
+temperature = -100
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = USEREVENT+1 # Bouton left (tout en haut)
@@ -45,7 +47,6 @@ BOUTON_UP       = USEREVENT+4 # Bouton Up (1er en bas)
 BOUTON_DOWN     = USEREVENT+5 # Bouton Down (tout en bas)
 GMASSSTORAGE    = USEREVENT+6 # Event branchement en mode cle usb
 USB_DISCONNECTED = USEREVENT+7 # Event Cable usb debranche
-APPUI_LONG	= USEREVENT+8 # appui long
 
 GPIO_ROUE = 17
 GPIO_LEFT = 27
@@ -118,8 +119,19 @@ def g_mass_storage_callback():
              pygame.event.post(pygame.event.Event(GMASSSTORAGE))
         else:
              pygame.event.post(pygame.event.Event(USB_DISCONNECTED))
-    except:
         rfile.close()
+    except:
+        pass
+
+def rpi_temp():
+    global temperature
+    try:
+        tfile = open('/sys/class/thermal/thermal_zone0/temp')
+        t = tfile.read()
+        temperature = float(t)/1000
+        tfile.close()
+    except:
+        pass
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback)
@@ -188,7 +200,8 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
         # On ne checke la connectivité usb que toutes les 5 secondes
         if time.time() - 5 > t_usb : 
             g_mass_storage_callback()
-            t_usb = time.time()       
+            t_usb = time.time()   
+            rpi_temp()    
 
         # Event filtering
         filtered_events = []
@@ -784,7 +797,7 @@ class RoadbookScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp
+        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             self.maconfig['Roadbooks']['case'] = str(self.case)
@@ -817,9 +830,11 @@ class RoadbookScene(SceneBase):
         self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.localtime()), 1, (200,200,200))
         self.label_km = self.myfont_100.render('{0:.2f}'.format(distance/1000000), 1, (200,200,200))
         self.label_t_vi = self.myfont_36.render('Vitesse',1,(200,0,0))
-        self.label_vi = self.myfont_70.render('{0:.0f}'.format(speed), 1, (200,200,200))
+        self.label_vi = self.myfont_70.render('{0:.1f}'.format(speed), 1, (200,200,200))
         self.label_t_vm = self.myfont_36.render('VMax',1,(200,0,0))
-        self.label_vm = self.myfont_70.render('{0:.0f}'.format(vmax), 1, (100,100,100))
+        self.label_vm = self.myfont_70.render('{0:.1f}'.format(vmax), 1, (100,100,100))
+
+        self.label_temp = self.myfont_36.render('{0:.1f}°C'.format(temperature),1,(200,200,200))
 
     def Render(self, screen):
         screen.fill((0,0,0))
@@ -832,6 +847,7 @@ class RoadbookScene(SceneBase):
         screen.blit(self.label_vm, (700, 400))
         screen.blit (self.pages[self.case],(0,100))
         screen.blit (self.pages[self.case+1],(0,300))
+        screen.blit(self.label_temp,(300,5))
 
 
 
