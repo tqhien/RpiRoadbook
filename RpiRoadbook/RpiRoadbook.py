@@ -40,13 +40,13 @@ bouton_time = time.time()
 temperature = -100
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
-BOUTON_LEFT     = USEREVENT+1 # Bouton left (tout en haut)
-BOUTON_RIGHT    = USEREVENT+2 # Bouton right (2eme en haut)
-BOUTON_OK       = USEREVENT+3 # Bouton OK/select (au milieu)
-BOUTON_UP       = USEREVENT+4 # Bouton Up (1er en bas)
-BOUTON_DOWN     = USEREVENT+5 # Bouton Down (tout en bas)
-GMASSSTORAGE    = USEREVENT+6 # Event branchement en mode cle usb
-USB_DISCONNECTED = USEREVENT+7 # Event Cable usb debranche
+BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
+BOUTON_RIGHT    = pygame.K_RIGHT # Bouton right (2eme en haut)
+BOUTON_OK       = pygame.K_RETURN # Bouton OK/select (au milieu)
+BOUTON_UP       = pygame.K_UP # Bouton Up (1er en bas)
+BOUTON_DOWN     = pygame.K_DOWN # Bouton Down (tout en bas)
+GMASSSTORAGE    = USEREVENT+1 # Event branchement en mode cle usb
+USB_DISCONNECTED = USEREVENT+2 # Event Cable usb debranche
 
 GPIO_ROUE = 17
 GPIO_LEFT = 27
@@ -77,7 +77,7 @@ def input_left_callback(channel):
     while GPIO.input(channel) == 0 : # on attend le retour du bouton
         pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(BOUTON_LEFT))
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
 
 def input_right_callback(channel):
     global bouton_time
@@ -85,7 +85,7 @@ def input_right_callback(channel):
     while GPIO.input(channel) == 0 : # on attend le retour du bouton
         pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(BOUTON_RIGHT))
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
 
 def input_ok_callback(channel):
     global bouton_time
@@ -93,7 +93,7 @@ def input_ok_callback(channel):
     while GPIO.input(channel) == 0 : # on attend le retour du bouton
         pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(BOUTON_OK))
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
 
 def input_up_callback(channel):
     global bouton_time
@@ -101,7 +101,7 @@ def input_up_callback(channel):
     while GPIO.input(channel) == 0 : # on attend le retour du bouton
         pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(BOUTON_UP))
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
 
 def input_down_callback(channel):
     global bouton_time
@@ -109,7 +109,7 @@ def input_down_callback(channel):
     while GPIO.input(channel) == 0 : # on attend le retour du bouton
         pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(BOUTON_DOWN))
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
 
 def g_mass_storage_callback():
     try:
@@ -268,57 +268,40 @@ class TitleScene(SceneBase):
     def ProcessInput(self, events, pressed_keys):
         for event in events:
             if event.type == pygame.KEYDOWN :
-                self.iscountdown = False ;
-                if event.key == pygame.K_RETURN:
-                # Move to the next screen when the user pressed Enter
-                    if self.filename != self.filenames[self.selection] :
-                        self.filename = self.filenames[self.selection]
-                        self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                        self.maconfig['Roadbooks']['case'] = '-1'
-                        with open('RpiRoadbook.cfg', 'w') as configfile:
-                            self.maconfig.write(configfile)
-                    self.SwitchToScene(ConversionScene(self.filename))
-                elif event.key == pygame.K_UP:
-                    self.selection -= 1 ;
-                    if self.selection < 0: self.selection = 0 ;
+                self.iscountdown = False 
+                if event.key == BOUTON_UP :
+                    self.iscountdown = False 
+                    if self.column ==1 : self.selection -= 1 
+                    if self.selection < 0: self.selection = 0 
                     if self.selection < self.fenetre: self.fenetre -= 1
                     if self.fenetre < 0 : self.fenetre = 0
-                elif event.key == pygame.K_DOWN:
-                    self.selection += 1 ;
-                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;
+                elif event.key == BOUTON_DOWN :
+                    self.iscountdown = False 
+                    if self.column == 1 : self.selection += 1 
+                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 
                     if self.selection >= self.fenetre+10: self.fenetre+=1
-            elif event.type == BOUTON_LEFT :
-                self.iscountdown = False
-                self.column += 1
-                if self.column > 2 : self.column = 2
-            elif event.type == BOUTON_RIGHT :
-                self.iscountdown = False
-                self.column -= 1
-                if self.column < 1 : self.column = 1
-            elif event.type == BOUTON_UP :
-                    self.iscountdown = False ;
-                    if self.column ==1 : self.selection -= 1 ;
-                    if self.selection < 0: self.selection = 0 ;
-                    if self.selection < self.fenetre: self.fenetre -= 1
-                    if self.fenetre < 0 : self.fenetre = 0
-            elif event.type == BOUTON_DOWN :
-                    self.iscountdown = False ;
-                    if self.column == 1 : self.selection += 1 ;
-                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 ;
-                    if self.selection >= self.fenetre+10: self.fenetre+=1
-            elif event.type == BOUTON_OK :
-                    self.iscountdown = False ;
-                    if self.column == 1 :
-                        if self.filename != self.filenames[self.selection] :
-                            self.filename = self.filenames[self.selection]
-                            self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                            self.maconfig['Roadbooks']['case'] = '-1'
-                            with open('RpiRoadbook.cfg', 'w') as configfile:
-                                self.maconfig.write(configfile)
-                        self.SwitchToScene(ConversionScene(self.filename))
-                    else :
-                        self.SwitchToScene(ConfigScene())
+                elif event.key == BOUTON_LEFT :
+                    self.iscountdown = False
+                    self.column -= 1
+                    if self.column < 1 : self.column = 1
+                elif event.key == BOUTON_RIGHT :
+                    self.iscountdown = False
+                    self.column += 1
+                    if self.column > 2 : self.column = 2        
+                elif event.key == BOUTON_OK :
+                        self.iscountdown = False ;
+                        if self.column == 1 :
+                            if self.filename != self.filenames[self.selection] :
+                                self.filename = self.filenames[self.selection]
+                                self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
+                                self.maconfig['Roadbooks']['case'] = '-1'
+                                with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                                    self.maconfig.write(configfile)
+                            self.SwitchToScene(ConversionScene(self.filename))
+                        else :
+                            self.SwitchToScene(ConfigScene())
             elif event.type == GMASSSTORAGE :
+                self.iscountdown = False
                 self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
@@ -326,7 +309,7 @@ class TitleScene(SceneBase):
             self.k = time.time();
             if (self.k-self.j>=self.countdown) :
                 self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                with open('RpiRoadbook.cfg', 'w') as configfile:
+                with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                     self.maconfig.write(configfile)
                 self.SwitchToScene(ConversionScene(self.filename))
 
@@ -373,8 +356,9 @@ class NoneScene(SceneBase):
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
-            elif event.type == BOUTON_LEFT or event.type == BOUTON_RIGHT or event.type == BOUTON_OK or event.type == BOUTON_UP or event.type == BOUTON_DOWN :
-                self.SwitchToScene(TitleScene())
+            elif event.type = pygame.KEYDOWN :
+                if event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
+                    self.SwitchToScene(TitleScene())
             elif event.type == GMASSSTORAGE:
                 self.SwitchToScene(G_MassStorageScene())
 
@@ -417,42 +401,36 @@ class ConfigScene(SceneBase):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
-                if event.key == pygame.K_UP:
-                    self.oldcase = self.case
-                    self.case += 1
-                if event.key == pygame.K_DOWN:
-                    self.oldcase = self.case
-                    self.case -= 1
-                if event.key == pygame.K_HOME:
+                elif event.key == pygame.K_HOME:
                     self.oldcase = self.case
                     self.case = self.nb_cases -1
-                if event.key == pygame.K_END:
+                elif event.key == pygame.K_END:
                     self.oldcase = self.case
                     self.case = 1
-            elif event.type == BOUTON_RIGHT:
-                self.index+=1
-                if self.index > 7:
-                    self.index = 0
-            elif event.type == BOUTON_LEFT:
-                self.index -= 1
-                if self.index < 0 :
-                    self.index = 7    
-            elif event.type == BOUTON_DOWN:
-                self.data[self.index] -= 1
-            elif event.type == BOUTON_UP:
-                self.data[self.index] += 1
-            elif event.type == BOUTON_OK:
-                # validation
-                subprocess.call ('sudo rw')
-                subprocess.call ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
-                subprocess.call ('sudo hwclock --set --date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
-                subprocess.call ('sudo ro')
-                self.maconfig['Parametres_Odometre']['roue'] = str(self.data[6])
-                try:
-                    with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
-                        self.maconfig.write(configfile)
-                except: pass
-                if self.index == 7 : self.SwitchToScene(TitleScene())
+                elif event.key == BOUTON_RIGHT:
+                    self.index+=1
+                    if self.index > 7:
+                        self.index = 0
+                elif event.key == BOUTON_LEFT:
+                    self.index -= 1
+                    if self.index < 0 :
+                        self.index = 7    
+                elif event.key == BOUTON_DOWN:
+                    self.data[self.index] -= 1
+                elif event.key == BOUTON_UP:
+                    self.data[self.index] += 1
+                elif event.key == BOUTON_OK:
+                    # validation
+                    subprocess.call ('sudo rw')
+                    subprocess.call ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
+                    subprocess.call ('sudo hwclock --set --date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
+                    subprocess.call ('sudo ro')
+                    self.maconfig['Parametres_Odometre']['roue'] = str(self.data[6])
+                    try:
+                        with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                            self.maconfig.write(configfile)
+                    except: pass
+                    if self.index == 7 : self.SwitchToScene(TitleScene())
             # Vérification validité des valeurs
             if self.data[2] < 2018 : self.data[2] = 2018
             if self.data[1] < 1 : self.data[1] = 1
@@ -522,26 +500,14 @@ class G_MassStorageScene(SceneBase):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
-                if event.key == pygame.K_UP:
-                    self.oldcase = self.case
-                    self.case += 1
-                if event.key == pygame.K_DOWN:
-                    self.oldcase = self.case
-                    self.case -= 1
-                if event.key == pygame.K_HOME:
-                    self.oldcase = self.case
-                    self.case = self.nb_cases -1
-                if event.key == pygame.K_END:
-                    self.oldcase = self.case
-                    self.case = 1
-            elif event.type == BOUTON_LEFT or event.type == BOUTON_RIGHT or event.type == BOUTON_OK or event.type == BOUTON_UP or event.type == BOUTON_DOWN :
-                os.system('modprobe -r g_mass_storage')
-                time.sleep(1)
-                os.system('modprobe g_mass_storage file=/home/rpi/piusb.bin stall=0 ro=0 removable=1')
-                time.sleep(1)
-                os.system('mount -t vfat /home/rpi/piusb.bin /mnt/piusb')
-                time.sleep(1)
-                self.SwitchToScene(TitleScene())
+                elif event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
+                    os.system('modprobe -r g_mass_storage')
+                    time.sleep(1)
+                    os.system('modprobe g_mass_storage file=/home/rpi/piusb.bin stall=0 ro=0 removable=1')
+                    time.sleep(1)
+                    os.system('mount -t vfat /home/rpi/piusb.bin /mnt/piusb')
+                    time.sleep(1)
+                    self.SwitchToScene(TitleScene())
         
 
     def Update(self):
@@ -748,47 +714,35 @@ class RoadbookScene(SceneBase):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
-                if event.key == pygame.K_UP:
-                    self.oldcase = self.case
-                    self.case += 1
-                if event.key == pygame.K_DOWN:
+                elif event.key == BOUTON_RIGHT:
+                    distance+=10000
+                    cmavant=distance
+                    j = time.time()
+                elif event.key == BOUTON_LEFT:
+                    distance-=10000
+                    if distance <= 0 : distance = 0
+                    cmavant = distance
+                    j = time.time();
+                elif event.key == BOUTON_DOWN:
                     self.oldcase = self.case
                     self.case -= 1
-                if event.key == pygame.K_HOME:
+                    if bouton_time >= 2.0 :
+                        self.case = 0
+                elif event.key == BOUTON_UP:
                     self.oldcase = self.case
-                    self.case = self.nb_cases -1
-                if event.key == pygame.K_END:
-                    self.oldcase = self.case
-                    self.case = 1
-            elif event.type == BOUTON_RIGHT:
-                distance+=10000
-                cmavant=distance
-                j = time.time()
-            elif event.type == BOUTON_LEFT:
-                distance-=10000
-                if distance <= 0 : distance = 0
-                cmavant = distance
-                j = time.time();
-            elif event.type == BOUTON_DOWN:
-                self.oldcase = self.case
-                self.case -= 1
-                if bouton_time >= 2.0 :
-                    self.case = 0
-            elif event.type == BOUTON_UP:
-                self.oldcase = self.case
-                self.case += 1
-                if bouton_time >= 2.0 :
-                    self.case = self.nb_cases - 2
-            elif event.type == BOUTON_OK:
-                if bouton_time >= 2.0 :
-                    self.SwitchToScene(TitleScene())
-                else:
-                    distance = 0.0
-                    cmavant = distance 
-                    vmoy = 0
-                    speed = 0
-                    tpsinit = time.time()/1000
-                    vmax = 0;
+                    self.case += 1
+                    if bouton_time >= 2.0 :
+                        self.case = self.nb_cases - 2
+                elif event.key == BOUTON_OK:
+                    if bouton_time >= 2.0 :
+                        self.SwitchToScene(TitleScene())
+                    else:
+                        distance = 0.0
+                        cmavant = distance 
+                        vmoy = 0
+                        speed = 0
+                        tpsinit = time.time()/1000
+                        vmax = 0;
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - 2 :
