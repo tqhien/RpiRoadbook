@@ -151,11 +151,11 @@ def check_configfile():
     maconfig.read('default.cfg')
     # On essaye de charger celui existant, en écrasant les paramètres par défaut s'ils sont définis
     try:
-        maconfig.read('RpiRoadbook.cfg')
+        maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
     except:
         pass
     # On sauvegarde la configuration finale
-    with open('RpiRoadbook.cfg', 'w') as configfile:
+    with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
             maconfig.write(configfile)
 
 #*******************************************************************************************************#
@@ -247,7 +247,7 @@ class TitleScene(SceneBase):
         check_configfile()
         # On charge le fichier de config
         self.maconfig = configparser.ConfigParser()
-        self.maconfig.read('RpiRoadbook.cfg')
+        self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
 
         self.roue = int(self.maconfig['Parametres_Odometre']['roue'])
         self.countdown = 4 ;
@@ -399,7 +399,7 @@ class ConfigScene(SceneBase):
         self.font = pygame.font.SysFont("cantarell", 70)
         self.now = time.localtime()
         self.maconfig = configparser.ConfigParser()
-        self.maconfig.read('RpiRoadbook.cfg')
+        self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.index = 0
         self.label_date = self.font.render('Date : ',True,(200,200,200))
         self.label_heure = self.font.render ('Heure:',True,(200,200,200))
@@ -449,7 +449,7 @@ class ConfigScene(SceneBase):
                 subprocess.call ('sudo ro')
                 self.maconfig['Parametres_Odometre']['roue'] = str(self.data[6])
                 try:
-                    with open('RpiRoadbook.cfg', 'w') as configfile:
+                    with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                         self.maconfig.write(configfile)
                 except: pass
                 if self.index == 7 : self.SwitchToScene(TitleScene())
@@ -575,8 +575,8 @@ class ConversionScene(SceneBase):
         text1 = self.font.render('Preparation du roadbook... Patience...', True, (0, 255, 0))
         self.maconfig = configparser.ConfigParser()
         filedir = os.path.splitext(self.filename)[0]
-        if os.path.isdir('./../Roadbooks/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
-            os.mkdir('./../Roadbooks/'+filedir)
+        if os.path.isdir('/mnt/piusb/Conversions/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
+            os.mkdir('/mnt/piusb/Conversions/'+filedir)
 
 			# on vérifie le format de la page :
             width, height = page_size ('/mnt/piusb/'+self.filename)
@@ -589,7 +589,7 @@ class ConversionScene(SceneBase):
                     screen.blit(text2,(100,230))
                     text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                     screen.blit(text,(100,260))
-                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
                     pygame.display.flip()
             else:
                 # conversion et découpage des cases
@@ -628,10 +628,10 @@ class ConversionScene(SceneBase):
                         screen.blit(text1,(100,200))
                         screen.blit(text2,(100,230))
                         screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
                         pygame.display.flip()
             # On charge le fichier de configuration
-            self.maconfig.read('RpiRoadbook.cfg')
+            self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
             # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
             self.maconfig['Roadbooks']['case'] = str(total-2)
             with open('RpiRoadbook.cfg', 'w') as configfile:
@@ -641,7 +641,7 @@ class ConversionScene(SceneBase):
             filedir = os.path.splitext(self.filename)[0]
             nb_pages = page_count ('/mnt/piusb/'+self.filename)
             width, height = page_size ('/mnt/piusb/'+self.filename)
-            nb_images = len([f for f in os.listdir('./../Roadbooks/'+filedir) if re.search('.jpg$', f)])
+            nb_images = len([f for f in os.listdir('/mnt/piusb/Conversions/'+filedir) if re.search('.jpg$', f)])
             if width > height :
                 total = nb_pages
                 if total != nb_images :
@@ -652,7 +652,7 @@ class ConversionScene(SceneBase):
                         screen.blit(text2,(100,230))
                         text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                         screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
                         pygame.display.flip()
             else :
                 # Format Tripy
@@ -661,7 +661,7 @@ class ConversionScene(SceneBase):
                 #Nombre de case par page
                 nb_cases = nb_ligne * 2
                 total = nb_pages * nb_cases
-                nb_images = len([f for f in os.listdir('./../Roadbooks/'+filedir) if re.search('.jpg$', f)])
+                nb_images = len([f for f in os.listdir('/mnt/piusb/Conversions/'+filedir) if re.search('.jpg$', f)])
                 if total != nb_images :
                     text2 = self.font.render('Pas le meme nombre de cases ! On verifie...', True, (0, 255, 0))
                     #Marge supperieur (pix)
@@ -694,14 +694,14 @@ class ConversionScene(SceneBase):
                             screen.blit(text2,(100,230))
                             text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
                             screen.blit(text,(100,260))
-                            self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='./../Roadbooks/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
+                            self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
                             pygame.display.flip()
             # On charge le fichier de configuration
-            self.maconfig.read('RpiRoadbook.cfg')
+            self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
             if int(self.maconfig['Roadbooks']['case']) < 0 or int(self.maconfig['Roadbooks']['case']) > total -2 :
               # Pb avec la position sauvegardée. On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
               self.maconfig['Roadbooks']['case'] = str(total-2)
-              with open('RpiRoadbook.cfg', 'w') as configfile:
+              with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
 
         self.SwitchToScene(RoadbookScene(self.filename))
@@ -715,11 +715,11 @@ class RoadbookScene(SceneBase):
         SceneBase.__init__(self,fname)
 
         self.maconfig = configparser.ConfigParser()
-        self.maconfig.read('RpiRoadbook.cfg')
+        self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.filedir = os.path.splitext(self.filename)[0]
 
         #Chargement des images
-        fichiers = [name for name in os.listdir('./../Roadbooks/'+self.filedir) if os.path.isfile(os.path.join('./../Roadbooks/'+self.filedir, name))]
+        fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))]
         self.nb_cases = len(fichiers)
         self.case = int(self.maconfig['Roadbooks']['case'])
         if self.case < 0 :
@@ -727,7 +727,7 @@ class RoadbookScene(SceneBase):
         self.oldcase = self.case
         self.pages = []
         for i in fichiers:
-            self.pages.append (pygame.image.load(os.path.join('./../Roadbooks/'+self.filedir,i)))  # On a converti toutes les images. c'est plus long au début mais plus réactif ensuite...
+            self.pages.append (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+self.filedir,i)))  # On a converti toutes les images. c'est plus long au début mais plus réactif ensuite et on peut rajouter des annotations
 
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 72)
@@ -802,7 +802,7 @@ class RoadbookScene(SceneBase):
             # On sauvegarde la nouvelle position
             self.maconfig['Roadbooks']['case'] = str(self.case)
             try:
-              with open('RpiRoadbook.cfg', 'w') as configfile:
+              with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
             except: pass
 
@@ -822,7 +822,7 @@ class RoadbookScene(SceneBase):
         if distancetmp > 100000 : # On sauvegarde l'odometre tous les 100 metres
             self.maconfig['Parametres_Odometre']['totalisateur'] = str(distance)
             try:
-              with open('RpiRoadbook.cfg', 'w') as configfile:
+              with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
             except: pass
             distancetmp = 0
