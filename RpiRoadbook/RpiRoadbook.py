@@ -570,7 +570,7 @@ class ConversionScene(SceneBase):
                     screen.blit(text2,(100,230))
                     text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                     screen.blit(text,(100,260))
-                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile=str(total-i), fmt='jpg')
                     pygame.display.flip()
             else:
                 # conversion et découpage des cases
@@ -596,8 +596,8 @@ class ConversionScene(SceneBase):
                 w = round(largeur)
                 h = round(hauteur)
 
-                for i in reversed(range (nb_pages)) :
-                    for j in reversed(range (nb_cases)):
+                for i in range (nb_pages) :
+                    for j in range (nb_cases):
                         if j < nb_ligne :
                             x = round(0)
                             y = round(marge_up+(nb_ligne-j-1)*hauteur)
@@ -609,7 +609,7 @@ class ConversionScene(SceneBase):
                         screen.blit(text1,(100,200))
                         screen.blit(text2,(100,230))
                         screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(i*nb_cases+j),fmt='jpg')
                         pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
@@ -633,7 +633,7 @@ class ConversionScene(SceneBase):
                         screen.blit(text2,(100,230))
                         text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                         screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , fmt='jpg')
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150 , singlefile=str(total-i),fmt='jpg')
                         pygame.display.flip()
             else :
                 # Format Tripy
@@ -662,8 +662,8 @@ class ConversionScene(SceneBase):
                     w = round(largeur)
                     h = round(hauteur)
 
-                    for i in reversed(range (nb_pages)) :
-                        for j in reversed(range (nb_cases)):
+                    for i in range (nb_pages) :
+                        for j in range (nb_cases):
                             if j < nb_ligne :
                                 x = round(0)
                                 y = round(marge_up+(nb_ligne-j-1)*hauteur)
@@ -675,7 +675,7 @@ class ConversionScene(SceneBase):
                             screen.blit(text2,(100,230))
                             text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
                             screen.blit(text,(100,260))
-                            self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(total-i*nb_cases-j),fmt='jpg')
+                            self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(i*nb_cases+j),fmt='jpg')
                             pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
@@ -700,11 +700,11 @@ class RoadbookScene(SceneBase):
         self.filedir = os.path.splitext(self.filename)[0]
 
         #Chargement des images
-        fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))]
+        fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))].sort()
         self.nb_cases = len(fichiers)
         self.case = int(self.maconfig['Roadbooks']['case'])
         if self.case < 0 :
-            self.case = self.nb_cases - 2 # on compte de 0 à longueur-1, on se place sur l'avant dernière case si 1ère ouverture
+            self.case = 0 # on compte de 0 à longueur-1
         self.oldcase = self.case
         self.pages = []
         for i in fichiers:
@@ -738,12 +738,12 @@ class RoadbookScene(SceneBase):
                     if distance <= 0 : distance = 0
                     cmavant = distance
                     j = time.time();
-                elif event.key == BOUTON_DOWN:
+                elif event.key == BOUTON_UP:
                     self.oldcase = self.case
                     self.case -= 1
                     if bouton_time >= 2.0 :
                         self.case = 0
-                elif event.key == BOUTON_UP:
+                elif event.key == BOUTON_DOWN:
                     self.oldcase = self.case
                     self.case += 1
                     if bouton_time >= 2.0 :
@@ -814,8 +814,8 @@ class RoadbookScene(SceneBase):
         screen.blit(self.label_vi, (700, 200))
         screen.blit(self.label_t_vm, (630,320))
         screen.blit(self.label_vm, (700, 400))
-        screen.blit (self.pages[self.case],(0,100))
-        screen.blit (self.pages[self.case+1],(0,300))
+        screen.blit (self.pages[self.case+1],(0,100))
+        screen.blit (self.pages[self.case],(0,300))
         screen.blit(self.label_temp,(300,5))
 
 
