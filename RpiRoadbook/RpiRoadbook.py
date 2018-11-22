@@ -146,14 +146,27 @@ GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bou
 #----------------------------------------------------------------------------------------------#
 
 def check_configfile():
+    goldenconfig = configparser.ConfigParser()
+    goldenconfig.read('default.cfg')
+
     maconfig = configparser.ConfigParser()
-    # On commence par charger le fichier par défaut
-    maconfig.read('default.cfg')
-    # On essaye de charger celui existant, en écrasant les paramètres par défaut s'ils sont définis
+    incorrectlines = []
+    # On essaye de charger celui existant
     try:
         maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
+        for section in maconfig.sections():
+            #check each key is present in corresponding golden section
+            for key in maconfig.options(section):
+                if not goldenconfig.has_option(section,key):
+                    incorrectlines.append(key ,maconfig.get(section,key))
+        # set defaults if keys not present
+        for section in goldenconfig.sections ()
+            for key in goldenconfig.options(section):
+                if not maconfig.has_option(section,key):
+                    maconfig(section,key) = goldenconfig(section,key)
     except:
-        pass
+        # Erreur : pas de fichier de config, on charge celui par défaut
+        maconfig.read('default.cfg')
     # On sauvegarde la configuration finale
     with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
             maconfig.write(configfile)
@@ -379,6 +392,7 @@ class ConfigScene(SceneBase):
     def __init__(self, fname = ''):
         self.next = self
         self.filename = fname
+        check_configfile()
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 70)
         self.now = time.localtime()
@@ -528,6 +542,7 @@ class ConversionScene(SceneBase):
     def __init__(self, fname = ''):
         self.next = self
         self.filename = fname
+        check_configfile()
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 24)
 
@@ -679,7 +694,7 @@ class ConversionScene(SceneBase):
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
         SceneBase.__init__(self,fname)
-
+        check_configfile()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.filedir = os.path.splitext(self.filename)[0]
