@@ -259,8 +259,8 @@ class TitleScene(SceneBase):
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
         if len(self.filenames) == 0 : self.SwitchToScene(NoneScene())
         self.filename = self.saved if self.saved in self.filenames  else ''
-        self.menu_config = pygame.image.load('./../images/icone_config.jpg')
-        self.menu_config_white = pygame.image.load('./../images/icone_config_white.jpg')
+        self.menu_config = pygame.image.load('./images/icone_config.jpg')
+        self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
         self.column = 1
         self.j = time.time()
 
@@ -407,8 +407,8 @@ class ConfigScene(SceneBase):
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
         self.data.extend([int(self.maconfig['Parametres_Odometre']['roue'])])
-        self.bouton_ok = pygame.image.load('./../images/ok.jpg')
-        self.bouton_ok_white = pygame.image.load('./../images/ok_white.jpg')
+        self.bouton_ok = pygame.image.load('./images/ok.jpg')
+        self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
 
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -511,7 +511,7 @@ class G_MassStorageScene(SceneBase):
         self.filename = fname
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 24)
-        self.usb_connected = pygame.image.load ('./../images/usb_connected_white.jpg')
+        self.usb_connected = pygame.image.load ('./images/usb_connected_white.jpg')
         self.text = self.font.render('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',True,(200,0,0))
         #os.system('umount /mnt/piusb')
 
