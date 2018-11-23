@@ -163,7 +163,7 @@ def check_configfile():
         for section in goldenconfig.sections ():
             for key in goldenconfig.options(section):
                 if not maconfig.has_option(section,key):
-                    maconfig[section][key] = goldenconfig(section,key)
+                    maconfig.set(section,key,goldenconfig(section,key))
     except:
         # Erreur : pas de fichier de config, on charge celui par défaut
         maconfig.read('default.cfg')
@@ -698,6 +698,22 @@ class RoadbookScene(SceneBase):
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.filedir = os.path.splitext(self.filename)[0]
+        self.orientation = self.maconfig['Parametres']['orientation']
+        self.l_tps_x = int(self.maconfig[self.orientation]['l_tps_x'])
+        self.l_tps_y = int(self.maconfig[self.orientation]['l_tps_y'])
+        self.l_km_x = int(self.maconfig[self.orientation]['l_km_x'])
+        self.l_km_y = int(self.maconfig[self.orientation]['l_km_y'])
+        self.l_t_vi_x = int(self.maconfig[self.orientation]['l_t_vi_x'])
+        self.l_t_vi_y = int(self.maconfig[self.orientation]['l_t_vi_y'])
+        self.l_vi_x = int(self.maconfig[self.orientation]['l_vi_x'])
+        self.l_vi_y = int(self.maconfig[self.orientation]['l_vi_y'])
+        self.l_t_vm_x = int(self.maconfig[self.orientation]['l_t_vm_x'])
+        self.l_t_vm_y = int(self.maconfig[self.orientation]['l_t_vm_y'])
+        self.l_vm_x = int(self.maconfig[self.orientation]['l_vm_x'])
+        self.l_vm_y = int(self.maconfig[self.orientation]['l_vm_y'])
+        self.l_temp_x = int(self.maconfig[self.orientation]['l_temp_x'])
+        self.l_temp_y = int(self.maconfig[self.orientation]['l_temp_y'])
+        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
 
         #Chargement des images
         fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))]
@@ -709,6 +725,14 @@ class RoadbookScene(SceneBase):
         self.pages = []
         for i in fichiers:
             self.pages.append (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+self.filedir,i)))  # On a converti toutes les images. c'est plus long au début mais plus réactif ensuite et on peut rajouter des annotations
+        (w,h) = self.pages[0].get_rect().size
+        ratio = min(480/w,200/4) if self.orientation == 'Portrait' else min(600/w,200,h)
+        self.nh = h
+        # Mise à l'échelle des images si portraits
+        if self.orientation == 'Portrait':
+             self.nh = h * ratio
+             for i in range(len(self.pages)):
+                  self.pages [i] = pygame.transform.rotozoom (self.pages[i],0,ratio)
 
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 72)
@@ -806,17 +830,21 @@ class RoadbookScene(SceneBase):
         self.label_temp = self.myfont_36.render('{0:.1f}°C'.format(temperature),1,(200,200,200))
 
     def Render(self, screen):
-        screen.fill((0,0,0))
-	    # Positionnement des différents éléments d'affichage
-        screen.blit(self.label_tps, (10, 5))
-        screen.blit(self.label_km, (600, -10))
-        screen.blit(self.label_t_vi,(630,120))
-        screen.blit(self.label_vi, (700, 200))
-        screen.blit(self.label_t_vm, (630,320))
-        screen.blit(self.label_vm, (700, 400))
-        screen.blit (self.pages[self.case+1],(0,100))
-        screen.blit (self.pages[self.case],(0,300))
-        screen.blit(self.label_temp,(300,5))
+        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+        img_tmp.fill((0,0,0))
+        # Positionnement des différents éléments d'affichage
+        img_tmp.blit(self.label_tps, (self.l_tps_x, self.l_tps_y))
+        img_tmp.blit(self.label_km, (self.l_km_x, self.l_km_y))
+        img_tmp.blit(self.label_t_vi,(self.l_t_vi_x, self.l_t_vi_y))
+        img_tmp.blit(self.label_vi, (self.l_vi_x, self.l_vi_y))
+        img_tmp.blit(self.label_t_vm, (self.l_t_vm_x, self.l_t_vm_y))
+        img_tmp.blit(self.label_vm, (self.l_vm_x, self.l_vm_y))
+        for n in range(int(self.maconfig[self.orientation]['ncases'])):
+            img_tmp.blit (self.pages[self.case+n],(0,self.imgtmp_h-(n+1)*self.nh))
+        img_tmp.blit(self.label_temp,(self.l_temp_x, self.l_temp_y))
+        if self.orientation == 'Portrait' :
+            img_tmp=pygame.transform.rotate (img_tmp,90)
+        screen.blit(img_tmp,(0,0))
 
 
 
