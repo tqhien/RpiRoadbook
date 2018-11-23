@@ -262,7 +262,7 @@ class TitleScene(SceneBase):
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
 
-        self.roue = int(self.maconfig['Parametres_Odometre']['roue'])
+        self.roue = int(self.maconfig['Parametres']['roue'])
         self.countdown = 4 ;
         self.iscountdown = True ;
         self.selection= 0 ;
@@ -404,7 +404,7 @@ class ConfigScene(SceneBase):
         self.label_roue = self.font.render('Roue : ',True,(200,200,200))
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
-        self.data.extend([int(self.maconfig['Parametres_Odometre']['roue'])])
+        self.data.extend([int(self.maconfig['Parametres']['roue'])])
         self.bouton_ok = pygame.image.load('./images/ok.jpg')
         self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
 
@@ -789,7 +789,7 @@ class RoadbookScene(SceneBase):
         if speed > vmax : vmax = speed
 
         if distancetmp > 100000 : # On sauvegarde l'odometre tous les 100 metres
-            self.maconfig['Parametres_Odometre']['totalisateur'] = str(distance)
+            self.maconfig['Parametres']['totalisateur'] = str(distance)
             try:
               with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
