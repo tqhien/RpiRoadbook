@@ -160,10 +160,10 @@ def check_configfile():
                 if not goldenconfig.has_option(section,key):
                     incorrectlines.append(key ,maconfig.get(section,key))
         # set defaults if keys not present
-        for section in goldenconfig.sections ()
+        for section in goldenconfig.sections ():
             for key in goldenconfig.options(section):
                 if not maconfig.has_option(section,key):
-                    maconfig(section,key) = goldenconfig(section,key)
+                    maconfig[section][key] = goldenconfig(section,key)
     except:
         # Erreur : pas de fichier de config, on charge celui par défaut
         maconfig.read('default.cfg')
@@ -369,7 +369,7 @@ class NoneScene(SceneBase):
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
-            elif event.type = pygame.KEYDOWN :
+            elif event.type == pygame.KEYDOWN :
                 if event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
                     self.SwitchToScene(TitleScene())
             elif event.type == GMASSSTORAGE:
@@ -435,10 +435,10 @@ class ConfigScene(SceneBase):
                     self.data[self.index] += 1
                 elif event.key == BOUTON_OK:
                     # validation
-                    subprocess.call ('sudo rw')
-                    subprocess.call ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
-                    subprocess.call ('sudo hwclock --set --date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]))
-                    subprocess.call ('sudo ro')
+                    subprocess.Popen ('sudo rw',shell=True)
+                    subprocess.Popen ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
+                    subprocess.Popen ('sudo hwclock -s "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
+                    subprocess.Popen ('sudo ro',shell=True)
                     self.maconfig['Parametres_Odometre']['roue'] = str(self.data[6])
                     try:
                         with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
@@ -570,7 +570,7 @@ class ConversionScene(SceneBase):
                     screen.blit(text2,(100,230))
                     text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                     screen.blit(text,(100,260))
-                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile=str(total-i), fmt='jpg')
+                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(total-i), fmt='jpg')
                     pygame.display.flip()
             else:
                 # conversion et découpage des cases
@@ -609,7 +609,7 @@ class ConversionScene(SceneBase):
                         screen.blit(text1,(100,200))
                         screen.blit(text2,(100,230))
                         screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(i*nb_cases+j),fmt='jpg')
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                         pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
@@ -633,7 +633,7 @@ class ConversionScene(SceneBase):
                         screen.blit(text2,(100,230))
                         text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
                         screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150 , singlefile=str(total-i),fmt='jpg')
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150 , singlefile='{:03}'.format(total-i),fmt='jpg')
                         pygame.display.flip()
             else :
                 # Format Tripy
@@ -675,7 +675,7 @@ class ConversionScene(SceneBase):
                             screen.blit(text2,(100,230))
                             text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
                             screen.blit(text,(100,260))
-                            self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile=str(i*nb_cases+j),fmt='jpg')
+                            self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                             pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
@@ -700,7 +700,7 @@ class RoadbookScene(SceneBase):
         self.filedir = os.path.splitext(self.filename)[0]
 
         #Chargement des images
-        fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))].sort()
+        fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))]
         self.nb_cases = len(fichiers)
         self.case = int(self.maconfig['Roadbooks']['case'])
         if self.case < 0 :
