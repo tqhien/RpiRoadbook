@@ -146,29 +146,14 @@ GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bou
 #----------------------------------------------------------------------------------------------#
 
 def check_configfile():
-    goldenconfig = configparser.ConfigParser()
-    goldenconfig.read('default.cfg')
-
     maconfig = configparser.ConfigParser()
-    incorrectlines = []
+    maconfig.read('default.cfg')
     # On essaye de charger celui existant
     try:
         maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
-        for section in maconfig.sections():
-            #check each key is present in corresponding golden section
-            for key in maconfig.options(section):
-                if not goldenconfig.has_option(section,key):
-                    incorrectlines.append(key ,maconfig.get(section,key))
-        # set defaults if keys not present
-        for section in goldenconfig.sections ():
-            for key in goldenconfig.options(section):
-                if not maconfig.has_option(section,key):
-                    maconfig.set(section,key,goldenconfig(section,key))
     except:
-        # Erreur : pas de fichier de config, on charge celui par défaut
-        maconfig.read('default.cfg')
-    # On sauvegarde la configuration finale
-    with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+        # Erreur : pas de fichier de config, on sauvegarde la configuration finale
+        with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
             maconfig.write(configfile)
 
 #*******************************************************************************************************#
