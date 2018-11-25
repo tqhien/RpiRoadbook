@@ -34,18 +34,21 @@ vmax = 0.00
 vmoy = 0.0
 tps = 0.0
 tpsinit=0.0
-j = 0
 cmavant = 0
-bouton_time = time.time()
 temperature = -100
 cpu = -1
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
+BOUTON_HOME     = pygame.K_HOME # Bouton left long
 BOUTON_RIGHT    = pygame.K_RIGHT # Bouton right (2eme en haut)
+BOUTON_END      = pygame.K_END # Bouton right long
 BOUTON_OK       = pygame.K_RETURN # Bouton OK/select (au milieu)
+BOUTON_BACKSPACE = pygame.K_BACKSPACE # Bouton OK long
 BOUTON_UP       = pygame.K_UP # Bouton Up (1er en bas)
+BOUTON_PGUP     = pygame.K_PAGEUP # Bouton UP long
 BOUTON_DOWN     = pygame.K_DOWN # Bouton Down (tout en bas)
+BOUTON_PGDOWN  = pygame.K_PAGEDOWN # Bouton Down long
 GMASSSTORAGE    = USEREVENT+1 # Event branchement en mode cle usb
 USB_DISCONNECTED = USEREVENT+2 # Event Cable usb debranche
 
@@ -73,44 +76,54 @@ def input_roue_callback(channel):
     distancetmp += roue
 
 def input_left_callback(channel):
-    global bouton_time
     b4_time = time.time()
-    while GPIO.input(channel) == 0 : # on attend le retour du bouton
-        pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
+    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+        bouton_time = time.time() - b4_time
+    if bouton_time < 2 :
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
 
 def input_right_callback(channel):
-    global bouton_time
     b4_time = time.time()
-    while GPIO.input(channel) == 0 : # on attend le retour du bouton
-        pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
+    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+        bouton_time = time.time() - b4_time
+    if bouton_time < 2 :
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
 
 def input_ok_callback(channel):
-    global bouton_time
     b4_time = time.time()
-    while GPIO.input(channel) == 0 : # on attend le retour du bouton
-        pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
+    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+        bouton_time = time.time() - b4_time
+    if bouton_time < 2 :
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
 
 def input_up_callback(channel):
-    global bouton_time
     b4_time = time.time()
-    while GPIO.input(channel) == 0 : # on attend le retour du bouton
-        pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
+    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+        bouton_time = time.time() - b4_time
+    if bouton_time < 2 :
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
 
 def input_down_callback(channel):
-    global bouton_time
     b4_time = time.time()
-    while GPIO.input(channel) == 0 : # on attend le retour du bouton
-        pass
     bouton_time = time.time() - b4_time
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
+    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+        bouton_time = time.time() - b4_time
+    if bouton_time < 2 :
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
 
 def g_mass_storage_callback():
     try:
@@ -757,7 +770,7 @@ class RoadbookScene(SceneBase):
         self.label_vm = self.myfont_70.render("000", 1, (100,100,100))
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,tpsinit,cmavant,j,vmoy,vmax,bouton_time
+        global distance,tpsinit,cmavant,vmoy,vmax
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -767,32 +780,36 @@ class RoadbookScene(SceneBase):
                 elif event.key == BOUTON_RIGHT:
                     distance+=10000
                     cmavant=distance
-                    j = time.time()
+                elif event.key == BOUTON_END:
+                    distance+=50000
+                    cmavant=distance
                 elif event.key == BOUTON_LEFT:
                     distance-=10000
                     if distance <= 0 : distance = 0
                     cmavant = distance
-                    j = time.time();
+                elif event.key == BOUTON_HOME:
+                    distance-=50000
+                    if distance <= 0 : distance = 0
+                    cmavant = distance
                 elif event.key == BOUTON_UP:
                     self.oldcase = self.case
                     self.case -= 1
-                    if bouton_time >= 2.0 :
+                elif event.key == BOUTON_PGUP:
                         self.case = 0
                 elif event.key == BOUTON_DOWN:
                     self.oldcase = self.case
                     self.case += 1
-                    if bouton_time >= 2.0 :
-                        self.case = self.nb_cases - 2
+                elif event.key == BOUTON_PGDOWN:
+                    self.case = self.nb_cases - 2
                 elif event.key == BOUTON_OK:
-                    if bouton_time >= 2.0 :
-                        self.SwitchToScene(TitleScene())
-                    else:
-                        distance = 0.0
-                        cmavant = distance 
-                        vmoy = 0
-                        speed = 0
-                        tpsinit = time.time()/1000
-                        vmax = 0;
+                    distance = 0.0
+                    cmavant = distance 
+                    vmoy = 0
+                    speed = 0
+                    tpsinit = time.time()/1000
+                    vmax = 0;
+                elif event.key == BOUTON_BACKSPACE:
+                    self.SwitchToScene(TitleScene())
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - 2 :
