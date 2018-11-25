@@ -304,9 +304,10 @@ class TitleScene(SceneBase):
                                 self.maconfig['Roadbooks']['case'] = '-1'
                                 with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                     self.maconfig.write(configfile)
+                            self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
                             self.SwitchToScene(ConversionScene(self.filename))
                         else :
-                            self.SwitchToScene(ConfigScene())
+                            self.SwitchToScene(ConfigScene()) 
             elif event.type == GMASSSTORAGE :
                 self.iscountdown = False
                 self.SwitchToScene(G_MassStorageScene())
