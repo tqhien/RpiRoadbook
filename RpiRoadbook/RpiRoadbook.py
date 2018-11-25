@@ -38,6 +38,7 @@ j = 0
 cmavant = 0
 bouton_time = time.time()
 temperature = -100
+cpu = -1
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
@@ -64,7 +65,7 @@ GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 #*******************************************************************************************************#
-#------------------------- Les callbacks des interruptions GPIO  ---------------------------------------#
+#------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
     global distance,distancetmp
@@ -133,6 +134,13 @@ def rpi_temp():
     except:
         pass
 
+def cpu_load():
+    global cpu
+    try:
+        with open ('/proc/loadavg','r') as f:
+            cpu = int(f.readline().split(" ")[:3][0]*100)
+    except cpu = -1
+
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback)
 GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=200)
@@ -195,11 +203,12 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
-        # On ne checke la connectivité usb que toutes les 5 secondes
+        # On ne checke la connectivité usb, la température et la charge cpu que toutes les 5 secondes
         if time.time() - 5 > t_usb : 
             g_mass_storage_callback()
             t_usb = time.time()   
             rpi_temp()    
+            cpu_load()
 
         # Event filtering
         filtered_events = []
@@ -678,6 +687,7 @@ class ConversionScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
+        global distance
         SceneBase.__init__(self,fname)
         check_configfile()
         self.maconfig = configparser.ConfigParser()
@@ -699,6 +709,21 @@ class RoadbookScene(SceneBase):
         self.l_temp_x = int(self.maconfig[self.orientation]['l_temp_x'])
         self.l_temp_y = int(self.maconfig[self.orientation]['l_temp_y'])
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
+
+        import logging
+        from logging.handlers import RotatingFileHandler
+
+        try :
+            with open('/mnt/piusb/odometre.log', "r") as f1:
+                last_line = f1.readlines()[-1]
+                distance = int(last_line)
+        except :
+            distance = 0
+
+        self.odometre_log = logging.getLogger('Rotating Odometer Log')
+        self.odometre_log.setLevel(logging.INFO)
+        self.odometre_handler = RotatingFileHandler('/mnt/pisub/odometre.log',maxBytes=8000,backupCount=20)
+        self.odometre_log.addHandler(self.odometre_handler)
 
         #Chargement des images
         fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))]
@@ -775,7 +800,7 @@ class RoadbookScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature
+        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature,cpu
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             self.maconfig['Roadbooks']['case'] = str(self.case)
@@ -798,11 +823,7 @@ class RoadbookScene(SceneBase):
         if speed > vmax : vmax = speed
 
         if distancetmp > 100000 : # On sauvegarde l'odometre tous les 100 metres
-            self.maconfig['Parametres']['totalisateur'] = str(distance)
-            try:
-              with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
-                self.maconfig.write(configfile)
-            except: pass
+            self.odometre_log.info('{}'.format(distance))
             distancetmp = 0
 
         self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.localtime()), 1, (200,200,200))
@@ -813,6 +834,7 @@ class RoadbookScene(SceneBase):
         self.label_vm = self.myfont_70.render('{0:.1f}'.format(vmax), 1, (100,100,100))
 
         self.label_temp = self.myfont_36.render('{0:.1f}°C'.format(temperature),1,(200,200,200))
+        self.label_cpu = self.myfont_36.render('{}%'.format(cpu),1,(200,200,200))
 
     def Render(self, screen):
         img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
@@ -827,6 +849,7 @@ class RoadbookScene(SceneBase):
         for n in range(int(self.maconfig[self.orientation]['ncases'])):
             img_tmp.blit (self.pages[self.case+n],(0,self.imgtmp_h-(n+1)*self.nh))
         img_tmp.blit(self.label_temp,(self.l_temp_x, self.l_temp_y))
+        img_tmp.blit(self.label_cpu,(self.l_temp_x,self.l_temp_y+40))
         if self.orientation == 'Portrait' :
             img_tmp=pygame.transform.rotate (img_tmp,90)
         screen.blit(img_tmp,(0,0))
