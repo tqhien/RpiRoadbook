@@ -305,11 +305,11 @@ class TitleScene(SceneBase):
                 elif event.key == BOUTON_LEFT :
                     self.iscountdown = False
                     self.column -= 1
-                    if self.column < 1 : self.column = 1
+                    if self.column < 1 : self.column = 2
                 elif event.key == BOUTON_RIGHT :
                     self.iscountdown = False
                     self.column += 1
-                    if self.column > 2 : self.column = 2        
+                    if self.column > 2 : self.column = 1        
                 elif event.key == BOUTON_OK :
                         self.iscountdown = False ;
                         if self.column == 1 :
@@ -346,7 +346,8 @@ class TitleScene(SceneBase):
         for i in range (len(self.filenames)) :
             if i >= self.fenetre and i <self.fenetre+10 :
                 couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
-                fond = (0,0,255) if i == self.selection else (0,0,0)
+                fond = (0,0,255) if i == self.selection and self.column==1
+                 else (0,0,0)
                 text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
                 screen.blit (text,(10,80+(i-self.fenetre)*30))
         if self.fenetre+10<len(self.filenames):
