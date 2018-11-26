@@ -35,6 +35,7 @@ vmoy = 0.0
 tps = 0.0
 tpsinit=0.0
 cmavant = 0
+j = time.time()
 temperature = -100
 cpu = -1
 
@@ -78,7 +79,7 @@ def input_roue_callback(channel):
 def input_left_callback(channel):
     b4_time = time.time()
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
         bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
@@ -88,7 +89,7 @@ def input_left_callback(channel):
 def input_right_callback(channel):
     b4_time = time.time()
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
         bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
@@ -98,7 +99,7 @@ def input_right_callback(channel):
 def input_ok_callback(channel):
     b4_time = time.time()
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
         bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
@@ -108,7 +109,7 @@ def input_ok_callback(channel):
 def input_up_callback(channel):
     b4_time = time.time()
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
         bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
@@ -118,7 +119,7 @@ def input_up_callback(channel):
 def input_down_callback(channel):
     b4_time = time.time()
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 or bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
+    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
         bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
@@ -151,8 +152,9 @@ def cpu_load():
     global cpu
     try:
         with open ('/proc/loadavg','r') as f:
-            cpu = int(f.readline().split(" ")[:3][0]*100)
-    except cpu = -1
+            cpu = int(float(f.readline().split(" ")[:3][0])*100)
+    except:
+        cpu = -1
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback)
@@ -736,7 +738,7 @@ class RoadbookScene(SceneBase):
 
         self.odometre_log = logging.getLogger('Rotating Odometer Log')
         self.odometre_log.setLevel(logging.INFO)
-        self.odometre_handler = RotatingFileHandler('/mnt/pisub/odometre.log',maxBytes=8000,backupCount=20)
+        self.odometre_handler = RotatingFileHandler('/mnt/piusb/odometre.log',maxBytes=8000,backupCount=20)
         self.odometre_log.addHandler(self.odometre_handler)
 
         #Chargement des images
