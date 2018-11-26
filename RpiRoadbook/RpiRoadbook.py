@@ -880,4 +880,4 @@ class RoadbookScene(SceneBase):
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
 
-run_RpiRoadbook(800, 480, 60, TitleScene())
+run_RpiRoadbook(800, 480, 5, TitleScene())
