@@ -346,8 +346,7 @@ class TitleScene(SceneBase):
         for i in range (len(self.filenames)) :
             if i >= self.fenetre and i <self.fenetre+10 :
                 couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
-                fond = (0,0,255) if i == self.selection and self.column==1
-                 else (0,0,0)
+                fond = (0,0,255) if i == self.selection and self.column==1  else (0,0,0)
                 text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
                 screen.blit (text,(10,80+(i-self.fenetre)*30))
         if self.fenetre+10<len(self.filenames):
@@ -410,14 +409,42 @@ class ConfigScene(SceneBase):
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.index = 0
+        self.label_roue = self.font.render('Roue : ',True,(200,200,200))
+        self.d_roue = int(self.maconfig['Parametres']['roue'])
+
         self.label_date = self.font.render('Date : ',True,(200,200,200))
         self.label_heure = self.font.render ('Heure:',True,(200,200,200))
-        self.label_roue = self.font.render('Roue : ',True,(200,200,200))
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
-        self.data.extend([int(self.maconfig['Parametres']['roue'])])
+
+        self.label_orientation = self.font.render('Orientation : ',True,(200,200,200))
+        self.paysage = self.maconfig['Parametres']['orientation'] == 'Paysage'
+        
         self.bouton_ok = pygame.image.load('./images/ok.jpg')
         self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
+
+    def update_time():
+        # Vérification validité des valeurs
+        if self.data[2] < 2018 : self.data[2] = 2018
+        if self.data[1] < 1 : self.data[1] = 1
+        if self.data[1] > 12 : self.data[1] = 12
+        if self.data[0] < 1 : self.data[0] = 1
+        if self.data[0] > 31 : self.data[0] = 31
+        # Vérification de la validité de la date
+        try:
+            datetime.datetime(self.data[2],self.data[1],self.data[0])
+        except ValueError :
+            self.data[0] -= 1
+        # Validité de l'heure
+        if self.data[3] < 0 : self.data[3] = 0
+        if self.data[3] > 23 : self.data[3] = 23
+        if self.data[4] < 0 : self.data[4] = 0
+        if self.data[4] > 59 : self.data[4] = 59 
+        if self.data[5] < 0 : self.data[5] = 0
+        if self.data[5] < 59 : self.data[5] = 59
+        # Mise à jour de l'heure
+        subprocess.Popen ('sudo hwclock --set --date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" --noadjfile --utc'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
+        subprocess.Popen ('sudo hwclock -s',shell=True)
 
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -426,82 +453,96 @@ class ConfigScene(SceneBase):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
-                elif event.key == pygame.K_HOME:
-                    self.oldcase = self.case
-                    self.case = self.nb_cases -1
-                elif event.key == pygame.K_END:
-                    self.oldcase = self.case
-                    self.case = 1
                 elif event.key == BOUTON_RIGHT:
                     self.index+=1
-                    if self.index > 7:
+                    if self.index > 8:
                         self.index = 0
                 elif event.key == BOUTON_LEFT:
                     self.index -= 1
                     if self.index < 0 :
-                        self.index = 7    
+                        self.index = 8    
                 elif event.key == BOUTON_DOWN:
-                    self.data[self.index] -= 1
+                    if self.index < 5 :
+                        self.data[self.index] -= 1
+                        update_time()
+                    elif self.index == 5 :
+                        self.data[5] = 0
+                        update_time()
+                    elif self.index == 6 :
+                        self.d_roue -= 1
+                        if self.d_roue < 10 : self.d_roue = 10
+                    elif self.index == 7 :
+                        self.paysage = not self.paysage
                 elif event.key == BOUTON_UP:
-                    self.data[self.index] += 1
+                    if self.index < 5 :
+                        self.data[self.index] += 1
+                        update_time()
+                    elif self.index == 5:
+                        self.data[5] = 0
+                        update_time()
+                    elif self.index == 6:
+                        self.d_roue += 1
+                        if self.d_roue > 9999 : self.d_roue = 9999
+                    elif self.index == 7 :
+                        self.paysage = not self.paysage
                 elif event.key == BOUTON_OK:
                     # validation
-                    subprocess.Popen ('sudo rw',shell=True)
-                    subprocess.Popen ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
-                    subprocess.Popen ('sudo hwclock -s "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
-                    subprocess.Popen ('sudo ro',shell=True)
-                    self.maconfig['Parametres_Odometre']['roue'] = str(self.data[6])
-                    try:
-                        with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
-                            self.maconfig.write(configfile)
-                    except: pass
-                    if self.index == 7 : self.SwitchToScene(TitleScene())
-            # Vérification validité des valeurs
-            if self.data[2] < 2018 : self.data[2] = 2018
-            if self.data[1] < 1 : self.data[1] = 1
-            if self.data[1] > 12 : self.data[1] = 12
-            if self.data[0] < 1 : self.data[0] = 1
-            if self.data[0] > 31 : self.data[0] = 31
-            # Vérification de la validité de la date
-            try:
-                datetime.datetime(self.data[2],self.data[1],self.data[1])
-            except ValueError :
-                self.data[0] -= 1
-            # Validité de l'heure
-            if self.data[3] < 0 : self.data[3] = 0
-            if self.data[3] > 23 : self.data[3] = 23
-            if self.data[4] < 0 : self.data[4] = 0
-            if self.data[4] > 59 : self.data[4] = 59 
-            if self.data[5] < 0 : self.data[5] = 0
-            if self.data[5] < 59 : self.data[5] = 59
-            # Validité du développement de la roue
-            if self.data[6] < 10 : self.data[6] = 10
-            if self.data[6] > 9999 : self.data[6] = 9999
+                    if self.index == 6:
+                        self.maconfig['Parametres']['roue'] = str(self.d_roue)
+                        try:
+                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                                self.maconfig.write(configfile)
+                        except: 
+                            pass
+                    elif self.index == 7:
+                        self.maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        try:
+                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                                self.maconfig.write(configfile)
+                        except: 
+                            pass       
+                    elif self.index == 8 : 
+                        self.SwitchToScene(TitleScene())
+                    # on passe au réglage suivant
+                    self.index +=1
+                    if self.index > 8:
+                        self.index = 0
+            
+            
         
 
     def Update(self):
+        self.now = time.localtime()
+        self.data = []
+        self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
         self.d = self.font.render('{:02d}/'.format(self.data[0]),True,(200,200,200),(0,0,200)) if self.index == 0 else self.font.render('{:02d}/'.format(self.data[0]),True,(200,200,200))
         self.m = self.font.render('{:02d}/'.format(self.data[1]),True,(200,200,200),(0,0,200)) if self.index == 1 else self.font.render('{:02d}/'.format(self.data[1]),True,(200,200,200))
         self.y = self.font.render('{}'.format(self.data[2]),True,(200,200,200),(0,0,200)) if self.index == 2 else self.font.render('{}'.format(self.data[2]),True,(200,200,200))
         self.hour = self.font.render('{:02d}:'.format(self.data[3]),True,(200,200,200),(0,0,200)) if self.index == 3 else self.font.render('{:02d}:'.format(self.data[3]),True,(200,200,200))
         self.minute = self.font.render('{:02d}:'.format(self.data[4]),True,(200,200,200),(0,0,200)) if self.index == 4 else self.font.render('{:02d}:'.format(self.data[4]),True,(200,200,200))
         self.second = self.font.render('{:02d}'.format(self.data[5]),True,(200,200,200),(0,0,200)) if self.index == 5 else self.font.render('{:02d}'.format(self.data[5]),True,(200,200,200))
-        self.d_roue = self.font.render('{} mm'.format(self.data[6]),True,(200,200,200),(0,0,200)) if self.index == 6 else self.font.render('{} mm'.format(self.data[6]),True,(200,200,200))
+        self.t_roue = self.font.render('{} mm'.format(self.d_roue),True,(200,200,200),(0,0,200)) if self.index == 6 else self.font.render('{} mm'.format(self.d_roue),True,(200,200,200))
+        if self.paysage :
+            self.t_orientation = self.font.render('Paysage',True,(200,200,200),(0,0,200)) if self.index == 7 else self.font.render('Paysage',True,(200,200,200))
+        else :
+            self.t_orientation = self.font.render('Portrait',True,(200,200,200),(0,0,200)) if self.index == 7 else self.font.render('Portrait',True,(200,200,200))
 
     def Render(self, screen):
         screen.fill((0,0,0))
-        screen.blit(self.label_date, (10, 50))
-        screen.blit(self.d, (200, 50))
-        screen.blit(self.m, (300, 50))
-        screen.blit(self.y, (400, 50))
-        screen.blit(self.label_heure,(10,200))
-        screen.blit(self.hour, (250, 200))
-        screen.blit(self.minute, (350, 200))
-        screen.blit(self.second, (450, 200))
-        screen.blit(self.label_roue, (10, 350))
-        screen.blit(self.d_roue, (200, 350))
+        screen.blit(self.label_roue, (10, 25))
+        screen.blit(self.t_roue, (200, 25))
+        screen.blit(self.label_orientation, (10, 150))
+        screen.blit(self.t_orientation, (200, 150))
+        screen.blit(self.label_date, (10, 2750))
+        screen.blit(self.d, (200, 275))
+        screen.blit(self.m, (300, 275))
+        screen.blit(self.y, (400, 275))
+        screen.blit(self.label_heure,(10,400))
+        screen.blit(self.hour, (250, 400))
+        screen.blit(self.minute, (350, 400))
+        screen.blit(self.second, (450, 400))
+        
         screen.blit(self.bouton_ok_white,(750,430)) if self.index == 7 else screen.blit(self.bouton_ok,(750,430))
-        pygame.display.flip()
         
 
 
