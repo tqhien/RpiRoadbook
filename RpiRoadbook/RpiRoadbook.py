@@ -346,7 +346,7 @@ class TitleScene(SceneBase):
         for i in range (len(self.filenames)) :
             if i >= self.fenetre and i <self.fenetre+10 :
                 couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
-                fond = (0,0,255) if i == self.selection and self.column==1  else (0,0,0)
+                fond = (0,0,255) if i == self.selection and self.column==1 else (0,0,0)
                 text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
                 screen.blit (text,(10,80+(i-self.fenetre)*30))
         if self.fenetre+10<len(self.filenames):
@@ -408,7 +408,7 @@ class ConfigScene(SceneBase):
         self.now = time.localtime()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
-        self.index = 0
+        self.index = 6
         self.label_roue = self.font.render('Roue : ',True,(200,200,200))
         self.d_roue = int(self.maconfig['Parametres']['roue'])
 
@@ -423,7 +423,7 @@ class ConfigScene(SceneBase):
         self.bouton_ok = pygame.image.load('./images/ok.jpg')
         self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
 
-    def update_time():
+    def update_time(self):
         # Vérification validité des valeurs
         if self.data[2] < 2018 : self.data[2] = 2018
         if self.data[1] < 1 : self.data[1] = 1
@@ -441,10 +441,10 @@ class ConfigScene(SceneBase):
         if self.data[4] < 0 : self.data[4] = 0
         if self.data[4] > 59 : self.data[4] = 59 
         if self.data[5] < 0 : self.data[5] = 0
-        if self.data[5] < 59 : self.data[5] = 59
-        # Mise à jour de l'heure
+        if self.data[5] > 59 : self.data[5] = 59
+        subprocess.Popen ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
         subprocess.Popen ('sudo hwclock --set --date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" --noadjfile --utc'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
-        subprocess.Popen ('sudo hwclock -s',shell=True)
+
 
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -464,10 +464,10 @@ class ConfigScene(SceneBase):
                 elif event.key == BOUTON_DOWN:
                     if self.index < 5 :
                         self.data[self.index] -= 1
-                        update_time()
+                        self.update_time()
                     elif self.index == 5 :
                         self.data[5] = 0
-                        update_time()
+                        self.update_time()
                     elif self.index == 6 :
                         self.d_roue -= 1
                         if self.d_roue < 10 : self.d_roue = 10
@@ -476,10 +476,10 @@ class ConfigScene(SceneBase):
                 elif event.key == BOUTON_UP:
                     if self.index < 5 :
                         self.data[self.index] += 1
-                        update_time()
+                        self.update_time()
                     elif self.index == 5:
                         self.data[5] = 0
-                        update_time()
+                        self.update_time()
                     elif self.index == 6:
                         self.d_roue += 1
                         if self.d_roue > 9999 : self.d_roue = 9999
@@ -532,8 +532,8 @@ class ConfigScene(SceneBase):
         screen.blit(self.label_roue, (10, 25))
         screen.blit(self.t_roue, (200, 25))
         screen.blit(self.label_orientation, (10, 150))
-        screen.blit(self.t_orientation, (200, 150))
-        screen.blit(self.label_date, (10, 2750))
+        screen.blit(self.t_orientation, (400, 150))
+        screen.blit(self.label_date, (10, 275))
         screen.blit(self.d, (200, 275))
         screen.blit(self.m, (300, 275))
         screen.blit(self.y, (400, 275))
@@ -542,7 +542,7 @@ class ConfigScene(SceneBase):
         screen.blit(self.minute, (350, 400))
         screen.blit(self.second, (450, 400))
         
-        screen.blit(self.bouton_ok_white,(750,430)) if self.index == 7 else screen.blit(self.bouton_ok,(750,430))
+        screen.blit(self.bouton_ok_white,(750,430)) if self.index == 8 else screen.blit(self.bouton_ok,(750,430))
         
 
 
