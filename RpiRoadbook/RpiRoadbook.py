@@ -185,7 +185,7 @@ def cpu_load():
         cpu = -1
 
 #On définit les interruptions sur les GPIO des commandes
-GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback)
+GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
 GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=200)
 GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=200)
 GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=200)
