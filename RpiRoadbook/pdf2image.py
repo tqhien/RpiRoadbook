@@ -1,6 +1,62 @@
 """
+
+Ce module a été adapté à partir du projet initial de Edouard Balval : pdf2image.
+
     pdf2image is a light wrapper for the poppler-utils tools that can convert your
-    PDFs into Pillow images.
+    PDFs into Pillow images. It was originally written by Edouard Belval and release under a MIT license :
+
+        MIT License
+
+        Copyright (c) 2017 Edouard Belval
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+
+    The original source code is available here : <https://github.com/Belval/pdf2image>
+
+This program is part of RpiRoadbook
+
+RpiRoadbook is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RpiRoadbook is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+
+Ce programme fait partie du logiciel RpiRoadbook
+
+RpiRoadbook est un logiciel libre ; vous pouvez le redistribuer ou le modifier 
+suivant les termes de la GNU General Public License telle que publiée par la 
+Free Software Foundation ; soit la version 3 de la licence, soit (à votre gré) 
+toute version ultérieure.
+
+RpiRoadbook est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ; 
+sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER. 
+Consultez la GNU General Public License pour plus de détails.
+
+Vous devez avoir reçu une copie de la GNU General Public License en même temps que ce programme ; 
+si ce n'est pas le cas, consultez <http://www.gnu.org/licenses>
 """
 
 import os
