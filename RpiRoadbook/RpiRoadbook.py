@@ -408,7 +408,7 @@ class ConfigScene(SceneBase):
         self.now = time.localtime()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
-        self.index = 6
+        self.index = 7 # de 0 à 5 : date et heure, 6=ok, 7=roue, 8=orientation
         self.label_roue = self.font.render('Roue : ',True,(200,200,200))
         self.d_roue = int(self.maconfig['Parametres']['roue'])
 
@@ -468,10 +468,10 @@ class ConfigScene(SceneBase):
                     elif self.index == 5 :
                         self.data[5] = 0
                         self.update_time()
-                    elif self.index == 6 :
+                    elif self.index == 7 :
                         self.d_roue -= 1
                         if self.d_roue < 10 : self.d_roue = 10
-                    elif self.index == 7 :
+                    elif self.index == 8 :
                         self.paysage = not self.paysage
                 elif event.key == BOUTON_UP:
                     if self.index < 5 :
@@ -480,28 +480,28 @@ class ConfigScene(SceneBase):
                     elif self.index == 5:
                         self.data[5] = 0
                         self.update_time()
-                    elif self.index == 6:
+                    elif self.index == 7:
                         self.d_roue += 1
                         if self.d_roue > 9999 : self.d_roue = 9999
-                    elif self.index == 7 :
+                    elif self.index == 8 :
                         self.paysage = not self.paysage
                 elif event.key == BOUTON_OK:
                     # validation
-                    if self.index == 6:
+                    if self.index == 7:
                         self.maconfig['Parametres']['roue'] = str(self.d_roue)
                         try:
                             with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                 self.maconfig.write(configfile)
                         except: 
                             pass
-                    elif self.index == 7:
+                    elif self.index == 8:
                         self.maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         try:
                             with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                 self.maconfig.write(configfile)
                         except: 
                             pass       
-                    elif self.index == 8 : 
+                    elif self.index == 6 : 
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant
                     self.index +=1
