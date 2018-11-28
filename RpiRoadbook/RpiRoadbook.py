@@ -29,6 +29,9 @@ Consultez la GNU General Public License pour plus de détails.
 
 Vous devez avoir reçu une copie de la GNU General Public License en même temps que ce programme ; 
 si ce n'est pas le cas, consultez <http://www.gnu.org/licenses>
+
+Ce programme s'appuie sur la bibliothèque gratuit et open-source Pygame pour Python : <http://www.pygame.org>
+et s'est inspiré de <https://nerdparadise.com/programming/pygame/part7> pour la class d'objet des scènes
 """
 
 # Pour masquer le message de la version de pygame
@@ -301,11 +304,15 @@ class TitleScene(SceneBase):
         self.iscountdown = True ;
         self.selection= 0 ;
         self.fenetre = 0 ;
-        self.saved= self.maconfig['Roadbooks']['etape'] ;
+        self.saved = self.maconfig['Roadbooks']['etape'] ;
         self.font = pygame.font.SysFont("cantarell", 24)
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
         if len(self.filenames) == 0 : self.SwitchToScene(NoneScene())
-        self.filename = self.saved if self.saved in self.filenames  else ''
+        if self.saved in self.filenames : # le fichier rb existe, on le préselectionne
+            self.filename = self.saved 
+            self.selection = self.filenames.index(self.filename)
+        else : # le fichier rb n'existe plus
+            self.filename = ''
         self.menu_config = pygame.image.load('./images/icone_config.jpg')
         self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
         self.column = 1
@@ -338,10 +345,10 @@ class TitleScene(SceneBase):
                 elif event.key == BOUTON_OK :
                         self.iscountdown = False ;
                         if self.column == 1 :
-                            if self.filename != self.filenames[self.selection] :
+                            if self.filename != self.filenames[self.selection] : # on a sélectionné un nouveau rb, on va se positionner au début
                                 self.filename = self.filenames[self.selection]
                                 self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                                self.maconfig['Roadbooks']['case'] = '-1'
+                                self.maconfig['Roadbooks']['case'] = '1'
                                 with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                     self.maconfig.write(configfile)
                             self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
