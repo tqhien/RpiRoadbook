@@ -1,6 +1,6 @@
 """
 
-Ce module a été adapté à partir du projet initial de Edouard Balval : pdf2image.
+Ce module a été adapté/complété à partir du projet initial de Edouard Balval : pdf2image.
 
     pdf2image is a light wrapper for the poppler-utils tools that can convert your
     PDFs into Pillow images. It was originally written by Edouard Belval and release under a MIT license :
@@ -77,6 +77,8 @@ def convert_from_path(pdf_path, dpi=200, output_folder=None, first_page=None, la
             output_folder -> Write the resulting images to a folder (instead of directly in memory)
             first_page -> First page to process
             last_page -> Last page to process before stopping
+            x,y,w,h -> crop zone
+            singlefile -> name of the single image
             fmt -> Output image format
             thread_count -> How many threads we are allowed to spawn for processing
             userpw -> PDF's password
@@ -140,6 +142,8 @@ def convert_from_bytes(pdf_file, dpi=200, output_folder=None, first_page=None, l
             output_folder -> Write the resulting images to a folder (instead of directly in memory)
             first_page -> First page to process
             last_page -> Last page to process before stopping
+            x,y,w,h -> crop zone
+            singlefile -> name of the single image
             fmt -> Output image format
             thread_count -> How many threads we are allowed to spawn for processing
             userpw -> PDF's password
