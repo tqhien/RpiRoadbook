@@ -348,7 +348,7 @@ class TitleScene(SceneBase):
                             if self.filename != self.filenames[self.selection] : # on a sélectionné un nouveau rb, on va se positionner au début
                                 self.filename = self.filenames[self.selection]
                                 self.maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                                self.maconfig['Roadbooks']['case'] = '1'
+                                self.maconfig['Roadbooks']['case'] = '0'
                                 with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                     self.maconfig.write(configfile)
                             self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
@@ -816,7 +816,7 @@ class RoadbookScene(SceneBase):
         self.odometre_log.addHandler(self.odometre_handler)
 
         #Chargement des images
-        fichiers = [name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))]
+        fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))])
         self.nb_cases = len(fichiers)
         self.case = int(self.maconfig['Roadbooks']['case'])
         if self.case < 0 :
@@ -826,13 +826,11 @@ class RoadbookScene(SceneBase):
         for i in fichiers:
             self.pages.append (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+self.filedir,i)))  # On a converti toutes les images. c'est plus long au début mais plus réactif ensuite et on peut rajouter des annotations
         (w,h) = self.pages[0].get_rect().size
-        ratio = min(480/w,200/4) if self.orientation == 'Portrait' else min(600/w,200,h)
-        self.nh = h
-        # Mise à l'échelle des images si portraits
-        if self.orientation == 'Portrait':
-             self.nh = h * ratio
-             for i in range(len(self.pages)):
-                  self.pages [i] = pygame.transform.rotozoom (self.pages[i],0,ratio)
+        ratio = min(480/w,200/h) if self.orientation == 'Portrait' else min(600/w,200/h)
+        # Mise à l'échelle des images
+        self.nh = h * ratio
+        for i in range(len(self.pages)):
+            self.pages [i] = pygame.transform.rotozoom (self.pages[i],0,ratio)
 
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 72)
