@@ -298,7 +298,12 @@ class TitleScene(SceneBase):
         # On charge le fichier de config
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
-
+        self.orientation = self.maconfig['Parametres']['orientation']
+        self.select_config_x = int(self.maconfig[self.orientation]['select_config_x'])
+        self.select_config_y = int(self.maconfig[self.orientation]['select_config_y'])
+        self.select_text_x = int(self.maconfig[self.orientation]['select_text_x'])
+        self.select_text_y = int(self.maconfig[self.orientation]['select_text_y'])
+        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.roue = int(self.maconfig['Parametres']['roue'])
         self.countdown = 4 ;
         self.iscountdown = True ;
@@ -369,28 +374,32 @@ class TitleScene(SceneBase):
                 self.SwitchToScene(ConversionScene(self.filename))
 
     def Render(self, screen):
-        screen.fill((0, 0, 0))
+        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+        img_tmp.fill((0,0,0))
         invite = self.font.render ('Sélectionnez le roadbook à charger :',0,(255,255,255))
-        screen.blit(invite,(10,10))
+        img_tmp.blit(invite,(10,10))
         if self.fenetre > 0 :
             fleche_up = self.font.render('(moins)',0,(100,100,100))
-            screen.blit (fleche_up,(10,50))
+            img_tmp.blit (fleche_up,(10,50))
         for i in range (len(self.filenames)) :
             if i >= self.fenetre and i <self.fenetre+10 :
                 couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
                 fond = (0,0,255) if i == self.selection and self.column==1 else (0,0,0)
                 text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
-                screen.blit (text,(10,80+(i-self.fenetre)*30))
+                img_tmp.blit (text,(10,80+(i-self.fenetre)*30))
         if self.fenetre+10<len(self.filenames):
             fleche_up = self.font.render('(plus)',0,(100,100,100))
-            screen.blit (fleche_up,(10,380))
-        screen.blit(self.menu_config_white,(750,430)) if self.column == 2 else screen.blit(self.menu_config,(750,430))    
+            img_tmp.blit (fleche_up,(10,380))
+        img_tmp.blit(self.menu_config_white,(self.select_config_x,self.select_config_y)) if self.column == 2 else img_tmp.blit(self.menu_config,(self.select_config_x,self.select_config_y))    
         if self.iscountdown :
             if self.k-self.j>= self.countdown :
                 text = self.font.render('Chargement du roadbook... Veuillez patienter.',True,(0,255,0))
             else :
                 text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
-            screen.blit(text,(10,450))
+            img_tmp.blit(text,(self.select_text_x,self.select_text_y))
+        if self.orientation == 'Portrait' :
+            img_tmp=pygame.transform.rotate (img_tmp,90)
+        screen.blit(img_tmp,(0,0))
         pygame.display.flip()
 
 #*******************************************************************************************************#
@@ -440,6 +449,35 @@ class ConfigScene(SceneBase):
         self.now = time.localtime()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
+        self.orientation = self.maconfig['Parametres']['orientation']
+        self.config_l_roue_x = int(self.maconfig[self.orientation]['config_l_roue_x'])
+        self.config_l_roue_y = int(self.maconfig[self.orientation]['config_l_roue_y'])
+        self.config_roue_x = int(self.maconfig[self.orientation]['config_roue_x'])
+        self.config_roue_y = int(self.maconfig[self.orientation]['config_roue_y'])
+        self.config_l_orientation_x = int(self.maconfig[self.orientation]['config_l_orientation_x'])
+        self.config_l_orientation_y = int(self.maconfig[self.orientation]['config_l_orientation_y'])
+        self.config_orientation_x = int(self.maconfig[self.orientation]['config_orientation_x'])
+        self.config_orientation_y = int(self.maconfig[self.orientation]['config_orientation_y'])
+        self.config_l_date_x = int(self.maconfig[self.orientation]['config_l_date_x'])
+        self.config_l_date_y = int(self.maconfig[self.orientation]['config_l_date_y'])
+        self.config_d_x = int(self.maconfig[self.orientation]['config_d_x'])
+        self.config_d_y = int(self.maconfig[self.orientation]['config_d_y'])
+        self.config_m_x = int(self.maconfig[self.orientation]['config_m_x'])
+        self.config_m_y = int(self.maconfig[self.orientation]['config_m_y'])
+        self.config_y_x = int(self.maconfig[self.orientation]['config_y_x'])
+        self.config_y_y = int(self.maconfig[self.orientation]['config_y_y'])
+        self.config_l_heure_x = int(self.maconfig[self.orientation]['config_l_heure_x'])
+        self.config_l_heure_y = int(self.maconfig[self.orientation]['config_l_heure_y'])
+        self.config_hour_x = int(self.maconfig[self.orientation]['config_hour_x'])
+        self.config_hour_y = int(self.maconfig[self.orientation]['config_hour_y'])
+        self.config_minute_x = int(self.maconfig[self.orientation]['config_minute_x'])
+        self.config_minute_y = int(self.maconfig[self.orientation]['config_minute_y'])
+        self.config_seconde_x = int(self.maconfig[self.orientation]['config_seconde_x'])
+        self.config_seconde_y = int(self.maconfig[self.orientation]['config_seconde_y'])
+        self.config_ok_x = int(self.maconfig[self.orientation]['config_ok_x'])
+        self.config_ok_y = int(self.maconfig[self.orientation]['config_ok_y'])
+
+        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.index = 7 # de 0 à 5 : date et heure, 6=ok, 7=roue, 8=orientation
         self.label_roue = self.font.render('Roue : ',True,(200,200,200))
         self.d_roue = int(self.maconfig['Parametres']['roue'])
@@ -553,28 +591,33 @@ class ConfigScene(SceneBase):
         self.hour = self.font.render('{:02d}:'.format(self.data[3]),True,(200,200,200),(0,0,200)) if self.index == 3 else self.font.render('{:02d}:'.format(self.data[3]),True,(200,200,200))
         self.minute = self.font.render('{:02d}:'.format(self.data[4]),True,(200,200,200),(0,0,200)) if self.index == 4 else self.font.render('{:02d}:'.format(self.data[4]),True,(200,200,200))
         self.second = self.font.render('{:02d}'.format(self.data[5]),True,(200,200,200),(0,0,200)) if self.index == 5 else self.font.render('{:02d}'.format(self.data[5]),True,(200,200,200))
-        self.t_roue = self.font.render('{} mm'.format(self.d_roue),True,(200,200,200),(0,0,200)) if self.index == 6 else self.font.render('{} mm'.format(self.d_roue),True,(200,200,200))
+        self.t_roue = self.font.render('{} mm'.format(self.d_roue),True,(200,200,200),(0,0,200)) if self.index == 7 else self.font.render('{} mm'.format(self.d_roue),True,(200,200,200))
         if self.paysage :
-            self.t_orientation = self.font.render('Paysage',True,(200,200,200),(0,0,200)) if self.index == 7 else self.font.render('Paysage',True,(200,200,200))
+            self.t_orientation = self.font.render('Paysage',True,(200,200,200),(0,0,200)) if self.index == 8 else self.font.render('Paysage',True,(200,200,200))
         else :
-            self.t_orientation = self.font.render('Portrait',True,(200,200,200),(0,0,200)) if self.index == 7 else self.font.render('Portrait',True,(200,200,200))
+            self.t_orientation = self.font.render('Portrait',True,(200,200,200),(0,0,200)) if self.index == 8 else self.font.render('Portrait',True,(200,200,200))
 
     def Render(self, screen):
-        screen.fill((0,0,0))
-        screen.blit(self.label_roue, (10, 25))
-        screen.blit(self.t_roue, (200, 25))
-        screen.blit(self.label_orientation, (10, 150))
-        screen.blit(self.t_orientation, (400, 150))
-        screen.blit(self.label_date, (10, 275))
-        screen.blit(self.d, (200, 275))
-        screen.blit(self.m, (300, 275))
-        screen.blit(self.y, (400, 275))
-        screen.blit(self.label_heure,(10,400))
-        screen.blit(self.hour, (250, 400))
-        screen.blit(self.minute, (350, 400))
-        screen.blit(self.second, (450, 400))
+        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+        img_tmp.fill((0,0,0))
+        img_tmp.blit(self.label_roue, (self.config_l_roue_x, self.config_l_roue_y))
+        img_tmp.blit(self.t_roue, (self.config_roue_x, self.config_roue_y))
+        img_tmp.blit(self.label_orientation, (self.config_l_orientation_x, self.config_l_orientation_y))
+        img_tmp.blit(self.t_orientation, (self.config_orientation_x, self.config_orientation_y))
+        img_tmp.blit(self.label_date, (self.config_l_date_x, self.config_l_date_y))
+        img_tmp.blit(self.d, (self.config_d_x, self.config_d_y))
+        img_tmp.blit(self.m, (self.config_m_x, self.config_m_y))
+        img_tmp.blit(self.y, (self.config_y_x, self.config_y_y))
+        img_tmp.blit(self.label_heure,(self.config_l_heure_x, self.config_l_heure_y))
+        img_tmp.blit(self.hour, (self.config_hour_x, self.config_hour_y))
+        img_tmp.blit(self.minute, (self.config_minute_x, self.config_minute_y))
+        img_tmp.blit(self.second, (self.config_seconde_x, self.config_seconde_y))
         
-        screen.blit(self.bouton_ok_white,(750,430)) if self.index == 8 else screen.blit(self.bouton_ok,(750,430))
+        img_tmp.blit(self.bouton_ok_white,(self.config_ok_x, self.config_ok_y)) if self.index == 6 else img_tmp.blit(self.bouton_ok,(self.config_ok_x, self.config_ok_y))
+
+        if self.orientation == 'Portrait' :
+            img_tmp=pygame.transform.rotate (img_tmp,90)
+        screen.blit(img_tmp,(0,0))
         
 
 
@@ -629,6 +672,16 @@ class ConversionScene(SceneBase):
         check_configfile()
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 24)
+        self.maconfig = configparser.ConfigParser()
+        self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
+        self.orientation = self.maconfig['Parametres']['orientation']
+        self.conv_text_x = int(self.maconfig[self.orientation]['conv_text_x'])
+        self.conv_text_y = int(self.maconfig[self.orientation]['conv_text_y'])
+        self.conv_text1_x = int(self.maconfig[self.orientation]['conv_text1_x'])
+        self.conv_text1_y = int(self.maconfig[self.orientation]['conv_text1_y'])
+        self.conv_text2_x = int(self.maconfig[self.orientation]['conv_text2_x'])
+        self.conv_text2_y= int(self.maconfig[self.orientation]['conv_text2_y'])
+        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
 
     def ProcessInput(self, events, pressed_keys):
         pass
@@ -638,7 +691,6 @@ class ConversionScene(SceneBase):
 
     def Render(self, screen):
         text1 = self.font.render('Preparation du roadbook... Patience...', True, (0, 255, 0))
-        self.maconfig = configparser.ConfigParser()
         filedir = os.path.splitext(self.filename)[0]
         if os.path.isdir('/mnt/piusb/Conversions/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
             os.mkdir('/mnt/piusb/Conversions/'+filedir)
@@ -649,19 +701,22 @@ class ConversionScene(SceneBase):
                 text2 = self.font.render('Conversion des cases en cours...', True, (0, 255, 0))
                 total = page_count ('/mnt/piusb/'+self.filename)
                 for i in range (total) :
-                    screen.fill((0, 0, 0))
-                    screen.blit(text1,(100,200))
-                    screen.blit(text2,(100,230))
+                    screen.fill((0,0,0))
+                    img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+                    img_tmp.fill((0,0,0))
+                    img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
+                    img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
                     text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
-                    screen.blit(text,(100,260))
-                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(total-i), fmt='jpg')
+                    img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
+                    self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
+                    if self.orientation == 'Portrait' :
+                        img_tmp=pygame.transform.rotate (img_tmp,90)
+                    screen.blit(img_tmp,(0,0))
                     pygame.display.flip()
             else:
                 # conversion et découpage des cases
-                screen.fill((0, 0, 0))
-                screen.blit(text1,(100,200))
                 text2 = self.font.render('Format Tripy. Conversion en cours...', True, (0, 255, 0))
-                screen.blit(text2,(100,230))
+
                 nb_pages = page_count ('/mnt/piusb/'+self.filename)
                 #Marge supperieur (pix)
                 marge_up = 178
@@ -689,11 +744,16 @@ class ConversionScene(SceneBase):
                             x = round(milieu)
                             y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
                         text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
-                        screen.fill((0, 0, 0))
-                        screen.blit(text1,(100,200))
-                        screen.blit(text2,(100,230))
-                        screen.blit(text,(100,260))
+                        screen.fill((0,0,0))
+                        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+                        img_tmp.fill((0,0,0))
+                        img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
+                        img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
+                        img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
+                        if self.orientation == 'Portrait' :
+                            img_tmp=pygame.transform.rotate (img_tmp,90)
+                        screen.blit(img_tmp,(0,0))
                         pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
@@ -712,12 +772,17 @@ class ConversionScene(SceneBase):
                 if total != nb_images :
                     text2 = self.font.render('Pas le meme nombre de cases ! On verifie...', True, (0, 255, 0))
                     for i in range (total) :
-                        screen.fill((0, 0, 0))
-                        screen.blit(text1,(100,200))
-                        screen.blit(text2,(100,230))
+                        screen.fill((0,0,0))
+                        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+                        img_tmp.fill((0,0,0))
+                        img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
+                        img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
                         text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
-                        screen.blit(text,(100,260))
-                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150 , singlefile='{:03}'.format(total-i),fmt='jpg')
+                        img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
+                        self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
+                        if self.orientation == 'Portrait' :
+                            img_tmp=pygame.transform.rotate (img_tmp,90)
+                        screen.blit(img_tmp,(0,0))
                         pygame.display.flip()
             else :
                 # Format Tripy
@@ -754,18 +819,22 @@ class ConversionScene(SceneBase):
                             else :
                                 x = round(milieu)
                                 y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
-                            screen.fill((0, 0, 0))
-                            screen.blit(text1,(100,200))
-                            screen.blit(text2,(100,230))
-                            text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
-                            screen.blit(text,(100,260))
+                            screen.fill((0,0,0))
+                            img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
+                            img_tmp.fill((0,0,0))
+                            img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
+                            img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
+                            img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
                             self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
+                            if self.orientation == 'Portrait' :
+                                img_tmp=pygame.transform.rotate (img_tmp,90)
+                            screen.blit(img_tmp,(0,0))
                             pygame.display.flip()
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
             if int(self.maconfig['Roadbooks']['case']) < 0 or int(self.maconfig['Roadbooks']['case']) > total -2 :
-              # Pb avec la position sauvegardée. On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
-              self.maconfig['Roadbooks']['case'] = str(total-2)
+              # Pb avec la position sauvegardée. On se positionne au début du rb
+              self.maconfig['Roadbooks']['case'] = '0'
               with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                 self.maconfig.write(configfile)
 
@@ -784,21 +853,24 @@ class RoadbookScene(SceneBase):
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.filedir = os.path.splitext(self.filename)[0]
         self.orientation = self.maconfig['Parametres']['orientation']
-        self.l_tps_x = int(self.maconfig[self.orientation]['l_tps_x'])
-        self.l_tps_y = int(self.maconfig[self.orientation]['l_tps_y'])
-        self.l_km_x = int(self.maconfig[self.orientation]['l_km_x'])
-        self.l_km_y = int(self.maconfig[self.orientation]['l_km_y'])
-        self.l_t_vi_x = int(self.maconfig[self.orientation]['l_t_vi_x'])
-        self.l_t_vi_y = int(self.maconfig[self.orientation]['l_t_vi_y'])
-        self.l_vi_x = int(self.maconfig[self.orientation]['l_vi_x'])
-        self.l_vi_y = int(self.maconfig[self.orientation]['l_vi_y'])
-        self.l_t_vm_x = int(self.maconfig[self.orientation]['l_t_vm_x'])
-        self.l_t_vm_y = int(self.maconfig[self.orientation]['l_t_vm_y'])
-        self.l_vm_x = int(self.maconfig[self.orientation]['l_vm_x'])
-        self.l_vm_y = int(self.maconfig[self.orientation]['l_vm_y'])
-        self.l_temp_x = int(self.maconfig[self.orientation]['l_temp_x'])
-        self.l_temp_y = int(self.maconfig[self.orientation]['l_temp_y'])
+        self.rb_tps_x = int(self.maconfig[self.orientation]['rb_tps_x'])
+        self.rb_tps_y = int(self.maconfig[self.orientation]['rb_tps_y'])
+        self.rb_km_x = int(self.maconfig[self.orientation]['rb_km_x'])
+        self.rb_km_y = int(self.maconfig[self.orientation]['rb_km_y'])
+        self.rb_t_vi_x = int(self.maconfig[self.orientation]['rb_t_vi_x'])
+        self.rb_t_vi_y = int(self.maconfig[self.orientation]['rb_t_vi_y'])
+        self.rb_vi_x = int(self.maconfig[self.orientation]['rb_vi_x'])
+        self.rb_vi_y = int(self.maconfig[self.orientation]['rb_vi_y'])
+        self.rb_t_vm_x = int(self.maconfig[self.orientation]['rb_t_vm_x'])
+        self.rb_t_vm_y = int(self.maconfig[self.orientation]['rb_t_vm_y'])
+        self.rb_vm_x = int(self.maconfig[self.orientation]['rb_vm_x'])
+        self.rb_vm_y = int(self.maconfig[self.orientation]['rb_vm_y'])
+        self.rb_temp_x = int(self.maconfig[self.orientation]['rb_temp_x'])
+        self.rb_temp_y = int(self.maconfig[self.orientation]['rb_temp_y'])
+        self.rb_cpu_x = int(self.maconfig[self.orientation]['rb_cpu_x'])
+        self.rb_cpu_y = int(self.maconfig[self.orientation]['rb_cpu_y'])
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
+        self.ncases = int(self.maconfig[self.orientation]['ncases'])
 
         import logging
         from logging.handlers import RotatingFileHandler
@@ -874,7 +946,7 @@ class RoadbookScene(SceneBase):
                     self.oldcase = self.case
                     self.case += 1
                 elif event.key == BOUTON_PGDOWN:
-                    self.case = self.nb_cases - 2
+                    self.case = self.nb_cases - self.ncases
                 elif event.key == BOUTON_OK:
                     distance = 0.0
                     cmavant = distance 
@@ -886,8 +958,8 @@ class RoadbookScene(SceneBase):
                     self.SwitchToScene(TitleScene())
 
         # Action sur le dérouleur
-        if self.case > self.nb_cases - 2 :
-            self.case = self.nb_cases -2
+        if self.case > self.nb_cases - self.ncases :
+            self.case = self.nb_cases -self.ncases
         if self.case < 0 :
             self.case = 0
 
@@ -932,16 +1004,16 @@ class RoadbookScene(SceneBase):
         img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
         img_tmp.fill((0,0,0))
         # Positionnement des différents éléments d'affichage
-        img_tmp.blit(self.label_tps, (self.l_tps_x, self.l_tps_y))
-        img_tmp.blit(self.label_km, (self.l_km_x, self.l_km_y))
-        img_tmp.blit(self.label_t_vi,(self.l_t_vi_x, self.l_t_vi_y))
-        img_tmp.blit(self.label_vi, (self.l_vi_x, self.l_vi_y))
-        img_tmp.blit(self.label_t_vm, (self.l_t_vm_x, self.l_t_vm_y))
-        img_tmp.blit(self.label_vm, (self.l_vm_x, self.l_vm_y))
-        for n in range(int(self.maconfig[self.orientation]['ncases'])):
+        img_tmp.blit(self.label_tps, (self.rb_tps_x, self.rb_tps_y))
+        img_tmp.blit(self.label_km, (self.rb_km_x, self.rb_km_y))
+        img_tmp.blit(self.label_t_vi,(self.rb_t_vi_x, self.rb_t_vi_y))
+        img_tmp.blit(self.label_vi, (self.rb_vi_x, self.rb_vi_y))
+        img_tmp.blit(self.label_t_vm, (self.rb_t_vm_x, self.rb_t_vm_y))
+        img_tmp.blit(self.label_vm, (self.rb_vm_x, self.rb_vm_y))
+        for n in range(self.ncases):
             img_tmp.blit (self.pages[self.case+n],(0,self.imgtmp_h-(n+1)*self.nh))
-        img_tmp.blit(self.label_temp,(self.l_temp_x, self.l_temp_y))
-        img_tmp.blit(self.label_cpu,(self.l_temp_x,self.l_temp_y+40))
+        img_tmp.blit(self.label_temp,(self.rb_temp_x, self.rb_temp_y))
+        img_tmp.blit(self.label_cpu,(self.rb_cpu_x,self.rb_cpu_y))
         if self.orientation == 'Portrait' :
             img_tmp=pygame.transform.rotate (img_tmp,90)
         screen.blit(img_tmp,(0,0))
