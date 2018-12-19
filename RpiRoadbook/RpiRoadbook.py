@@ -88,6 +88,8 @@ GPIO_OK = 23
 GPIO_UP = 24
 GPIO_DOWN = 25
 
+GPIO_DIM = 18
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
 GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -95,6 +97,9 @@ GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_DIM, GPIO.OUT)
+pulse = GPIO.PWM(GPIO_DIM,1000) # fréquence de 1kHz
+pulse.start(100.0)
 
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
@@ -184,13 +189,19 @@ def cpu_load():
     except:
         cpu = -1
 
+image_cache = {}
+def get_image(key):
+  if not key in image_cache:
+    image_cache[key] = pygame.image.load(key)
+  return image_cache[key]
+
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=200)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=200)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=200)
-GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=200)
-GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=200)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
 
 #----------------------------------------------------------------------------------------------#
 #-------------------------- Vérification configfile -------------------------------------------#
@@ -245,6 +256,8 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
     check_configfile()
 
     while active_scene != None:
+        pygame.time.wait(10)
+        clock.tick(fps)
         pressed_keys = pygame.key.get_pressed()
         # On ne checke la connectivité usb, la température et la charge cpu que toutes les 5 secondes
         if time.time() - 5 > t_usb : 
@@ -281,7 +294,7 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
         active_scene = active_scene.next
 
         pygame.display.flip()
-        clock.tick(fps)
+        #clock.tick(fps)
     GPIO.cleanup()
 
 
@@ -445,7 +458,7 @@ class ConfigScene(SceneBase):
         self.filename = fname
         check_configfile()
         pygame.font.init()
-        self.font = pygame.font.SysFont("cantarell", 70)
+        self.font = pygame.font.SysFont("cantarell", 50)
         self.now = time.localtime()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
@@ -458,6 +471,10 @@ class ConfigScene(SceneBase):
         self.config_l_orientation_y = int(self.maconfig[self.orientation]['config_l_orientation_y'])
         self.config_orientation_x = int(self.maconfig[self.orientation]['config_orientation_x'])
         self.config_orientation_y = int(self.maconfig[self.orientation]['config_orientation_y'])
+        self.config_l_dim_x = int(self.maconfig[self.orientation]['config_l_dim_x'])
+        self.config_l_dim_y = int(self.maconfig[self.orientation]['config_l_dim_y'])
+        self.config_dim_x = int(self.maconfig[self.orientation]['config_dim_x'])
+        self.config_dim_y = int(self.maconfig[self.orientation]['config_dim_y'])
         self.config_l_date_x = int(self.maconfig[self.orientation]['config_l_date_x'])
         self.config_l_date_y = int(self.maconfig[self.orientation]['config_l_date_y'])
         self.config_d_x = int(self.maconfig[self.orientation]['config_d_x'])
@@ -490,6 +507,9 @@ class ConfigScene(SceneBase):
         self.label_orientation = self.font.render('Orientation : ',True,(200,200,200))
         self.paysage = self.maconfig['Parametres']['orientation'] == 'Paysage'
         
+        self.label_dim = self.font.render('Luminosite : ',True,(200,200,200)) 
+        self.dim = int(self.maconfig['Parametres']['luminosite'])
+
         self.bouton_ok = pygame.image.load('./images/ok.jpg')
         self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
 
@@ -525,12 +545,12 @@ class ConfigScene(SceneBase):
                     self.Terminate()
                 elif event.key == BOUTON_RIGHT:
                     self.index+=1
-                    if self.index > 8:
+                    if self.index > 9:
                         self.index = 0
                 elif event.key == BOUTON_LEFT:
                     self.index -= 1
                     if self.index < 0 :
-                        self.index = 8    
+                        self.index = 9    
                 elif event.key == BOUTON_DOWN:
                     if self.index < 5 :
                         self.data[self.index] -= 1
@@ -543,6 +563,10 @@ class ConfigScene(SceneBase):
                         if self.d_roue < 10 : self.d_roue = 10
                     elif self.index == 8 :
                         self.paysage = not self.paysage
+                    elif self.index == 9 :
+                        self.dim -= 5
+                        if self.dim < 5 : self.dim = 5
+                        pulse.ChangeDutyCycle(self.dim)
                 elif event.key == BOUTON_UP:
                     if self.index < 5 :
                         self.data[self.index] += 1
@@ -555,6 +579,10 @@ class ConfigScene(SceneBase):
                         if self.d_roue > 9999 : self.d_roue = 9999
                     elif self.index == 8 :
                         self.paysage = not self.paysage
+                    elif self.index == 9 :
+                        self.dim += 5
+                        if self.dim > 100 : self.dim = 100
+                        pulse.ChangeDutyCycle(self.dim)
                 elif event.key == BOUTON_OK:
                     # validation
                     if self.index == 7:
@@ -566,16 +594,24 @@ class ConfigScene(SceneBase):
                             pass
                     elif self.index == 8:
                         self.maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
                         try:
                             with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                 self.maconfig.write(configfile)
                         except: 
                             pass       
+                    elif self.index == 9 :
+                        self.maconfig['Parametres']['luminosite'] = str(self.dim)
+                        try:
+                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                                self.maconfig.write(configfile)
+                        except: 
+                            pass
                     elif self.index == 6 : 
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant
                     self.index +=1
-                    if self.index > 8:
+                    if self.index > 9:
                         self.index = 0
             
             
@@ -596,6 +632,7 @@ class ConfigScene(SceneBase):
             self.t_orientation = self.font.render('Paysage',True,(200,200,200),(0,0,200)) if self.index == 8 else self.font.render('Paysage',True,(200,200,200))
         else :
             self.t_orientation = self.font.render('Portrait',True,(200,200,200),(0,0,200)) if self.index == 8 else self.font.render('Portrait',True,(200,200,200))
+        self.t_dim = self.font.render('{:03d}%'.format(self.dim), True, (200,200,200),(0,0,200)) if self.index == 9 else self.font.render('{:03d}%'.format(self.dim),True,(200,200,200))
 
     def Render(self, screen):
         img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
@@ -604,6 +641,8 @@ class ConfigScene(SceneBase):
         img_tmp.blit(self.t_roue, (self.config_roue_x, self.config_roue_y))
         img_tmp.blit(self.label_orientation, (self.config_l_orientation_x, self.config_l_orientation_y))
         img_tmp.blit(self.t_orientation, (self.config_orientation_x, self.config_orientation_y))
+        img_tmp.blit(self.label_dim, (self.config_l_dim_x, self.config_l_dim_y))
+        img_tmp.blit(self.t_dim, (self.config_dim_x, self.config_dim_y))
         img_tmp.blit(self.label_date, (self.config_l_date_x, self.config_l_date_y))
         img_tmp.blit(self.d, (self.config_d_x, self.config_d_y))
         img_tmp.blit(self.m, (self.config_m_x, self.config_m_y))
@@ -894,15 +933,15 @@ class RoadbookScene(SceneBase):
         if self.case < 0 :
             self.case = 0 # on compte de 0 à longueur-1
         self.oldcase = self.case
-        self.pages = []
-        for i in fichiers:
-            self.pages.append (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+self.filedir,i)))  # On a converti toutes les images. c'est plus long au début mais plus réactif ensuite et on peut rajouter des annotations
-        (w,h) = self.pages[0].get_rect().size
+        self.pages = {}
+        for i in range(len(fichiers)):
+            self.pages [str(i)] = pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+self.filedir,fichiers[i]))
+        (w,h) = next(iter(self.pages.values())).get_rect().size
         ratio = min(480/w,200/h) if self.orientation == 'Portrait' else min(600/w,200/h)
         # Mise à l'échelle des images
         self.nh = h * ratio
-        for i in range(len(self.pages)):
-            self.pages [i] = pygame.transform.rotozoom (self.pages[i],0,ratio)
+        for i in self.pages.keys():
+            self.pages [i] = pygame.transform.rotozoom (self.pages.get(i),0,ratio)
 
         pygame.font.init()
         self.font = pygame.font.SysFont("cantarell", 72)
@@ -947,14 +986,14 @@ class RoadbookScene(SceneBase):
                     self.case += 1
                 elif event.key == BOUTON_PGDOWN:
                     self.case = self.nb_cases - self.ncases
-                elif event.key == BOUTON_OK:
+                elif event.key == BOUTON_BACKSPACE:
                     distance = 0.0
                     cmavant = distance 
                     vmoy = 0
                     speed = 0
                     tpsinit = time.time()/1000
                     vmax = 0;
-                elif event.key == BOUTON_BACKSPACE:
+                elif event.key == BOUTON_OK:
                     self.SwitchToScene(TitleScene())
 
         # Action sur le dérouleur
@@ -1011,7 +1050,7 @@ class RoadbookScene(SceneBase):
         img_tmp.blit(self.label_t_vm, (self.rb_t_vm_x, self.rb_t_vm_y))
         img_tmp.blit(self.label_vm, (self.rb_vm_x, self.rb_vm_y))
         for n in range(self.ncases):
-            img_tmp.blit (self.pages[self.case+n],(0,self.imgtmp_h-(n+1)*self.nh))
+            img_tmp.blit (self.pages.get(str(self.case+n)),(0,self.imgtmp_h-(n+1)*self.nh))
         img_tmp.blit(self.label_temp,(self.rb_temp_x, self.rb_temp_y))
         img_tmp.blit(self.label_cpu,(self.rb_cpu_x,self.rb_cpu_y))
         if self.orientation == 'Portrait' :
@@ -1024,4 +1063,4 @@ class RoadbookScene(SceneBase):
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
 
-run_RpiRoadbook(800, 480, 5, TitleScene())
+run_RpiRoadbook(800, 480, 2, TitleScene())
