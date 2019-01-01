@@ -47,7 +47,7 @@ import datetime
 import os
 import configparser
 import re
-import serial
+# import serial
 # Pour la lecture des fichiers pdf et conversion en image
 from pdf2image import page_count,convert_from_path,page_size
 import subprocess
@@ -66,6 +66,11 @@ cmavant = 0
 j = time.time()
 temperature = -100
 cpu = -1
+
+filedir = ''
+fichiers = []
+
+rb_ration = 1
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
@@ -98,7 +103,7 @@ GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DIM, GPIO.OUT)
-pulse = GPIO.PWM(GPIO_DIM,1000) # fréquence de 1kHz
+pulse = GPIO.PWM(GPIO_DIM,800) # fréquence de 800Hz
 pulse.start(100.0)
 
 #*******************************************************************************************************#
@@ -159,6 +164,18 @@ def input_down_callback(channel):
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
 
+#On définit les interruptions sur les GPIO des commandes
+GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+
+#*******************************************************************************************************#
+#------------------------- Le callback de la connexion USB ---------------------------------------------#
+#*******************************************************************************************************#
+
 def g_mass_storage_callback():
     try:
         rfile = open('/sys/class/udc/20980000.usb/state')
@@ -170,6 +187,8 @@ def g_mass_storage_callback():
         rfile.close()
     except:
         pass
+
+
 
 def rpi_temp():
     global temperature
@@ -189,19 +208,126 @@ def cpu_load():
     except:
         cpu = -1
 
+#-----------------------------------------------------------------------------------------------#
+#----------------------------- Gestion des images en cache -------------------------------------#
+#-----------------------------------------------------------------------------------------------#
 image_cache = {}
-def get_image(key):
-  if not key in image_cache:
-    image_cache[key] = pygame.image.load(key)
-  return image_cache[key]
+def get_image(key,angle=0):
+    global filedir,fichiers,image_cache
+    # Chargement des images uniquement si pas encore en cache
+    if not (key,angle) in image_cache:
+        image_cache[(key,angle)] = pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[key])),angle,rb_ratio)
+    return image_cache[(key,angle)]
 
-#On définit les interruptions sur les GPIO des commandes
-GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+
+#-------------------------------------------------------------------------------------------#
+#------------------------------ Optimisation des rendus des textes -------------------------#
+#-------------------------------------------------------------------------------------------#
+alphabet = {}
+alphabet_size_x = {}
+alphabet_size_y = {}
+font25 = ''
+font50 = ''
+font75 = ''
+font100=''
+font200=''
+
+labels = {}
+old_labels = {}
+
+BLANC = 0
+ROUGE = 1
+VERT = 2
+BLEU = 3
+JAUNE = 4
+GRIS = 5
+
+def setup_alphabet():
+    global alphabet,alphabet_size_x,alphabet_size_y,font25,font50,font75,font100,font200
+    for i in range(1,256) :
+        alphabet[(25,chr(i),0,False)] = (font25.render(chr(i),0,(255,255,255),(0,0,0)),font25.render(chr(i),0,(255,0,0),(0,0,0)),font25.render(chr(i),0,(0,255,0),(0,0,0)),font25.render(chr(i),0,(0,0,255),(0,0,0)),font25.render(chr(i),0,(255,255,0),(0,0,0)),font25.render(chr(i),0,(125,125,125),(0,0,0)))
+        alphabet[(25,chr(i),90,False)] = (pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90),pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(0,0,0)),90),pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(0,0,0)),90),pygame.transform.rotate (font25.render(chr(i),0,(0,0,255),(0,0,0)),90),pygame.transform.rotate (font25.render(chr(i),0,(255,255,0),(0,0,0)),90),pygame.transform.rotate (font25.render(chr(i),0,(125,125,125),(0,0,0)),90))
+        alphabet[(25,chr(i),0,True)] = (font25.render(chr(i),0,(0,0,0),(255,255,255)),font25.render(chr(i),0,(255,0,0),(255,255,255)),font25.render(chr(i),0,(0,255,0),(255,255,255)),font25.render(chr(i),0,(0,0,255),(255,255,255)),font25.render(chr(i),0,(255,255,0),(255,255,255)),font25.render(chr(i),0,(125,125,125),(255,255,255)))
+        alphabet[(25,chr(i),90,True)] = (pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90),pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(255,255,255)),90),pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(255,255,255)),90),pygame.transform.rotate (font25.render(chr(i),0,(0,0,255),(255,255,255)),90),pygame.transform.rotate (font25.render(chr(i),0,(255,255,0),(255,255,255)),90),pygame.transform.rotate (font25.render(chr(i),0,(125,125,125),(255,255,255)),90))
+        alphabet_size_x[(25,chr(i),0)] = alphabet[(25,chr(i),0,False)][0].get_size()[0]
+        alphabet_size_y[(25,chr(i),0)] = 0
+        alphabet_size_x[(25,chr(i),90)] = 0 
+        alphabet_size_y[(25,chr(i),90)] = -alphabet[(25,chr(i),90,False)][0].get_size()[1]
+#        alphabet[(50,chr(i),0,False)] = (font50.render(chr(i),0,(255,255,255),(0,0,0)),font50.render(chr(i),0,(255,0,0),(0,0,0)),font50.render(chr(i),0,(0,255,0),(0,0,0)),font50.render(chr(i),0,(0,0,255),(0,0,0)),font50.render(chr(i),0,(255,255,0),(0,0,0)),font50.render(chr(i),0,(125,125,125),(0,0,0)))
+#        alphabet[(50,chr(i),90,False)] = (pygame.transform.rotate (font50.render(chr(i),0,(255,255,255),(0,0,0)),90),pygame.transform.rotate (font50.render(chr(i),0,(255,0,0),(0,0,0)),90),pygame.transform.rotate (font50.render(chr(i),0,(0,255,0),(0,0,0)),90),pygame.transform.rotate (font50.render(chr(i),0,(0,0,255),(0,0,0)),90),pygame.transform.rotate (font50.render(chr(i),0,(255,255,0),(0,0,0)),90),pygame.transform.rotate (font50.render(chr(i),0,(125,125,125),(0,0,0)),90))
+#        alphabet[(50,chr(i),0,True)] = (font50.render(chr(i),0,(0,0,0),(255,255,255)),font50.render(chr(i),0,(255,0,0),(255,255,255)),font50.render(chr(i),0,(0,255,0),(255,255,255)),font50.render(chr(i),0,(0,0,255),(255,255,255)),font50.render(chr(i),0,(255,255,0),(255,255,255)),font50.render(chr(i),0,(125,125,125),(255,255,255)))
+#        alphabet[(50,chr(i),90,True)] = (pygame.transform.rotate (font50.render(chr(i),0,(0,0,0),(255,255,255)),90),pygame.transform.rotate (font50.render(chr(i),0,(255,0,0),(255,255,255)),90),pygame.transform.rotate (font50.render(chr(i),0,(0,255,0),(255,255,255)),90),pygame.transform.rotate (font50.render(chr(i),0,(0,0,255),(255,255,255)),90),pygame.transform.rotate (font50.render(chr(i),0,(255,255,0),(255,255,255)),90),pygame.transform.rotate (font50.render(chr(i),0,(125,125,125),(255,255,255)),90))
+#        alphabet_size_x[(50,chr(i),0)] = alphabet[(50,chr(i),0,False)][0].get_size()[0]
+#        alphabet_size_y[(50,chr(i),0)] = 0
+#        alphabet_size_x[(50,chr(i),90)] = 0 
+#        alphabet_size_y[(50,chr(i),90)] = -alphabet[(50,chr(i),90,False)][0].get_size()[1]
+        alphabet[(75,chr(i),0,False)] = (font75.render(chr(i),0,(255,255,255),(0,0,0)),font75.render(chr(i),0,(255,0,0),(0,0,0)),font75.render(chr(i),0,(0,255,0),(0,0,0)),font75.render(chr(i),0,(0,0,255),(0,0,0)),font75.render(chr(i),0,(255,255,0),(0,0,0)),font75.render(chr(i),0,(125,125,125),(0,0,0)))
+        alphabet[(75,chr(i),90,False)] = (pygame.transform.rotate (font75.render(chr(i),0,(255,255,255),(0,0,0)),90),pygame.transform.rotate (font75.render(chr(i),0,(255,0,0),(0,0,0)),90),pygame.transform.rotate (font75.render(chr(i),0,(0,255,0),(0,0,0)),90),pygame.transform.rotate (font75.render(chr(i),0,(0,0,255),(0,0,0)),90),pygame.transform.rotate (font75.render(chr(i),0,(255,255,0),(0,0,0)),90),pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(0,0,0)),90))
+        alphabet[(75,chr(i),0,True)] = (font75.render(chr(i),0,(0,0,0),(255,255,255)),font75.render(chr(i),0,(255,0,0),(255,255,255)),font75.render(chr(i),0,(0,255,0),(255,255,255)),font75.render(chr(i),0,(0,0,255),(255,255,255)),font75.render(chr(i),0,(255,255,0),(255,255,255)),font75.render(chr(i),0,(125,125,125),(255,255,255)))
+        alphabet[(75,chr(i),90,True)] = (pygame.transform.rotate (font75.render(chr(i),0,(0,0,0),(255,255,255)),90),pygame.transform.rotate (font75.render(chr(i),0,(255,0,0),(255,255,255)),90),pygame.transform.rotate (font75.render(chr(i),0,(0,255,0),(255,255,255)),90),pygame.transform.rotate (font75.render(chr(i),0,(0,0,255),(255,255,255)),90),pygame.transform.rotate (font75.render(chr(i),0,(255,255,0),(255,255,255)),90),pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(255,255,255)),90))
+        alphabet_size_x[(75,chr(i),0)] = alphabet[(75,chr(i),0,False)][0].get_size()[0]
+        alphabet_size_y[(75,chr(i),0)] = 0
+        alphabet_size_x[(75,chr(i),90)] = 0 
+        alphabet_size_y[(75,chr(i),90)] = -alphabet[(75,chr(i),90,False)][0].get_size()[1]
+        alphabet[(100,chr(i),0,False)] = (font100.render(chr(i),0,(255,255,255),(0,0,0)),font100.render(chr(i),0,(255,0,0),(0,0,0)),font100.render(chr(i),0,(0,255,0),(0,0,0)),font100.render(chr(i),0,(0,0,255),(0,0,0)),font100.render(chr(i),0,(255,255,0),(0,0,0)),font100.render(chr(i),0,(125,125,125),(0,0,0)))
+        alphabet[(100,chr(i),90,False)] = (pygame.transform.rotate (font100.render(chr(i),0,(255,255,255),(0,0,0)),90),pygame.transform.rotate (font100.render(chr(i),0,(255,0,0),(0,0,0)),90),pygame.transform.rotate (font100.render(chr(i),0,(0,255,0),(0,0,0)),90),pygame.transform.rotate (font100.render(chr(i),0,(0,0,255),(0,0,0)),90),pygame.transform.rotate (font100.render(chr(i),0,(255,255,0),(0,0,0)),90),pygame.transform.rotate (font100.render(chr(i),0,(125,125,125),(0,0,0)),90))
+        alphabet[(100,chr(i),0,True)] = (font100.render(chr(i),0,(0,0,0),(255,255,255)),font100.render(chr(i),0,(255,0,0),(255,255,255)),font100.render(chr(i),0,(0,255,0),(255,255,255)),font100.render(chr(i),0,(0,0,255),(255,255,255)),font100.render(chr(i),0,(255,255,0),(255,255,255)),font100.render(chr(i),0,(125,125,125),(255,255,255)))
+        alphabet[(100,chr(i),90,True)] = (pygame.transform.rotate (font100.render(chr(i),0,(0,0,0),(255,255,255)),90),pygame.transform.rotate (font100.render(chr(i),0,(255,0,0),(255,255,255)),90),pygame.transform.rotate (font100.render(chr(i),0,(0,255,0),(255,255,255)),90),pygame.transform.rotate (font100.render(chr(i),0,(0,0,255),(255,255,255)),90),pygame.transform.rotate (font100.render(chr(i),0,(255,255,0),(255,255,255)),90),pygame.transform.rotate (font100.render(chr(i),0,(125,125,125),(255,255,255)),90))
+        alphabet_size_x[(100,chr(i),0)] = alphabet[(100,chr(i),0,False)][0].get_size()[0]
+        alphabet_size_y[(100,chr(i),0)] = 0
+        alphabet_size_x[(100,chr(i),90)] = 0 
+        alphabet_size_y[(100,chr(i),90)] = -alphabet[(100,chr(i),90,False)][0].get_size()[1]
+#        alphabet[(200,chr(i),0,False)] = (font200.render(chr(i),0,(255,255,255),(0,0,0)),font200.render(chr(i),0,(255,0,0),(0,0,0)),font200.render(chr(i),0,(0,255,0),(0,0,0)),font200.render(chr(i),0,(0,0,255),(0,0,0)),font200.render(chr(i),0,(255,255,0),(0,0,0)),font200.render(chr(i),0,(125,125,125),(0,0,0)))
+#        alphabet[(200,chr(i),90,False)] = (pygame.transform.rotate (font200.render(chr(i),0,(255,255,255),(0,0,0)),90),pygame.transform.rotate (font200.render(chr(i),0,(255,0,0),(0,0,0)),90),pygame.transform.rotate (font200.render(chr(i),0,(0,255,0),(0,0,0)),90),pygame.transform.rotate (font200.render(chr(i),0,(0,0,255),(0,0,0)),90),pygame.transform.rotate (font200.render(chr(i),0,(255,255,0),(0,0,0)),90),pygame.transform.rotate (font200.render(chr(i),0,(125,125,125),(0,0,0)),90))
+#        alphabet[(200,chr(i),0,True)] = (font200.render(chr(i),0,(0,0,0),(255,255,255)),font200.render(chr(i),0,(255,0,0),(255,255,255)),font200.render(chr(i),0,(0,255,0),(255,255,255)),font200.render(chr(i),0,(0,0,255),(255,255,255)),font200.render(chr(i),0,(255,255,0),(255,255,255)),font200.render(chr(i),0,(125,125,125),(255,255,255)))
+#        alphabet[(200,chr(i),90,True)] = (pygame.transform.rotate (font200.render(chr(i),0,(0,0,0),(255,255,255)),90),pygame.transform.rotate (font200.render(chr(i),0,(255,0,0),(255,255,255)),90),pygame.transform.rotate (font200.render(chr(i),0,(0,255,0),(255,255,255)),90),pygame.transform.rotate (font200.render(chr(i),0,(0,0,255),(255,255,255)),90),pygame.transform.rotate (font200.render(chr(i),0,(255,255,0),(255,255,255)),90),pygame.transform.rotate (font200.render(chr(i),0,(125,125,125),(255,255,255)),90))
+#        alphabet_size_x[(200,chr(i),0)] = alphabet[(200,chr(i),0,False)][0].get_size()[0]
+#        alphabet_size_y[(200,chr(i),0)] = 0
+#        alphabet_size_x[(200,chr(i),90)] = 0 
+#        alphabet_size_y[(200,chr(i),90)] = -alphabet[(200,chr(i),90,False)][0].get_size()[1]
+
+def blit_text (screen,st,coords,size = 25, col=BLANC,angle=0, selected=False):
+    s = st+' '
+    if (not size in (25,50,75,100,200)) : size = 25
+    if (not angle in (0,90)) : angle = 0
+    (x,y) = coords
+    if angle == 0 :
+        for i in range(len(s)) :
+            r = screen.blit(alphabet[(size,s[i],angle,selected)][col],(x,y))
+            x += alphabet_size_x[(size,s[i],angle)]
+            y += alphabet_size_y[(size,s[i],angle)]
+            pygame.display.update(r)
+    else :
+        for i in range(len(s)) :
+            x += alphabet_size_x[(size,s[i],angle)]
+            y += alphabet_size_y[(size,s[i],angle)]
+            r = screen.blit(alphabet[(size,s[i],angle,selected)][col],(x,y))
+            pygame.display.update(r)
+
+def update_labels(screen):
+    global labels,old_labels
+    for i in list(labels.keys()) :
+        if (i not in old_labels.keys()) or (old_labels [i] != labels[i]) :
+            blit_text (screen,labels[i][0],labels[i][1],labels[i][2],labels[i][3],labels[i][4])
+            old_labels [i] = labels[i]
+
+#--------------------------------------------------------------------------------- ----------#
+#------------------------------ Optimisation des rendus des sprites -------------------------#
+#---------------------------------------------------------------------------------- ---------#
+
+sprites = {}
+old_sprites = {}
+
+def blit_sprite (screen,sprite,coords):
+    r = screen.blit(sprite,coords)
+    pygame.display.update(r)
+
+def update_sprites(screen):
+    global sprites,old_sprites
+    for i in list(sprites.keys()) :
+        if (i not in old_sprites.keys()) or (old_sprites [i] != sprites[i]) :
+            blit_sprite (screen,sprites[i][0],sprites[i][1])
+            old_sprites [i] = sprites[i]
 
 #----------------------------------------------------------------------------------------------#
 #-------------------------- Vérification configfile -------------------------------------------#
@@ -225,6 +351,8 @@ class SceneBase:
     def __init__(self, fname = ''):
         self.next = self
         self.filename = fname
+        #pygame.display.get_surface().fill((0,0,0))
+        #pygame.display.update()
 
     def ProcessInput(self, events, pressed_keys):
         print("uh-oh, you didn't override this in the child class")
@@ -245,19 +373,26 @@ class SceneBase:
 #--------------------------------------- La boucle principale de l'appli -------------------------------#
 #*******************************************************************************************************#
 def run_RpiRoadbook(width, height, fps, starting_scene):
+    global font25,font50,font75,font100,font200
     pygame.display.init() ;
     pygame.mouse.set_visible(False)
     screen = pygame.display.set_mode((width, height))
 
     clock = pygame.time.Clock()
 
+    font25 = pygame.font.SysFont("cantarell", 25)
+    font50 = pygame.font.SysFont("cantarell", 50)
+    font75 = pygame.font.SysFont("cantarell", 75)
+    font100 = pygame.font.SysFont("cantarell", 100)
+    font200 = pygame.font.SysFont("cantarell", 200)
+    
+    setup_alphabet()
+
     active_scene = starting_scene
     t_usb = time.time()
     check_configfile()
 
     while active_scene != None:
-        pygame.time.wait(10)
-        clock.tick(fps)
         pressed_keys = pygame.key.get_pressed()
         # On ne checke la connectivité usb, la température et la charge cpu que toutes les 5 secondes
         if time.time() - 5 > t_usb : 
@@ -293,8 +428,8 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
 
         active_scene = active_scene.next
 
-        pygame.display.flip()
-        #clock.tick(fps)
+        #pygame.display.update()
+        clock.tick(fps)
     GPIO.cleanup()
 
 
@@ -305,6 +440,7 @@ def run_RpiRoadbook(width, height, fps, starting_scene):
 #*******************************************************************************************************#
 class TitleScene(SceneBase):
     def __init__(self):
+        global angle,labels,old_labels,sprites,old_sprites
         SceneBase.__init__(self)
         pygame.font.init()
         check_configfile()
@@ -312,18 +448,31 @@ class TitleScene(SceneBase):
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.orientation = self.maconfig['Parametres']['orientation']
-        self.select_config_x = int(self.maconfig[self.orientation]['select_config_x'])
-        self.select_config_y = int(self.maconfig[self.orientation]['select_config_y'])
-        self.select_text_x = int(self.maconfig[self.orientation]['select_text_x'])
-        self.select_text_y = int(self.maconfig[self.orientation]['select_text_y'])
-        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
+
+        angle = 90 if self.orientation == 'Portrait' else 0
+
+        labels = {}
+        old_labels = {}
+        sprites = {}
+        old_sprites = {}
+
+        self.menu_config = pygame.image.load('./images/icone_config.jpg')
+        self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
+        sprites['config'] = (self.menu_config,(int(self.maconfig[self.orientation]['select_config_x']),int(self.maconfig[self.orientation]['select_config_y'])))
+
+        labels['infos'] = ('Demarrage automatique dans 5s...',(0,450),25,VERT,angle,False)
+        labels['invite'] = ('Selectionnez le roadbook a charger :',(10,10),25,BLANC,angle,False)
+        labels['up'] = ('        ',(10,50),25,BLANC,angle,False)
+        labels['down'] = ('        ',(10,380),25,BLANC,angle,False)
+        for i in range (10) :
+            labels['liste{}'.format(i)] = ('',(10,80+i*30),25,BLANC,angle,False)
+
         self.roue = int(self.maconfig['Parametres']['roue'])
-        self.countdown = 4 ;
+        self.countdown = 20 ;
         self.iscountdown = True ;
         self.selection= 0 ;
         self.fenetre = 0 ;
         self.saved = self.maconfig['Roadbooks']['etape'] ;
-        self.font = pygame.font.SysFont("cantarell", 24)
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
         if len(self.filenames) == 0 : self.SwitchToScene(NoneScene())
         if self.saved in self.filenames : # le fichier rb existe, on le préselectionne
@@ -331,8 +480,7 @@ class TitleScene(SceneBase):
             self.selection = self.filenames.index(self.filename)
         else : # le fichier rb n'existe plus
             self.filename = ''
-        self.menu_config = pygame.image.load('./images/icone_config.jpg')
-        self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
+        
         self.column = 1
         self.j = time.time()
 
@@ -378,6 +526,23 @@ class TitleScene(SceneBase):
                 self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
+        global sprites,old_sprites,labels,old_labels,angle
+        # Mise à jour de la liste de choix
+        if self.fenetre > 0 :
+            labels['up'] = ('(moins)',labels['up'][1],labels['up'][2],labels['up'][3],labels['up'][4],labels['up'][5])
+
+        for i in range (10) :
+            labels['liste{}'.format(i)] = ('                                                ',(10,80+i*30),25,BLANC,angle,False)
+        for i in range (len(self.filenames)) :
+            if i >= self.fenetre and i <self.fenetre+10 :
+                p = 'liste{}'.format(i-self.fenetre)
+                couleur = ROUGE if self.filenames[i] == self.saved else BLANC
+                fond = True if i == self.selection and self.column==1 else False
+                text = self.filenames[i]+' (En cours)' if self.filenames[i] == self.saved else self.filenames[i]
+                labels[p] = (text,labels[p][1],labels[p][2],couleur,labels[p][4],fond)
+        if self.fenetre+10<len(self.filenames):
+            labels['down'] = ('(plus)',labels['down'][1],labels['down'][2],labels['down'][3],labels['down'][4],labels['down'][5])
+ 
         if self.iscountdown:
             self.k = time.time();
             if (self.k-self.j>=self.countdown) :
@@ -386,48 +551,37 @@ class TitleScene(SceneBase):
                     self.maconfig.write(configfile)
                 self.SwitchToScene(ConversionScene(self.filename))
 
-    def Render(self, screen):
-        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-        img_tmp.fill((0,0,0))
-        invite = self.font.render ('Sélectionnez le roadbook à charger :',0,(255,255,255))
-        img_tmp.blit(invite,(10,10))
-        if self.fenetre > 0 :
-            fleche_up = self.font.render('(moins)',0,(100,100,100))
-            img_tmp.blit (fleche_up,(10,50))
-        for i in range (len(self.filenames)) :
-            if i >= self.fenetre and i <self.fenetre+10 :
-                couleur = (255,0,0) if self.filenames[i] == self.saved else (255,255,255)
-                fond = (0,0,255) if i == self.selection and self.column==1 else (0,0,0)
-                text = self.font.render (self.filenames[i]+' (En cours)', 0, couleur,fond) if self.filenames[i] == self.saved else self.font.render (self.filenames[i], 0, couleur,fond)
-                img_tmp.blit (text,(10,80+(i-self.fenetre)*30))
-        if self.fenetre+10<len(self.filenames):
-            fleche_up = self.font.render('(plus)',0,(100,100,100))
-            img_tmp.blit (fleche_up,(10,380))
-        img_tmp.blit(self.menu_config_white,(self.select_config_x,self.select_config_y)) if self.column == 2 else img_tmp.blit(self.menu_config,(self.select_config_x,self.select_config_y))    
+        sprites['config'] = (self.menu_config_white,sprites['config'][1]) if self.column == 2 else (self.menu_config,sprites['config'][1])
         if self.iscountdown :
-            if self.k-self.j>= self.countdown :
-                text = self.font.render('Chargement du roadbook... Veuillez patienter.',True,(0,255,0))
-            else :
-                text = self.font.render('Démarrage automatique dans '+str(int(self.countdown+1-(self.k-self.j)))+'s...', True, (0, 255, 0))
-            img_tmp.blit(text,(self.select_text_x,self.select_text_y))
-        if self.orientation == 'Portrait' :
-            img_tmp=pygame.transform.rotate (img_tmp,90)
-        screen.blit(img_tmp,(0,0))
-        pygame.display.flip()
+            if self.k-self.j< self.countdown :
+                #print(labels['infos'])
+                #labels['infos'] = ('{}'.format('Chargement'),labels['infos'][1],labels['infos'][2],labels['infos'][3],labels['infos'][4],labels['infos'][5])
+            #else :
+                labels['infos'] = ('Demarrage automatique dans {:1.0f}s...'.format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3],labels['infos'][4],labels['infos'][5])
+        else :
+            labels['infos'] = ('                                                ',labels['infos'][1],labels['infos'][2],labels['infos'][3],labels['infos'][4],labels['infos'][5])
+
+    def Render(self, screen):
+        update_labels(screen)
+        update_sprites(screen)
 
 #*******************************************************************************************************#
 #---------------------------------------- La partie Pas de Roadbooks présents --------------------------#
 #*******************************************************************************************************#
 class NoneScene(SceneBase):
     def __init__(self, fname = ''):
+        global labels,old_labels,sprites,old_sprites
+        SceneBase.__init__(self)
         self.next = self
         self.filename = fname
         pygame.font.init()
+        labels = {}
+        old_labels = {}
         self.font = pygame.font.SysFont("cantarell", 24)
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
-        self.text1 = self.font.render('Aucun roadbook present.', True, (200, 0, 0))
-        self.text2 = self.font.render('Appuyez sur un bouton pour revenir', True, (200, 0, 0))
-        self.text3 = self.font.render('au menu apres telechargement', True, (200, 0, 0))
+        labels['text1'] = ('Aucun roadbook present.', (100,200),25,ROUGE,0,False)
+        labels['text2'] = ('Appuyez sur un bouton pour revenir', (100,230),25,ROUGE,0,False)
+        labels['text3'] = ('au menu apres telechargement', (100,260),25,ROUGE,0,False)
 
     def ProcessInput(self, events, pressed_keys):
         for event in events:
@@ -443,75 +597,60 @@ class NoneScene(SceneBase):
         pass
 
     def Render(self, screen):
-        screen.fill((0,0,0))
-        screen.blit(self.text1, (100, 200))
-        screen.blit(self.text2, (100, 230))
-        screen.blit(self.text3, (100, 260))
-        pygame.display.flip()
+        update_labels(screen)
 
 #*******************************************************************************************************#
 #---------------------------------------- La partie Réglages -------------------------------------------#
 #*******************************************************************************************************#
 class ConfigScene(SceneBase):
     def __init__(self, fname = ''):
+        global angle,labels,old_labels,sprites,old_sprites
+        SceneBase.__init__(self)
         self.next = self
         self.filename = fname
         check_configfile()
         pygame.font.init()
-        self.font = pygame.font.SysFont("cantarell", 50)
+        labels = {}
+        old_labels = {}
+        sprites = {}
+        old_sprites = {}
         self.now = time.localtime()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.orientation = self.maconfig['Parametres']['orientation']
-        self.config_l_roue_x = int(self.maconfig[self.orientation]['config_l_roue_x'])
-        self.config_l_roue_y = int(self.maconfig[self.orientation]['config_l_roue_y'])
-        self.config_roue_x = int(self.maconfig[self.orientation]['config_roue_x'])
-        self.config_roue_y = int(self.maconfig[self.orientation]['config_roue_y'])
-        self.config_l_orientation_x = int(self.maconfig[self.orientation]['config_l_orientation_x'])
-        self.config_l_orientation_y = int(self.maconfig[self.orientation]['config_l_orientation_y'])
-        self.config_orientation_x = int(self.maconfig[self.orientation]['config_orientation_x'])
-        self.config_orientation_y = int(self.maconfig[self.orientation]['config_orientation_y'])
-        self.config_l_dim_x = int(self.maconfig[self.orientation]['config_l_dim_x'])
-        self.config_l_dim_y = int(self.maconfig[self.orientation]['config_l_dim_y'])
-        self.config_dim_x = int(self.maconfig[self.orientation]['config_dim_x'])
-        self.config_dim_y = int(self.maconfig[self.orientation]['config_dim_y'])
-        self.config_l_date_x = int(self.maconfig[self.orientation]['config_l_date_x'])
-        self.config_l_date_y = int(self.maconfig[self.orientation]['config_l_date_y'])
-        self.config_d_x = int(self.maconfig[self.orientation]['config_d_x'])
-        self.config_d_y = int(self.maconfig[self.orientation]['config_d_y'])
-        self.config_m_x = int(self.maconfig[self.orientation]['config_m_x'])
-        self.config_m_y = int(self.maconfig[self.orientation]['config_m_y'])
-        self.config_y_x = int(self.maconfig[self.orientation]['config_y_x'])
-        self.config_y_y = int(self.maconfig[self.orientation]['config_y_y'])
-        self.config_l_heure_x = int(self.maconfig[self.orientation]['config_l_heure_x'])
-        self.config_l_heure_y = int(self.maconfig[self.orientation]['config_l_heure_y'])
-        self.config_hour_x = int(self.maconfig[self.orientation]['config_hour_x'])
-        self.config_hour_y = int(self.maconfig[self.orientation]['config_hour_y'])
-        self.config_minute_x = int(self.maconfig[self.orientation]['config_minute_x'])
-        self.config_minute_y = int(self.maconfig[self.orientation]['config_minute_y'])
-        self.config_seconde_x = int(self.maconfig[self.orientation]['config_seconde_x'])
-        self.config_seconde_y = int(self.maconfig[self.orientation]['config_seconde_y'])
-        self.config_ok_x = int(self.maconfig[self.orientation]['config_ok_x'])
-        self.config_ok_y = int(self.maconfig[self.orientation]['config_ok_y'])
 
-        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.index = 7 # de 0 à 5 : date et heure, 6=ok, 7=roue, 8=orientation
-        self.label_roue = self.font.render('Roue : ',True,(200,200,200))
-        self.d_roue = int(self.maconfig['Parametres']['roue'])
-
-        self.label_date = self.font.render('Date : ',True,(200,200,200))
-        self.label_heure = self.font.render ('Heure:',True,(200,200,200))
-        self.data = []
-        self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
-
-        self.label_orientation = self.font.render('Orientation : ',True,(200,200,200))
-        self.paysage = self.maconfig['Parametres']['orientation'] == 'Paysage'
-        
-        self.label_dim = self.font.render('Luminosite : ',True,(200,200,200)) 
-        self.dim = int(self.maconfig['Parametres']['luminosite'])
+        angle = 90 if self.orientation == 'Portrait' else 0
 
         self.bouton_ok = pygame.image.load('./images/ok.jpg')
         self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
+
+        labels ['t_roue'] = ('Roue :',(int(self.maconfig[self.orientation]['config_l_roue_x']),int(self.maconfig[self.orientation]['config_l_roue_y'])),50,BLANC,angle,False)
+        labels ['roue'] = ('{:4d}'.format(0),(int(self.maconfig[self.orientation]['config_roue_x']),int(self.maconfig[self.orientation]['config_roue_y'])),50,BLANC,angle,False)
+        labels ['t_orientation'] = ('Orientation',(int(self.maconfig[self.orientation]['config_l_orientation_x']),int(self.maconfig[self.orientation]['config_l_orientation_y'])),50,BLANC,angle,False)
+        labels ['orientation'] = ('Paysage',(int(self.maconfig[self.orientation]['config_orientation_x']),int(self.maconfig[self.orientation]['config_orientation_y'])),50,BLANC,angle,False)
+        labels ['t_dim'] = ('Luminosite',(int(self.maconfig[self.orientation]['config_l_dim_x']),int(self.maconfig[self.orientation]['config_l_dim_y'])),50,BLANC,angle,False)
+        labels ['dim'] = ('100',(int(self.maconfig[self.orientation]['config_dim_x']),int(self.maconfig[self.orientation]['config_dim_y'])),50,BLANC,angle,False)
+        labels ['t_date'] = ('Date :',(int(self.maconfig[self.orientation]['config_l_date_x']),int(self.maconfig[self.orientation]['config_l_date_y'])),50,BLANC,angle,False)
+        labels ['jj'] = ('01/',(int(self.maconfig[self.orientation]['config_d_x']),int(self.maconfig[self.orientation]['config_d_y'])),50,BLANC,angle,False)
+        labels ['mm'] = ('01/',(int(self.maconfig[self.orientation]['config_m_x']),int(self.maconfig[self.orientation]['config_m_y'])),50,BLANC,angle,False)
+        labels ['aaaa'] = ('2018',(int(self.maconfig[self.orientation]['config_y_x']),int(self.maconfig[self.orientation]['config_y_y'])),50,BLANC,angle,False)
+        labels ['t_heure'] = ('Heure:',(int(self.maconfig[self.orientation]['config_l_heure_x']),int(self.maconfig[self.orientation]['config_l_heure_y'])),50,BLANC,angle,False)
+        labels ['hh'] = ('00:',(int(self.maconfig[self.orientation]['config_hour_x']),int(self.maconfig[self.orientation]['config_hour_y'])),50,BLANC,angle,False)
+        labels ['min'] = ('00:',(int(self.maconfig[self.orientation]['config_minute_x']),int(self.maconfig[self.orientation]['config_minute_y'])),50,BLANC,angle,False)
+        labels ['ss'] = ('00',(int(self.maconfig[self.orientation]['config_seconde_x']),int(self.maconfig[self.orientation]['config_seconde_y'])),50,BLANC,angle,False)
+        sprites ['ok'] = (self.bouton_ok,(int(self.maconfig[self.orientation]['config_ok_x']),int(self.maconfig[self.orientation]['config_ok_y'])))
+
+        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
+        self.index = 7 # de 0 à 5 : date et heure, 6=ok, 7=roue, 8=orientation
+        self.d_roue = int(self.maconfig['Parametres']['roue'])
+
+        self.data = []
+        self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
+
+        self.paysage = self.maconfig['Parametres']['orientation'] == 'Paysage'
+        self.dim = int(self.maconfig['Parametres']['luminosite'])
+
+        
 
     def update_time(self):
         # Vérification validité des valeurs
@@ -618,45 +757,30 @@ class ConfigScene(SceneBase):
         
 
     def Update(self):
+        global labels,old_labels,sprites,old_sprites
         self.now = time.localtime()
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
-        self.d = self.font.render('{:02d}/'.format(self.data[0]),True,(200,200,200),(0,0,200)) if self.index == 0 else self.font.render('{:02d}/'.format(self.data[0]),True,(200,200,200))
-        self.m = self.font.render('{:02d}/'.format(self.data[1]),True,(200,200,200),(0,0,200)) if self.index == 1 else self.font.render('{:02d}/'.format(self.data[1]),True,(200,200,200))
-        self.y = self.font.render('{}'.format(self.data[2]),True,(200,200,200),(0,0,200)) if self.index == 2 else self.font.render('{}'.format(self.data[2]),True,(200,200,200))
-        self.hour = self.font.render('{:02d}:'.format(self.data[3]),True,(200,200,200),(0,0,200)) if self.index == 3 else self.font.render('{:02d}:'.format(self.data[3]),True,(200,200,200))
-        self.minute = self.font.render('{:02d}:'.format(self.data[4]),True,(200,200,200),(0,0,200)) if self.index == 4 else self.font.render('{:02d}:'.format(self.data[4]),True,(200,200,200))
-        self.second = self.font.render('{:02d}'.format(self.data[5]),True,(200,200,200),(0,0,200)) if self.index == 5 else self.font.render('{:02d}'.format(self.data[5]),True,(200,200,200))
-        self.t_roue = self.font.render('{} mm'.format(self.d_roue),True,(200,200,200),(0,0,200)) if self.index == 7 else self.font.render('{} mm'.format(self.d_roue),True,(200,200,200))
+        labels['dd'] = ('{:02d}/'.format(self.data[0]),labels['dd'][1],labels['dd'][2],labels['dd'][3],labels['dd'][4],True) if self.index == 0 else ('{:02d}/'.format(self.data[0]),labels['dd'][1],labels['dd'][2],labels['dd'][3],labels['dd'][4],False)
+        labels['mm'] = ('{:02d}/'.format(self.data[1]),labels['mm'][1],labels['mm'][2],labels['mm'][3],labels['mm'][4],True) if self.index == 1 else ('{:02d}/'.format(self.data[1]),labels['mm'][1],labels['mm'][2],labels['mm'][3],labels['mm'][4],False)
+        labels['aaaa'] = ('{}'.format(self.data[2]),labels['aaaa'][1],labels['aaaa'][2],labels['aaaa'][3],labels['aaaa'][4],True) if self.index == 2 else ('{}'.format(self.data[2]),labels['aaaa'][1],labels['aaaa'][2],labels['aaaa'][3],labels['aaaa'][4],False)
+        labels['hh'] = ('{:02d}:'.format(self.data[3]),labels['hh'][1],labels['hh'][2],labels['hh'][3],labels['hh'][4],True) if self.index == 3 else ('{:02d}:'.format(self.data[3]),labels['hh'][1],labels['hh'][2],labels['hh'][3],labels['hh'][4],False)
+        labels['min'] = ('{:02d}:'.format(self.data[4]),labels['min'][1],labels['min'][2],labels['min'][3],labels['min'][4],True) if self.index == 4 else ('{:02d}:'.format(self.data[4]),labels['min'][1],labels['min'][2],labels['min'][3],labels['min'][4],False)
+        labels['ss'] = ('{}'.format(self.data[5]),labels['ss'][1],labels['ss'][2],labels['ss'][3],labels['ss'][4],True) if self.index == 5 else ('{}'.format(self.data[5]),labels['ss'][1],labels['ss'][2],labels['ss'][3],labels['ss'][4],False)
+        labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],labels['roue'][2],labels['roue'][3],labels['roue'][4],True) if self.index == 7 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],labels['roue'][2],labels['roue'][3],labels['roue'][4],False)
+        labels['orientation'] = ('{}'.format(self.data[2]),labels['aaaa'][1],labels['aaaa'][2],labels['aaaa'][3],labels['aaaa'][4],True) if self.index == 8 else ('{}'.format(self.data[2]),labels['aaaa'][1],labels['aaaa'][2],labels['aaaa'][3],labels['aaaa'][4],False)
+        labels['dim'] = ('{:3d}%'.format(self.dim),labels['dim'][1],labels['dim'][2],labels['dim'][3],labels['dim'][4],True) if self.index == 9 else ('{:3d}%'.format(self.dim),labels['dim'][1],labels['dim'][2],labels['dim'][3],labels['dim'][4],False)
+        
         if self.paysage :
-            self.t_orientation = self.font.render('Paysage',True,(200,200,200),(0,0,200)) if self.index == 8 else self.font.render('Paysage',True,(200,200,200))
+            labels['orientation'] = ('Paysage ',labels['orientation'][1],labels['orientation'][2],labels['orientation'][3],labels['orientation'][4],True) if self.index == 8 else ('Paysage ',labels['orientation'][1],labels['orientation'][2],labels['orientation'][3],labels['orientation'][4],False)
         else :
-            self.t_orientation = self.font.render('Portrait',True,(200,200,200),(0,0,200)) if self.index == 8 else self.font.render('Portrait',True,(200,200,200))
-        self.t_dim = self.font.render('{:03d}%'.format(self.dim), True, (200,200,200),(0,0,200)) if self.index == 9 else self.font.render('{:03d}%'.format(self.dim),True,(200,200,200))
+            labels['orientation'] = ('Portrait',labels['orientation'][1],labels['orientation'][2],labels['orientation'][3],labels['orientation'][4],True) if self.index == 8 else ('Portrait',labels['orientation'][1],labels['orientation'][2],labels['orientation'][3],labels['orientation'][4],False)
+
+        sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
-        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-        img_tmp.fill((0,0,0))
-        img_tmp.blit(self.label_roue, (self.config_l_roue_x, self.config_l_roue_y))
-        img_tmp.blit(self.t_roue, (self.config_roue_x, self.config_roue_y))
-        img_tmp.blit(self.label_orientation, (self.config_l_orientation_x, self.config_l_orientation_y))
-        img_tmp.blit(self.t_orientation, (self.config_orientation_x, self.config_orientation_y))
-        img_tmp.blit(self.label_dim, (self.config_l_dim_x, self.config_l_dim_y))
-        img_tmp.blit(self.t_dim, (self.config_dim_x, self.config_dim_y))
-        img_tmp.blit(self.label_date, (self.config_l_date_x, self.config_l_date_y))
-        img_tmp.blit(self.d, (self.config_d_x, self.config_d_y))
-        img_tmp.blit(self.m, (self.config_m_x, self.config_m_y))
-        img_tmp.blit(self.y, (self.config_y_x, self.config_y_y))
-        img_tmp.blit(self.label_heure,(self.config_l_heure_x, self.config_l_heure_y))
-        img_tmp.blit(self.hour, (self.config_hour_x, self.config_hour_y))
-        img_tmp.blit(self.minute, (self.config_minute_x, self.config_minute_y))
-        img_tmp.blit(self.second, (self.config_seconde_x, self.config_seconde_y))
-        
-        img_tmp.blit(self.bouton_ok_white,(self.config_ok_x, self.config_ok_y)) if self.index == 6 else img_tmp.blit(self.bouton_ok,(self.config_ok_x, self.config_ok_y))
-
-        if self.orientation == 'Portrait' :
-            img_tmp=pygame.transform.rotate (img_tmp,90)
-        screen.blit(img_tmp,(0,0))
+        update_labels(screen)
+        update_sprites(screen)
         
 
 
@@ -665,12 +789,17 @@ class ConfigScene(SceneBase):
 #*******************************************************************************************************#
 class G_MassStorageScene(SceneBase):
     def __init__(self, fname = ''):
+        global labels,old_labels,sprites,old_sprites
+        SceneBase.__init__(self)
         self.next = self
         self.filename = fname
         pygame.font.init()
-        self.font = pygame.font.SysFont("cantarell", 24)
-        self.usb_connected = pygame.image.load ('./images/usb_connected_white.jpg')
-        self.text = self.font.render('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',True,(200,0,0))
+        labels = {}
+        old_labels = {}
+        sprites = {}
+        old_sprites = {}
+        sprites['usb'] = (pygame.image.load ('./images/usb_connected_white.jpg'),(0,0))
+        labels ['text'] = ('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',(10,450),25,ROUGE,0,False)
         #os.system('umount /mnt/piusb')
 
     def ProcessInput(self, events, pressed_keys):
@@ -694,10 +823,8 @@ class G_MassStorageScene(SceneBase):
         pass
 
     def Render(self, screen):
-        screen.fill((0, 0, 0))
-        screen.blit(self.usb_connected, (0, 0))
-        screen.blit(self.text,(10,450))
-        pygame.display.flip()
+        update_labels(screen)
+        update_sprites(screen)
 
 
 
@@ -706,21 +833,26 @@ class G_MassStorageScene(SceneBase):
 #*******************************************************************************************************#
 class ConversionScene(SceneBase):
     def __init__(self, fname = ''):
+        global angle, labels,old_labels,sprites,old_sprites
+        SceneBase.__init__(self)
         self.next = self
         self.filename = fname
         check_configfile()
         pygame.font.init()
-        self.font = pygame.font.SysFont("cantarell", 24)
+
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
         self.orientation = self.maconfig['Parametres']['orientation']
-        self.conv_text_x = int(self.maconfig[self.orientation]['conv_text_x'])
-        self.conv_text_y = int(self.maconfig[self.orientation]['conv_text_y'])
-        self.conv_text1_x = int(self.maconfig[self.orientation]['conv_text1_x'])
-        self.conv_text1_y = int(self.maconfig[self.orientation]['conv_text1_y'])
-        self.conv_text2_x = int(self.maconfig[self.orientation]['conv_text2_x'])
-        self.conv_text2_y= int(self.maconfig[self.orientation]['conv_text2_y'])
-        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
+
+        angle = 90 if self.orientation == 'Portrait' else 0
+
+        labels = {}
+        old_labels = {}
+
+        labels ['text'] = ('',(int(self.maconfig[self.orientation]['conv_text_x']),int(self.maconfig[self.orientation]['conv_text_y'])),25,VERT,angle,False)
+        labels ['text1'] = ('',(int(self.maconfig[self.orientation]['conv_text1_x']),int(self.maconfig[self.orientation]['conv_text1_y'])),25,VERT,angle,False)
+        labels ['text2'] = ('',(int(self.maconfig[self.orientation]['conv_text2_x']),int(self.maconfig[self.orientation]['conv_text2_y'])),25,VERT,angle,False)
+ 
 
     def ProcessInput(self, events, pressed_keys):
         pass
@@ -729,7 +861,8 @@ class ConversionScene(SceneBase):
         pass
 
     def Render(self, screen):
-        text1 = self.font.render('Preparation du roadbook... Patience...', True, (0, 255, 0))
+        global labels,old_labels,sprites,old_sprites
+        labels['text1'] = ('Preparation du roadbook... Patience...',labels['text1'][1],labels['text1'][2],labels['text1'][3],labels['text1'][4],labels['text1'][5])
         filedir = os.path.splitext(self.filename)[0]
         if os.path.isdir('/mnt/piusb/Conversions/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
             os.mkdir('/mnt/piusb/Conversions/'+filedir)
@@ -737,24 +870,16 @@ class ConversionScene(SceneBase):
 			# on vérifie le format de la page :
             width, height = page_size ('/mnt/piusb/'+self.filename)
             if width > height :
-                text2 = self.font.render('Conversion des cases en cours...', True, (0, 255, 0))
+                labels['text2'] = ('Conversion des cases en cours...',labels['text2'][1],labels['text2'][2],labels['text2'][3],labels['text2'][4],labels['text2'][5])
                 total = page_count ('/mnt/piusb/'+self.filename)
                 for i in range (total) :
-                    screen.fill((0,0,0))
-                    img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-                    img_tmp.fill((0,0,0))
-                    img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
-                    img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
-                    text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
-                    img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
+                    labels['text'] = ('Case {}/{}'.format(i,total),labels['text'][1],labels['text'][2],labels['text'][3],labels['text'][4],labels['text'][5])
+                    update_labels(screen)
                     self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
-                    if self.orientation == 'Portrait' :
-                        img_tmp=pygame.transform.rotate (img_tmp,90)
-                    screen.blit(img_tmp,(0,0))
-                    pygame.display.flip()
+                    
             else:
                 # conversion et découpage des cases
-                text2 = self.font.render('Format Tripy. Conversion en cours...', True, (0, 255, 0))
+                labels['text2'] = ('Format Tripy. Conversion en cours...',labels['text2'][1],labels['text2'][2],labels['text2'][3],labels['text2'][4],labels['text2'][5])
 
                 nb_pages = page_count ('/mnt/piusb/'+self.filename)
                 #Marge supperieur (pix)
@@ -782,18 +907,9 @@ class ConversionScene(SceneBase):
                         else :
                             x = round(milieu)
                             y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
-                        text = self.font.render('Case {}/{}'.format(i*nb_cases+j+1,total), True, (0, 255, 0))
-                        screen.fill((0,0,0))
-                        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-                        img_tmp.fill((0,0,0))
-                        img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
-                        img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
-                        img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
+                        labels['text'] = ('Case {}/{}'.format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3],labels['text'][4],labels['text'][5])
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
-                        if self.orientation == 'Portrait' :
-                            img_tmp=pygame.transform.rotate (img_tmp,90)
-                        screen.blit(img_tmp,(0,0))
-                        pygame.display.flip()
+                        update_labels(screen)
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
             # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
@@ -809,20 +925,11 @@ class ConversionScene(SceneBase):
             if width > height :
                 total = nb_pages
                 if total != nb_images :
-                    text2 = self.font.render('Pas le meme nombre de cases ! On verifie...', True, (0, 255, 0))
+                    labels['text2'] = ('Pas le meme nombre de cases ! On verifie...', labels['text2'][1],labels['text2'][2],labels['text2'][3],labels['text2'][4],labels['text2'][5])
                     for i in range (total) :
-                        screen.fill((0,0,0))
-                        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-                        img_tmp.fill((0,0,0))
-                        img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
-                        img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
-                        text = self.font.render('Case {}/{}'.format(i,total), True, (0, 255, 0))
-                        img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
+                        labels['text'] = ('Case {}/{}'.format(i,total), labels['text'][1],labels['text'][2],labels['text'][3],labels['text'][4],labels['text'][5])
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
-                        if self.orientation == 'Portrait' :
-                            img_tmp=pygame.transform.rotate (img_tmp,90)
-                        screen.blit(img_tmp,(0,0))
-                        pygame.display.flip()
+                        update_labels(screen)
             else :
                 # Format Tripy
                 #print('Verification coherence Format Tripy')
@@ -832,7 +939,7 @@ class ConversionScene(SceneBase):
                 total = nb_pages * nb_cases
                 nb_images = len([f for f in os.listdir('/mnt/piusb/Conversions/'+filedir) if re.search('.jpg$', f)])
                 if total != nb_images :
-                    text2 = self.font.render('Pas le meme nombre de cases ! On verifie...', True, (0, 255, 0))
+                    labels['text2'] = ('Pas le meme nombre de cases ! On verifie...', labels['text2'][1],labels['text2'][2],labels['text2'][3],labels['text2'][4],labels['text2'][5])
                     #Marge supperieur (pix)
                     marge_up = 178
                     #Hauteur d'une case (pix)
@@ -858,17 +965,9 @@ class ConversionScene(SceneBase):
                             else :
                                 x = round(milieu)
                                 y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
-                            screen.fill((0,0,0))
-                            img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-                            img_tmp.fill((0,0,0))
-                            img_tmp.blit(text1,(self.conv_text1_x,self.conv_text1_y))
-                            img_tmp.blit(text2,(self.conv_text2_x,self.conv_text2_y))
-                            img_tmp.blit(text,(self.conv_text_x,self.conv_text_y))
+                            labels['text'] = ('Case {}/{}'.format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3],labels['text'][4],labels['text'][5])
                             self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
-                            if self.orientation == 'Portrait' :
-                                img_tmp=pygame.transform.rotate (img_tmp,90)
-                            screen.blit(img_tmp,(0,0))
-                            pygame.display.flip()
+                            update_labels(screen)
             # On charge le fichier de configuration
             self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
             if int(self.maconfig['Roadbooks']['case']) < 0 or int(self.maconfig['Roadbooks']['case']) > total -2 :
@@ -885,31 +984,35 @@ class ConversionScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global distance
+        global distance,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
+        pygame.display.get_surface().fill((0,0,0))
+        pygame.display.update()
         check_configfile()
         self.maconfig = configparser.ConfigParser()
         self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
-        self.filedir = os.path.splitext(self.filename)[0]
+        filedir = os.path.splitext(self.filename)[0]
+        labels = {}
+        old_labels = {}
+        sprites = {}
+        old_sprites = {}
+
         self.orientation = self.maconfig['Parametres']['orientation']
-        self.rb_tps_x = int(self.maconfig[self.orientation]['rb_tps_x'])
-        self.rb_tps_y = int(self.maconfig[self.orientation]['rb_tps_y'])
-        self.rb_km_x = int(self.maconfig[self.orientation]['rb_km_x'])
-        self.rb_km_y = int(self.maconfig[self.orientation]['rb_km_y'])
-        self.rb_t_vi_x = int(self.maconfig[self.orientation]['rb_t_vi_x'])
-        self.rb_t_vi_y = int(self.maconfig[self.orientation]['rb_t_vi_y'])
-        self.rb_vi_x = int(self.maconfig[self.orientation]['rb_vi_x'])
-        self.rb_vi_y = int(self.maconfig[self.orientation]['rb_vi_y'])
-        self.rb_t_vm_x = int(self.maconfig[self.orientation]['rb_t_vm_x'])
-        self.rb_t_vm_y = int(self.maconfig[self.orientation]['rb_t_vm_y'])
-        self.rb_vm_x = int(self.maconfig[self.orientation]['rb_vm_x'])
-        self.rb_vm_y = int(self.maconfig[self.orientation]['rb_vm_y'])
-        self.rb_temp_x = int(self.maconfig[self.orientation]['rb_temp_x'])
-        self.rb_temp_y = int(self.maconfig[self.orientation]['rb_temp_y'])
-        self.rb_cpu_x = int(self.maconfig[self.orientation]['rb_cpu_x'])
-        self.rb_cpu_y = int(self.maconfig[self.orientation]['rb_cpu_y'])
+        angle = 90 if self.orientation == 'Portrait' else 0
+
+        # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
+        labels['heure'] = ('00:00:00',(int(self.maconfig[self.orientation]['rb_tps_x']),int(self.maconfig[self.orientation]['rb_tps_y'])),75,BLANC,angle,False)
+        labels['distance'] = ('{:03.2f}'.format(0.0),(int(self.maconfig[self.orientation]['rb_km_x']),int(self.maconfig[self.orientation]['rb_km_y'])),100,BLANC,angle,False)
+        labels['t_vitesse'] = ('Vitesse',(int(self.maconfig[self.orientation]['rb_t_vi_x']),int(self.maconfig[self.orientation]['rb_t_vi_y'])),25,ROUGE,angle,False)
+        labels['vitesse'] = ('{:3.0f}'.format(0.0),(int(self.maconfig[self.orientation]['rb_vi_x']),int(self.maconfig[self.orientation]['rb_vi_y'])),75,BLANC,angle,False)
+        labels['t_vmax'] = ('Vit. moyenne',(int(self.maconfig[self.orientation]['rb_t_vm_x']),int(self.maconfig[self.orientation]['rb_t_vm_y'])),25,ROUGE,angle,False)
+        labels['vmax'] = ('{:3.0f}'.format(0.0),(int(self.maconfig[self.orientation]['rb_vm_x']),int(self.maconfig[self.orientation]['rb_vm_y'])),75,GRIS,angle,False)
+        labels['temperature'] = ('{:2.1f}C'.format(0.0),(int(self.maconfig[self.orientation]['rb_temp_x']),int(self.maconfig[self.orientation]['rb_temp_y'])),25,ROUGE,angle,False)
+        labels['cpu'] = ('{:2.0f}%'.format(0.0),(int(self.maconfig[self.orientation]['rb_cpu_x']),int(self.maconfig[self.orientation]['rb_cpu_y'])),25,ROUGE,angle,False)
+        
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.ncases = int(self.maconfig[self.orientation]['ncases'])
+        self.pages = {}
 
         import logging
         from logging.handlers import RotatingFileHandler
@@ -927,32 +1030,20 @@ class RoadbookScene(SceneBase):
         self.odometre_log.addHandler(self.odometre_handler)
 
         #Chargement des images
-        fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+self.filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+self.filedir, name))])
+        fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
         self.nb_cases = len(fichiers)
         self.case = int(self.maconfig['Roadbooks']['case'])
         if self.case < 0 :
             self.case = 0 # on compte de 0 à longueur-1
-        self.oldcase = self.case
-        self.pages = {}
-        for i in range(len(fichiers)):
-            self.pages [str(i)] = pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+self.filedir,fichiers[i]))
-        (w,h) = next(iter(self.pages.values())).get_rect().size
-        ratio = min(480/w,200/h) if self.orientation == 'Portrait' else min(600/w,200/h)
+        self.oldcase = self.case + 1
+        
+        samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
+        (w,h) = samplepage.get_rect().size
+        rb_ratio = min(480/w,200/h) if self.orientation == 'Portrait' else min(600/w,200/h)
         # Mise à l'échelle des images
-        self.nh = h * ratio
-        for i in self.pages.keys():
-            self.pages [i] = pygame.transform.rotozoom (self.pages.get(i),0,ratio)
+        self.nh = h * rb_ratio
 
-        pygame.font.init()
-        self.font = pygame.font.SysFont("cantarell", 72)
-        self.myfont_36 = pygame.font.SysFont("cantarell", 36)
-        self.myfont_70 = pygame.font.SysFont("cantarell", 70)
-        self.myfont_100 = pygame.font.SysFont("cantarell", 100)
-
-        self.label_tps = self.myfont_70.render("00:00:00", 1, (200,200,200))
-        self.label_km = self.myfont_100.render("000.00", 1, (200,200,200))
-        self.label_vi = self.myfont_70.render("000", 1, (200,200,200))
-        self.label_vm = self.myfont_70.render("000", 1, (100,100,100))
+        j = time.time()
 
     def ProcessInput(self, events, pressed_keys):
         global distance,tpsinit,cmavant,vmoy,vmax
@@ -1004,6 +1095,7 @@ class RoadbookScene(SceneBase):
 
     def Update(self):
         global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature,cpu
+        global labels,old_labels,sprites,old_sprites
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             self.maconfig['Roadbooks']['case'] = str(self.case)
@@ -1029,33 +1121,25 @@ class RoadbookScene(SceneBase):
             self.odometre_log.info('{}'.format(distance))
             distancetmp = 0
 
-        self.label_tps = self.myfont_70.render(time.strftime("%H:%M:%S", time.localtime()), 1, (200,200,200))
-        self.label_km = self.myfont_100.render('{0:.2f}'.format(distance/1000000), 1, (200,200,200))
-        self.label_t_vi = self.myfont_36.render('Vitesse',1,(200,0,0))
-        self.label_vi = self.myfont_70.render('{0:.1f}'.format(speed), 1, (200,200,200))
-        self.label_t_vm = self.myfont_36.render('VMax',1,(200,0,0))
-        self.label_vm = self.myfont_70.render('{0:.1f}'.format(vmax), 1, (100,100,100))
+        labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3],labels['heure'][4],labels['heure'][5]) 
+        labels['distance'] = ('{:3.2f}'.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3],labels['distance'][4],labels['distance'][5]) 
+        labels['vitesse'] = ('{:3.0f}'.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3],labels['vitesse'][4],labels['vitesse'][5]) 
+        labels['vmax'] = ('{:3.0f}'.format(vmax), labels['vmax'][1],labels['vmax'][2],labels['vmax'][3],labels['vmax'][4],labels['vmax'][5]) 
+        labels['temperature'] = ('{:2.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3],labels['temperature'][4],labels['temperature'][5]) 
+        labels['cpu'] = ('{:2.0f}%'.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3],labels['cpu'][4],labels['cpu'][5]) 
 
-        self.label_temp = self.myfont_36.render('{0:.1f}°C'.format(temperature),1,(200,200,200))
-        self.label_cpu = self.myfont_36.render('{}%'.format(cpu),1,(200,200,200))
+        if self.oldcase != self.case :
+            if angle == 0 :
+                for n in range(self.ncases):
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,self.imgtmp_h-(n+1)*self.nh))
+            else :
+                for n in range(self.ncases):
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(self.imgtmp_w-(n+1)*self.nh),0)
 
     def Render(self, screen):
-        img_tmp = pygame.Surface ((self.imgtmp_w,self.imgtmp_h)) 
-        img_tmp.fill((0,0,0))
-        # Positionnement des différents éléments d'affichage
-        img_tmp.blit(self.label_tps, (self.rb_tps_x, self.rb_tps_y))
-        img_tmp.blit(self.label_km, (self.rb_km_x, self.rb_km_y))
-        img_tmp.blit(self.label_t_vi,(self.rb_t_vi_x, self.rb_t_vi_y))
-        img_tmp.blit(self.label_vi, (self.rb_vi_x, self.rb_vi_y))
-        img_tmp.blit(self.label_t_vm, (self.rb_t_vm_x, self.rb_t_vm_y))
-        img_tmp.blit(self.label_vm, (self.rb_vm_x, self.rb_vm_y))
-        for n in range(self.ncases):
-            img_tmp.blit (self.pages.get(str(self.case+n)),(0,self.imgtmp_h-(n+1)*self.nh))
-        img_tmp.blit(self.label_temp,(self.rb_temp_x, self.rb_temp_y))
-        img_tmp.blit(self.label_cpu,(self.rb_cpu_x,self.rb_cpu_y))
-        if self.orientation == 'Portrait' :
-            img_tmp=pygame.transform.rotate (img_tmp,90)
-        screen.blit(img_tmp,(0,0))
+        # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
+        update_labels(screen)
+        update_sprites(screen)
 
 
 
@@ -1063,4 +1147,4 @@ class RoadbookScene(SceneBase):
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
 
-run_RpiRoadbook(800, 480, 2, TitleScene())
+run_RpiRoadbook(800, 480, 5, TitleScene())
