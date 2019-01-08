@@ -513,7 +513,7 @@ class SelectionScene(SceneBase):
                 labels['liste{}'.format(i)] = ('',(80+i*30,480),BLANC25,angle)
 
         self.roue = int(self.maconfig['Parametres']['roue'])
-        self.countdown = 20 ;
+        self.countdown = 5 ;
         self.iscountdown = True ;
         self.selection= 0 ;
         self.fenetre = 0 ;
@@ -926,6 +926,7 @@ class ConversionScene(SceneBase):
 
         labels = {}
         old_labels = {}
+        image_cache = {}
 
         labels ['text'] = ('',(int(self.maconfig[self.orientation]['conv_text_x']),int(self.maconfig[self.orientation]['conv_text_y'])),VERT25,angle)
         labels ['text1'] = ('',(int(self.maconfig[self.orientation]['conv_text1_x']),int(self.maconfig[self.orientation]['conv_text1_y'])),VERT25,angle)
@@ -1074,6 +1075,7 @@ class RoadbookScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
+        image_cache = {}
 
         self.orientation = self.maconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
@@ -1117,7 +1119,7 @@ class RoadbookScene(SceneBase):
         
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
-        rb_ratio = min(480/w,200/h) if self.orientation == 'Portrait' else min(600/w,200/h)
+        rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(600/w,180/h)
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
