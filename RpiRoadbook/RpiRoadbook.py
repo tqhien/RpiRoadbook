@@ -460,11 +460,20 @@ class TitleScene(SceneBase):
         pass
 
     def Update(self):
-        self.SwitchToScene(SelectionScene())
+        check_configfile()
+        # On charge le fichier de config
+        self.maconfig = configparser.ConfigParser()
+        self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
+        self.rallye = self.maconfig['Parametres']['mode'] == 'Rallye'
+        if self.rallye :
+            self.SwitchToScene(SelectionScene())
+        else :
+            self.SwitchToScene(OdometerScene())
 
     def Render(self, screen):
         screen.fill((0,0,0))
         pygame.display.update()
+
 
 
 
@@ -699,7 +708,8 @@ class ConfigScene(SceneBase):
             self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
             self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
         
-
+        labels ['t_mode'] = ('Mode :',(int(self.maconfig[self.orientation]['config_l_mode_x']),int(self.maconfig[self.orientation]['config_l_mode_y'])),BLANC50,angle)
+        labels ['mode'] = ('Rallye',(int(self.maconfig[self.orientation]['config_mode_x']),int(self.maconfig[self.orientation]['config_mode_y'])),BLANC50,angle)
         labels ['t_roue'] = ('Roue :',(int(self.maconfig[self.orientation]['config_l_roue_x']),int(self.maconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
         labels ['roue'] = ('{:4d}'.format(0),(int(self.maconfig[self.orientation]['config_roue_x']),int(self.maconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
         labels ['t_orientation'] = ('Orientation :',(int(self.maconfig[self.orientation]['config_l_orientation_x']),int(self.maconfig[self.orientation]['config_l_orientation_y'])),BLANC50,angle)
@@ -717,12 +727,13 @@ class ConfigScene(SceneBase):
         sprites ['ok'] = (self.bouton_ok,(int(self.maconfig[self.orientation]['config_ok_x']),int(self.maconfig[self.orientation]['config_ok_y'])))
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.index = 7 # de 0 à 5 : date et heure, 6=ok, 7=roue, 8=orientation, 9 =luminosité
+        self.index = 7 # de 0 à 5 : date et heure, 6=ok, 7= mode , 8=roue, 9=orientation, 10 =luminosité
         self.d_roue = int(self.maconfig['Parametres']['roue'])
 
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
 
+        self.rallye = self.maconfig['Parametres']['mode'] == 'Rallye'
         self.paysage = self.maconfig['Parametres']['orientation'] == 'Paysage'
         self.dim = int(self.maconfig['Parametres']['luminosite'])
 
@@ -762,12 +773,12 @@ class ConfigScene(SceneBase):
                     self.Terminate()
                 elif event.key == BOUTON_RIGHT:
                     self.index+=1
-                    if self.index > 9:
+                    if self.index > 10:
                         self.index = 0
                 elif event.key == BOUTON_LEFT:
                     self.index -= 1
                     if self.index < 0 :
-                        self.index = 9    
+                        self.index = 10    
                 elif event.key == BOUTON_DOWN:
                     if self.index < 5 :
                         self.data[self.index] -= 1
@@ -775,12 +786,14 @@ class ConfigScene(SceneBase):
                     elif self.index == 5 :
                         self.data[5] = 0
                         self.update_time()
-                    elif self.index == 7 :
+                    elif self.index ==7 :
+                        self.rallye = not self.rallye
+                    elif self.index == 8 :
                         self.d_roue -= 1
                         if self.d_roue < 10 : self.d_roue = 10
-                    elif self.index == 8 :
-                        self.paysage = not self.paysage
                     elif self.index == 9 :
+                        self.paysage = not self.paysage
+                    elif self.index == 10 :
                         self.dim -= 5
                         if self.dim < 5 : self.dim = 5
                         pulse.ChangeDutyCycle(self.dim)
@@ -791,25 +804,34 @@ class ConfigScene(SceneBase):
                     elif self.index == 5:
                         self.data[5] = 0
                         self.update_time()
-                    elif self.index == 7:
+                    elif self.index ==7:
+                        self.rallye = not self.rallye
+                    elif self.index == 8:
                         self.d_roue += 1
                         if self.d_roue > 9999 : self.d_roue = 9999
-                    elif self.index == 8 :
-                        self.paysage = not self.paysage
                     elif self.index == 9 :
+                        self.paysage = not self.paysage
+                    elif self.index == 10 :
                         self.dim += 5
                         if self.dim > 100 : self.dim = 100
                         pulse.ChangeDutyCycle(self.dim)
                 elif event.key == BOUTON_OK:
                     # validation
                     if self.index == 7:
-                        self.maconfig['Parametres']['roue'] = str(self.d_roue)
+                        self.maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
                         try:
                             with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                                 self.maconfig.write(configfile)
                         except: 
                             pass
                     elif self.index == 8:
+                        self.maconfig['Parametres']['roue'] = str(self.d_roue)
+                        try:
+                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                                self.maconfig.write(configfile)
+                        except: 
+                            pass
+                    elif self.index == 9:
                         self.maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
                         try:
@@ -817,7 +839,7 @@ class ConfigScene(SceneBase):
                                 self.maconfig.write(configfile)
                         except: 
                             pass       
-                    elif self.index == 9 :
+                    elif self.index == 10 :
                         self.maconfig['Parametres']['luminosite'] = str(self.dim)
                         try:
                             with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
@@ -828,7 +850,7 @@ class ConfigScene(SceneBase):
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant
                     self.index +=1
-                    if self.index > 9:
+                    if self.index > 10:
                         self.index = 0
             
             
@@ -845,13 +867,18 @@ class ConfigScene(SceneBase):
         labels['hh'] = ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50inv,labels['hh'][3]) if self.index == 3 else ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50,labels['hh'][3])
         labels['min'] = ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50inv,labels['min'][3]) if self.index == 4 else ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50,labels['min'][3])
         labels['ss'] = ('{:02d}'.format(self.data[5]),labels['ss'][1],BLANC50inv,labels['ss'][3]) if self.index == 5 else ('{:02d} '.format(self.data[5]),labels['ss'][1],BLANC50,labels['ss'][3])
-        labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 7 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
-        labels['dim'] = ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50inv,labels['dim'][3]) if self.index == 9 else ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50,labels['dim'][3])
+        labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 8 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
+        labels['dim'] = ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50inv,labels['dim'][3]) if self.index == 10 else ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50,labels['dim'][3])
         
-        if self.paysage :
-            labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 8 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+        if self.rallye :
+            labels['mode'] = ('Rallye',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 7 else ('Rallye',labels['mode'][1],BLANC50,labels['mode'][3])
         else :
-            labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 8 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+            labels['mode'] = ('Route',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 7 else ('Route   ',labels['mode'][1],BLANC50,labels['mode'][3])
+
+        if self.paysage :
+            labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 9 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+        else :
+            labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 9 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
 
         sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
 
@@ -1224,7 +1251,103 @@ class RoadbookScene(SceneBase):
         update_labels(screen)
         update_sprites(screen)
 
+#*******************************************************************************************************#
+#---------------------------------------- Ecran Compteur de vitesse simple -----------------------------#
+#*******************************************************************************************************#
 
+class OdometerScene(SceneBase):
+    def __init__(self, fname = ''):
+        global distance,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
+        SceneBase.__init__(self,fname)
+        check_configfile()
+        self.maconfig = configparser.ConfigParser()
+        self.maconfig.read('/mnt/piusb/RpiRoadbook.cfg')
+        filedir = os.path.splitext(self.filename)[0]
+        labels = {}
+        old_labels = {}
+        sprites = {}
+        old_sprites = {}
+        image_cache = {}
+
+        self.orientation = self.maconfig['Parametres']['orientation']
+        angle = 90 if self.orientation == 'Portrait' else 0
+
+        # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
+        labels['heure'] = ('00:00:00',(int(self.maconfig[self.orientation]['odo_tps_x']),int(self.maconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
+        labels['distance'] = ('{:03.2f}'.format(0.0),(int(self.maconfig[self.orientation]['odo_km_x']),int(self.maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
+        labels['t_vitesse'] = ('Vitesse',(int(self.maconfig[self.orientation]['odo_t_vi_x']),int(self.maconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
+        labels['vitesse'] = ('{:3.0f}'.format(100.0),(int(self.maconfig[self.orientation]['odo_vi_x']),int(self.maconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
+        labels['temperature'] = ('{:2.1f}C'.format(0.0),(int(self.maconfig[self.orientation]['odo_temp_x']),int(self.maconfig[self.orientation]['odo_temp_y'])),ROUGE25,angle)
+        labels['cpu'] = ('{:2.1f}%'.format(0.0),(int(self.maconfig[self.orientation]['odo_cpu_x']),int(self.maconfig[self.orientation]['odo_cpu_y'])),ROUGE25,angle)
+
+        import logging
+        from logging.handlers import RotatingFileHandler
+
+        try :
+            with open('/mnt/piusb/odometre.log', "r") as f1:
+                last_line = f1.readlines()[-1]
+                distance = int(last_line)
+        except :
+            distance = 0
+
+        self.odometre_log = logging.getLogger('Rotating Odometer Log')
+        self.odometre_log.setLevel(logging.INFO)
+        self.odometre_handler = RotatingFileHandler('/mnt/piusb/odometre.log',maxBytes=8000,backupCount=20)
+        self.odometre_log.addHandler(self.odometre_handler)
+
+        pygame.display.get_surface().fill((0,0,0))
+        pygame.display.update()
+
+        j = time.time()
+
+    def ProcessInput(self, events, pressed_keys):
+        global distance,cmavant,vmoy,speed,tpsinit,vmax
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.Terminate()
+            elif event.type == pygame.KEYDOWN :
+                if event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
+                    self.SwitchToScene(ConfigScene())
+                elif event.key == BOUTON_BACKSPACE:
+                    distance = 0.0
+                    cmavant = distance
+                    vmoy = 0
+                    speed = 0
+                    tpsinit = time.time()/1000
+                    vmax = 0;
+
+            elif event.type == GMASSSTORAGE:
+                self.SwitchToScene(G_MassStorageScene())
+
+    def Update(self):
+        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature,cpu
+        global labels,old_labels,sprites,old_sprites
+
+        if distance < 20000 or tps < 2 : 
+            vmoy = 0 # On maintient la vitesse moyenne à 0 sur les 20 premiers mètres ou les 2 premières secondes
+        else:
+            vmoy = ((distance/(time.time()-tpsinit))*3.6/1000);
+        k = time.time() - j
+        if ( k >= 2) : # Vitesse moyenne sur 2 secondes
+            speed = (distance*3.6-cmavant*3.6); 
+            speed = 1.0*speed/k/2000; 
+            j = time.time()
+            cmavant = distance
+
+        if distancetmp > 100000 : #On sauvegarde l'odometre tous les 100 metres
+            self.odometre_log.info('{}'.format(distance))
+            distancetmp = 0
+        if self.next == self :
+            labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
+            labels['distance'] = ('{:3.2f}'.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3])
+            labels['vitesse'] = ('{:3.0f}'.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
+            labels['temperature'] = ('{:2.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
+            labels['cpu'] = ('{:2.1f}%'.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
+
+    def Render(self, screen):
+        # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
+        update_labels(screen)
+        update_sprites(screen)
 
 # Pour optimisation
 #import cProfile
