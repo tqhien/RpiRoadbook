@@ -225,6 +225,9 @@ def get_image(key,angle=0):
 #-------------------------------------------------------------------------------------------#
 #------------------------------ Optimisation des rendus des textes -------------------------#
 #-------------------------------------------------------------------------------------------#
+
+mode_jour = True
+
 alphabet = {}
 alphabet_size_x = {}
 alphabet_size_y = {}
@@ -260,49 +263,94 @@ SALPHA = {'0':25,'1':50,'2':75,'3':100,'4':200,'5':25,'6':50,'7':25,'8':25,'9':2
 
 def setup_alphabet():
     global alphabet,alphabet_size_x,alphabet_size_y,font25,font50,font75,font100,font200
-    for i in range(1,256) :
-        alphabet[(chr(i),BLANC25,0)] = font25.render(chr(i),0,(255,255,255),(0,0,0))
-        alphabet[(chr(i),BLANC25inv,0)] = font25.render(chr(i),0,(0,0,0),(255,255,255))
-        alphabet[(chr(i),BLANC50,0)] = font50.render(chr(i),0,(255,255,255),(0,0,0))
-        alphabet[(chr(i),BLANC50inv,0)] = font50.render(chr(i),0,(0,0,0),(255,255,255))
-        alphabet[(chr(i),BLANC75,0)] = font75.render(chr(i),0,(255,255,255),(0,0,0))
-        alphabet[(chr(i),BLANC100,0)] = font100.render(chr(i),0,(255,255,255),(0,0,0))
-        alphabet[(chr(i),BLANC200,0)] = font200.render(chr(i),0,(255,255,255),(0,0,0))
-        alphabet[(chr(i),ROUGE25,0)] = font25.render(chr(i),0,(255,0,0),(0,0,0))
-        alphabet[(chr(i),ROUGE25inv,0)] = font25.render(chr(i),0,(255,0,0),(255,255,255))
-        alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,255,0),(0,0,0))
-        alphabet[(chr(i),GRIS75,0)] = font75.render(chr(i),0,(125,125,125),(0,0,0))
-        alphabet[(chr(i),BLANC25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90)
-        alphabet[(chr(i),BLANC25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90)
-        alphabet[(chr(i),BLANC50,90)] = pygame.transform.rotate (font50.render(chr(i),0,(255,255,255),(0,0,0)),90)
-        alphabet[(chr(i),BLANC50inv,90)] = pygame.transform.rotate (font50.render(chr(i),0,(0,0,0),(255,255,255)),90)
-        alphabet[(chr(i),BLANC75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(255,255,255),(0,0,0)),90)
-        alphabet[(chr(i),BLANC100,90)] = pygame.transform.rotate (font100.render(chr(i),0,(255,255,255),(0,0,0)),90)
-        alphabet[(chr(i),BLANC200,90)] = pygame.transform.rotate (font200.render(chr(i),0,(255,255,255),(0,0,0)),90)
-        alphabet[(chr(i),ROUGE25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(0,0,0)),90)
-        alphabet[(chr(i),ROUGE25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(255,255,255)),90)
-        alphabet[(chr(i),VERT25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(0,0,0)),90)
-        alphabet[(chr(i),GRIS75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(0,0,0)),90)
-        alphabet_size_x[(chr(i),25,0)] = alphabet[(chr(i),BLANC25,0)].get_size()[0]
-        alphabet_size_y[(chr(i),25,0)] = 0
-        alphabet_size_x[(chr(i),25,90)] = 0 
-        alphabet_size_y[(chr(i),25,90)] = -alphabet[(chr(i),BLANC25,90)].get_size()[1]
-        alphabet_size_x[(chr(i),50,0)] = alphabet[(chr(i),BLANC50,0)].get_size()[0]
-        alphabet_size_y[(chr(i),50,0)] = 0
-        alphabet_size_x[(chr(i),50,90)] = 0 
-        alphabet_size_y[(chr(i),50,90)] = -alphabet[(chr(i),BLANC50,90)].get_size()[1]
-        alphabet_size_x[(chr(i),75,0)] = alphabet[(chr(i),BLANC75,0)].get_size()[0]
-        alphabet_size_y[(chr(i),75,0)] = 0
-        alphabet_size_x[(chr(i),75,90)] = 0 
-        alphabet_size_y[(chr(i),75,90)] = -alphabet[(chr(i),BLANC75,90)].get_size()[1]
-        alphabet_size_x[(chr(i),100,0)] = alphabet[(chr(i),BLANC100,0)].get_size()[0]
-        alphabet_size_y[(chr(i),100,0)] = 0
-        alphabet_size_x[(chr(i),100,90)] = 0 
-        alphabet_size_y[(chr(i),100,90)] = -alphabet[(chr(i),BLANC100,90)].get_size()[1]
-        alphabet_size_x[(chr(i),200,0)] = alphabet[(chr(i),BLANC200,0)].get_size()[0]
-        alphabet_size_y[(chr(i),200,0)] = 0
-        alphabet_size_x[(chr(i),200,90)] = 0 
-        alphabet_size_y[(chr(i),200,90)] = -alphabet[(chr(i),BLANC200,90)].get_size()[1]
+    if mode_jour :
+        for i in range(1,256) :
+            alphabet[(chr(i),BLANC25,0)] = font25.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),BLANC25inv,0)] = font25.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),BLANC50,0)] = font50.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),BLANC50inv,0)] = font50.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),BLANC75,0)] = font75.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),BLANC100,0)] = font100.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),BLANC200,0)] = font200.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),ROUGE25,0)] = font25.render(chr(i),0,(255,0,0),(255,255,255))
+            alphabet[(chr(i),ROUGE25inv,0)] = font25.render(chr(i),0,(255,0,0),(0,0,0))
+            alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,255,0),(255,255,255))
+            alphabet[(chr(i),GRIS75,0)] = font75.render(chr(i),0,(125,125,125),(255,255,255))
+            alphabet[(chr(i),BLANC25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),BLANC25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),BLANC50,90)] = pygame.transform.rotate (font50.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),BLANC50inv,90)] = pygame.transform.rotate (font50.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),BLANC75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),BLANC100,90)] = pygame.transform.rotate (font100.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),BLANC200,90)] = pygame.transform.rotate (font200.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),ROUGE25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(255,255,255)),90)
+            alphabet[(chr(i),ROUGE25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(0,0,0)),90)
+            alphabet[(chr(i),VERT25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(255,255,255)),90)
+            alphabet[(chr(i),GRIS75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(255,255,255)),90)
+            alphabet_size_x[(chr(i),25,0)] = alphabet[(chr(i),BLANC25,0)].get_size()[0]
+            alphabet_size_y[(chr(i),25,0)] = 0
+            alphabet_size_x[(chr(i),25,90)] = 0 
+            alphabet_size_y[(chr(i),25,90)] = -alphabet[(chr(i),BLANC25,90)].get_size()[1]
+            alphabet_size_x[(chr(i),50,0)] = alphabet[(chr(i),BLANC50,0)].get_size()[0]
+            alphabet_size_y[(chr(i),50,0)] = 0
+            alphabet_size_x[(chr(i),50,90)] = 0 
+            alphabet_size_y[(chr(i),50,90)] = -alphabet[(chr(i),BLANC50,90)].get_size()[1]
+            alphabet_size_x[(chr(i),75,0)] = alphabet[(chr(i),BLANC75,0)].get_size()[0]
+            alphabet_size_y[(chr(i),75,0)] = 0
+            alphabet_size_x[(chr(i),75,90)] = 0 
+            alphabet_size_y[(chr(i),75,90)] = -alphabet[(chr(i),BLANC75,90)].get_size()[1]
+            alphabet_size_x[(chr(i),100,0)] = alphabet[(chr(i),BLANC100,0)].get_size()[0]
+            alphabet_size_y[(chr(i),100,0)] = 0
+            alphabet_size_x[(chr(i),100,90)] = 0 
+            alphabet_size_y[(chr(i),100,90)] = -alphabet[(chr(i),BLANC100,90)].get_size()[1]
+            alphabet_size_x[(chr(i),200,0)] = alphabet[(chr(i),BLANC200,0)].get_size()[0]
+            alphabet_size_y[(chr(i),200,0)] = 0
+            alphabet_size_x[(chr(i),200,90)] = 0 
+            alphabet_size_y[(chr(i),200,90)] = -alphabet[(chr(i),BLANC200,90)].get_size()[1]
+    else :
+        for i in range(1,256) :
+            alphabet[(chr(i),BLANC25,0)] = font25.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),BLANC25inv,0)] = font25.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),BLANC50,0)] = font50.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),BLANC50inv,0)] = font50.render(chr(i),0,(0,0,0),(255,255,255))
+            alphabet[(chr(i),BLANC75,0)] = font75.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),BLANC100,0)] = font100.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),BLANC200,0)] = font200.render(chr(i),0,(255,255,255),(0,0,0))
+            alphabet[(chr(i),ROUGE25,0)] = font25.render(chr(i),0,(255,0,0),(0,0,0))
+            alphabet[(chr(i),ROUGE25inv,0)] = font25.render(chr(i),0,(255,0,0),(255,255,255))
+            alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,255,0),(0,0,0))
+            alphabet[(chr(i),GRIS75,0)] = font75.render(chr(i),0,(125,125,125),(0,0,0))
+            alphabet[(chr(i),BLANC25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),BLANC25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),BLANC50,90)] = pygame.transform.rotate (font50.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),BLANC50inv,90)] = pygame.transform.rotate (font50.render(chr(i),0,(0,0,0),(255,255,255)),90)
+            alphabet[(chr(i),BLANC75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),BLANC100,90)] = pygame.transform.rotate (font100.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),BLANC200,90)] = pygame.transform.rotate (font200.render(chr(i),0,(255,255,255),(0,0,0)),90)
+            alphabet[(chr(i),ROUGE25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(0,0,0)),90)
+            alphabet[(chr(i),ROUGE25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(255,255,255)),90)
+            alphabet[(chr(i),VERT25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(0,0,0)),90)
+            alphabet[(chr(i),GRIS75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(0,0,0)),90)
+            alphabet_size_x[(chr(i),25,0)] = alphabet[(chr(i),BLANC25,0)].get_size()[0]
+            alphabet_size_y[(chr(i),25,0)] = 0
+            alphabet_size_x[(chr(i),25,90)] = 0 
+            alphabet_size_y[(chr(i),25,90)] = -alphabet[(chr(i),BLANC25,90)].get_size()[1]
+            alphabet_size_x[(chr(i),50,0)] = alphabet[(chr(i),BLANC50,0)].get_size()[0]
+            alphabet_size_y[(chr(i),50,0)] = 0
+            alphabet_size_x[(chr(i),50,90)] = 0 
+            alphabet_size_y[(chr(i),50,90)] = -alphabet[(chr(i),BLANC50,90)].get_size()[1]
+            alphabet_size_x[(chr(i),75,0)] = alphabet[(chr(i),BLANC75,0)].get_size()[0]
+            alphabet_size_y[(chr(i),75,0)] = 0
+            alphabet_size_x[(chr(i),75,90)] = 0 
+            alphabet_size_y[(chr(i),75,90)] = -alphabet[(chr(i),BLANC75,90)].get_size()[1]
+            alphabet_size_x[(chr(i),100,0)] = alphabet[(chr(i),BLANC100,0)].get_size()[0]
+            alphabet_size_y[(chr(i),100,0)] = 0
+            alphabet_size_x[(chr(i),100,90)] = 0 
+            alphabet_size_y[(chr(i),100,90)] = -alphabet[(chr(i),BLANC100,90)].get_size()[1]
+            alphabet_size_x[(chr(i),200,0)] = alphabet[(chr(i),BLANC200,0)].get_size()[0]
+            alphabet_size_y[(chr(i),200,0)] = 0
+            alphabet_size_x[(chr(i),200,90)] = 0 
+            alphabet_size_y[(chr(i),200,90)] = -alphabet[(chr(i),BLANC200,90)].get_size()[1]
 
 def blit_text (screen,st,coords, col=BLANC25,angle=0):
     if (not angle in (0,90)) : angle = 0
@@ -466,7 +514,10 @@ class TitleScene(SceneBase):
             self.SwitchToScene(OdometerScene())
 
     def Render(self, screen):
-        screen.fill((0,0,0))
+        if mode_jour :
+            screen.fill((255,255,255))
+        else :
+            screen.fill((0,0,0))
         pygame.display.update()
 
 
@@ -530,7 +581,10 @@ class SelectionScene(SceneBase):
         self.column = 1
         self.j = time.time()
 
-        pygame.display.get_surface().fill((0,0,0))
+        if mode_jour :
+            pygame.display.get_surface().fill((255,255,255))
+        else :
+            pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
 
 
@@ -648,7 +702,10 @@ class NoneScene(SceneBase):
         labels = {}
         old_labels = {}
 
-        pygame.display.get_surface().fill((0,0,0))
+        if mode_jour :
+            pygame.display.get_surface().fill((255,255,255))
+        else :
+            pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
 
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
@@ -726,7 +783,10 @@ class ConfigScene(SceneBase):
         self.paysage = maconfig['Parametres']['orientation'] == 'Paysage'
         self.dim = int(maconfig['Parametres']['luminosite'])
 
-        pygame.display.get_surface().fill((0,0,0))
+        if mode_jour :
+            pygame.display.get_surface().fill((255,255,255))
+        else:
+            pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
         
 
@@ -953,7 +1013,10 @@ class ConversionScene(SceneBase):
 
     def Render(self, screen):
         global labels,old_labels,sprites,old_sprites,maconfig
-        screen.fill((0,0,0))
+        if mode_jour :
+            screen.fill((255,255,255))
+        else:
+            screen.fill((0,0,0))
         pygame.display.update()
         labels['text1'] = ('Preparation du roadbook... Patience...',labels['text1'][1],labels['text1'][2],labels['text1'][3])
         filedir = os.path.splitext(self.filename)[0]
@@ -1144,7 +1207,10 @@ class RoadbookScene(SceneBase):
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
-        pygame.display.get_surface().fill((0,0,0))
+        if mode_jour :
+            pygame.display.get_surface().fill((255,255,255))
+        else :
+            pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
 
         j = time.time()
@@ -1304,7 +1370,10 @@ class OdometerScene(SceneBase):
         self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/totalisateur.log',maxBytes=8000,backupCount=20)
         self.totalisateur_log.addHandler(self.totalisateur_handler)
 
-        pygame.display.get_surface().fill((0,0,0))
+        if mode_jour:
+            pygame.display.get_surface().fill((255,255,255))
+        else:
+            pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
 
         j = time.time()
