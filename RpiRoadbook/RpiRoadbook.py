@@ -54,6 +54,7 @@ import subprocess
 
 import RPi.GPIO as GPIO
 
+totalisateur = 0
 distance = 0
 distancetmp = 0
 speed = 0.00
@@ -70,7 +71,7 @@ cpu = -1
 filedir = ''
 fichiers = []
 
-rb_ration = 1
+rb_ratio = 1
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
@@ -110,7 +111,8 @@ pulse.start(100.0)
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
-    global distance,distancetmp
+    global totalisateur,distance,distancetmp
+    totalisateur += roue
     distance += roue
     distancetmp += roue
 
@@ -1071,7 +1073,7 @@ class ConversionScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global distance,cmavant,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
+        global distance,cmavant,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         labels = {}
@@ -1115,6 +1117,18 @@ class RoadbookScene(SceneBase):
         self.odometre_log.setLevel(logging.INFO)
         self.odometre_handler = RotatingFileHandler('/mnt/piusb/odometre.log',maxBytes=8000,backupCount=20)
         self.odometre_log.addHandler(self.odometre_handler)
+
+        try :
+            with open('/mnt/piusb/totalisateur.log', "r") as f2:
+                last_line = f2.readlines()[-1]
+                totalisateur = int(last_line)
+        except :
+            totalisateur = 0
+
+        self.totalisateur_log = logging.getLogger('Rotating Totalisateur Log')
+        self.totalisateur_log.setLevel(logging.INFO)
+        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/totalisateur.log',maxBytes=8000,backupCount=20)
+        self.totalisateur_log.addHandler(self.totalisateur_handler)
 
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
@@ -1172,7 +1186,7 @@ class RoadbookScene(SceneBase):
                     cmavant = distance 
                     vmoy = 0
                     speed = 0
-                    tpsinit = time.time()/1000
+                    tpsinit = time.time()
                     vmax = 0;
                 elif event.key == BOUTON_OK:
                     self.SwitchToScene(TitleScene())
@@ -1194,7 +1208,7 @@ class RoadbookScene(SceneBase):
                 maconfig.write(configfile)
             except: pass
 
-        if distance < 20000 or tps < 2 : 
+        if distance < 200000 or tps < 2 : 
             vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 20 premiers metres ou les 2 premieres secondes
         else:
             vmoy = ((distance/(time.time()-tpsinit))*3.6/1000);
@@ -1209,6 +1223,7 @@ class RoadbookScene(SceneBase):
         if speed > vmax : vmax = speed
 
         if distancetmp > 100000 : # On sauvegarde l'odometre tous les 100 metres
+            self.totalisateur_log.info('{}'.format(totalisateur))
             self.odometre_log.info('{}'.format(distance))
             distancetmp = 0
 
@@ -1238,7 +1253,7 @@ class RoadbookScene(SceneBase):
 
 class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
-        global distance,cmavant,vmoy,vmax,speed,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
+        global distance,cmavant,totalisateur,vmoy,vmax,speed,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         labels = {}
@@ -1255,7 +1270,7 @@ class OdometerScene(SceneBase):
 
         # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
         labels['heure'] = ('00:00:00',(int(maconfig[self.orientation]['odo_tps_x']),int(maconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
-        labels['distance'] = ('{:6.2f}'.format(0.0),(int(maconfig[self.orientation]['odo_km_x']),int(maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
+        labels['totalisateur'] = ('{:6.2f}'.format(0.0),(int(maconfig[self.orientation]['odo_km_x']),int(maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
         labels['t_vitesse'] = ('Vitesse',(int(maconfig[self.orientation]['odo_t_vi_x']),int(maconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
         labels['vitesse'] = ('{:3.0f} '.format(100.0),(int(maconfig[self.orientation]['odo_vi_x']),int(maconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
         labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(maconfig[self.orientation]['odo_temp_x']),int(maconfig[self.orientation]['odo_temp_y'])),ROUGE25,angle)
@@ -1277,6 +1292,18 @@ class OdometerScene(SceneBase):
         self.odometre_handler = RotatingFileHandler('/mnt/piusb/odometre.log',maxBytes=8000,backupCount=20)
         self.odometre_log.addHandler(self.odometre_handler)
 
+        try :
+            with open('/mnt/piusb/totalisateur.log', "r") as f2:
+                last_line = f2.readlines()[-1]
+                totalisateur = int(last_line)
+        except :
+            totalisateur = 0
+
+        self.totalisateur_log = logging.getLogger('Rotating Totalisateur Log')
+        self.totalisateur_log.setLevel(logging.INFO)
+        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/totalisateur.log',maxBytes=8000,backupCount=20)
+        self.totalisateur_log.addHandler(self.totalisateur_handler)
+
         pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
 
@@ -1295,7 +1322,7 @@ class OdometerScene(SceneBase):
                     cmavant = distance
                     vmoy = 0
                     speed = 0
-                    tpsinit = time.time()/1000
+                    tpsinit = time.time()
                     vmax = 0;
 
             elif event.type == GMASSSTORAGE:
@@ -1312,17 +1339,18 @@ class OdometerScene(SceneBase):
         k = time.time() - j
         if ( k >= 2) : # Vitesse moyenne sur 2 secondes
             speed = (distance*3.6-cmavant*3.6); 
-            speed = 1.0*speed/k/2000; 
+            speed = 1.0*speed/k/1000; 
             j = time.time()
             cmavant = distance
 
         if distancetmp > 100000 : #On sauvegarde l'odometre tous les 100 metres
+            self.totalisateur_log.info('{}'.format(totalisateur))
             self.odometre_log.info('{}'.format(distance))
             distancetmp = 0
 
         if self.next == self :
             labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-            labels['distance'] = ('{:6.2f}'.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3])
+            labels['totalisateur'] = ('{:6.2f}'.format(totalisateur/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
             labels['vitesse'] = ('{:3.0f}    '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
             labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
             labels['cpu'] = ('{:4.1f}%'.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
