@@ -414,9 +414,9 @@ def update_sprites(screen):
 maconfig = configparser.ConfigParser()
 def check_configfile():
     global maconfig
-    candidates = ['/home/rpi/RpiRoadbook/gui.cfg','/home/rpi/RpiRoadbook/default.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/RpiRoadbook.cfg']
+    candidates = ['/home/rpi/RpiRoadbook/gui.cfg','/home/rpi/RpiRoadbook/default.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
     maconfig.read(candidates)
-    with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+    with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
         maconfig.write(configfile)
 
 #*******************************************************************************************************#
@@ -637,7 +637,7 @@ class SelectionScene(SceneBase):
                                 self.filename = self.filenames[self.selection]
                                 maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
                                 maconfig['Roadbooks']['case'] = '0'
-                                with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                                with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                     maconfig.write(configfile)
                             self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
                             self.SwitchToScene(ConversionScene(self.filename))
@@ -697,7 +697,7 @@ class SelectionScene(SceneBase):
                 self.k = time.time();
                 if (self.k-self.j>=self.countdown) :
                     maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                    with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                    with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                         maconfig.write(configfile)
                     self.SwitchToScene(ConversionScene(self.filename))
 
@@ -889,14 +889,14 @@ class ConfigScene(SceneBase):
                     if self.index == 7:
                         maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
                         try:
-                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                 maconfig.write(configfile)
                         except: 
                             pass
                     elif self.index == 8:
                         maconfig['Parametres']['roue'] = str(self.d_roue)
                         try:
-                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                 maconfig.write(configfile)
                         except: 
                             pass
@@ -904,14 +904,14 @@ class ConfigScene(SceneBase):
                         maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
                         try:
-                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                 maconfig.write(configfile)
                         except: 
                             pass       
                     elif self.index == 10 :
                         maconfig['Parametres']['luminosite'] = str(self.dim)
                         try:
-                            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                 maconfig.write(configfile)
                         except: 
                             pass
@@ -958,7 +958,7 @@ class ConfigScene(SceneBase):
         k = time.time()
         if k-self.t >= 5:
             try:
-                with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                     maconfig.write(configfile)
             except: 
                 pass
@@ -992,12 +992,12 @@ class G_MassStorageScene(SceneBase):
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
                 elif event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
-                    os.system('modprobe -r g_mass_storage')
-                    time.sleep(1)
-                    os.system('modprobe g_mass_storage file=/home/rpi/piusb.bin stall=0 ro=0 removable=1')
-                    time.sleep(1)
-                    os.system('mount -t vfat /home/rpi/piusb.bin /mnt/piusb')
-                    time.sleep(1)
+                    #os.system('modprobe -r g_mass_storage')
+                    #time.sleep(1)
+                    #os.system('modprobe g_mass_storage file=/home/rpi/piusb.bin stall=0 ro=0 removable=1')
+                    #time.sleep(1)
+                    #os.system('mount -t vfat /home/rpi/piusb.bin /mnt/piusb')
+                    #time.sleep(1)
                     self.SwitchToScene(TitleScene())
         
 
@@ -1095,7 +1095,7 @@ class ConversionScene(SceneBase):
                         update_labels(screen)
             # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
             maconfig['Roadbooks']['case'] = str(total-2)
-            with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
               maconfig.write(configfile)
         else:
             #print('On fait une verification de coherence')
@@ -1152,7 +1152,7 @@ class ConversionScene(SceneBase):
             if int(maconfig['Roadbooks']['case']) < 0 or int(maconfig['Roadbooks']['case']) > total -2 :
               # Pb avec la position sauvegardée. On se positionne au début du rb
               maconfig['Roadbooks']['case'] = '0'
-              with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+              with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                 maconfig.write(configfile)
 
         self.SwitchToScene(RoadbookScene(self.filename))
@@ -1196,7 +1196,7 @@ class RoadbookScene(SceneBase):
         from logging.handlers import RotatingFileHandler
 
         try :
-            with open('/mnt/piusb/odometre.log', "r") as f1:
+            with open('/mnt/piusb/.log/odometre.log', "r") as f1:
                 last_line = f1.readlines()[-1]
                 distance = int(last_line)
         except :
@@ -1205,11 +1205,11 @@ class RoadbookScene(SceneBase):
 
         self.odometre_log = logging.getLogger('Rotating Odometer Log')
         self.odometre_log.setLevel(logging.INFO)
-        self.odometre_handler = RotatingFileHandler('/mnt/piusb/odometre.log',maxBytes=8000,backupCount=20)
+        self.odometre_handler = RotatingFileHandler('/mnt/piusb/.log/odometre.log',maxBytes=8000,backupCount=20)
         self.odometre_log.addHandler(self.odometre_handler)
 
         try :
-            with open('/mnt/piusb/totalisateur.log', "r") as f2:
+            with open('/mnt/piusb/.log/totalisateur.log', "r") as f2:
                 last_line = f2.readlines()[-1]
                 totalisateur = int(last_line)
         except :
@@ -1217,7 +1217,7 @@ class RoadbookScene(SceneBase):
 
         self.totalisateur_log = logging.getLogger('Rotating Totalisateur Log')
         self.totalisateur_log.setLevel(logging.INFO)
-        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/totalisateur.log',maxBytes=8000,backupCount=20)
+        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/.log/totalisateur.log',maxBytes=8000,backupCount=20)
         self.totalisateur_log.addHandler(self.totalisateur_handler)
 
         #Chargement des images
@@ -1300,7 +1300,7 @@ class RoadbookScene(SceneBase):
             # On sauvegarde la nouvelle position
             maconfig['Roadbooks']['case'] = str(self.case)
             try:
-              with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+              with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                 maconfig.write(configfile)
             except: pass
 
@@ -1366,7 +1366,7 @@ class OdometerScene(SceneBase):
 
         # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
         labels['heure'] = ('00:00:00',(int(maconfig[self.orientation]['odo_tps_x']),int(maconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
-        labels['totalisateur'] = ('{:6.2f}'.format(0.0),(int(maconfig[self.orientation]['odo_km_x']),int(maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
+        labels['totalisateur'] = ('{:6.2f} '.format(0.0),(int(maconfig[self.orientation]['odo_km_x']),int(maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
         labels['t_vitesse'] = ('Vitesse',(int(maconfig[self.orientation]['odo_t_vi_x']),int(maconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
         labels['vitesse'] = ('{:3.0f} '.format(100.0),(int(maconfig[self.orientation]['odo_vi_x']),int(maconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
         labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(maconfig[self.orientation]['odo_temp_x']),int(maconfig[self.orientation]['odo_temp_y'])),ROUGE25,angle)
@@ -1376,7 +1376,7 @@ class OdometerScene(SceneBase):
         from logging.handlers import RotatingFileHandler
 
         try :
-            with open('/mnt/piusb/odometre.log', "r") as f1:
+            with open('/mnt/piusb/.log/odometre.log', "r") as f1:
                 last_line = f1.readlines()[-1]
                 distance = int(last_line)
         except :
@@ -1385,11 +1385,11 @@ class OdometerScene(SceneBase):
         cmavant = distance
         self.odometre_log = logging.getLogger('Rotating Odometer Log')
         self.odometre_log.setLevel(logging.INFO)
-        self.odometre_handler = RotatingFileHandler('/mnt/piusb/odometre.log',maxBytes=8000,backupCount=20)
+        self.odometre_handler = RotatingFileHandler('/mnt/piusb/.log/odometre.log',maxBytes=8000,backupCount=20)
         self.odometre_log.addHandler(self.odometre_handler)
 
         try :
-            with open('/mnt/piusb/totalisateur.log', "r") as f2:
+            with open('/mnt/piusb/.log/totalisateur.log', "r") as f2:
                 last_line = f2.readlines()[-1]
                 totalisateur = int(last_line)
         except :
@@ -1397,7 +1397,7 @@ class OdometerScene(SceneBase):
 
         self.totalisateur_log = logging.getLogger('Rotating Totalisateur Log')
         self.totalisateur_log.setLevel(logging.INFO)
-        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/totalisateur.log',maxBytes=8000,backupCount=20)
+        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/.log/totalisateur.log',maxBytes=8000,backupCount=20)
         self.totalisateur_log.addHandler(self.totalisateur_handler)
 
         if mode_jour:
