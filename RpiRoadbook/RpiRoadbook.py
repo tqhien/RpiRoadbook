@@ -107,7 +107,8 @@ GPIO.setup(GPIO_DIM, GPIO.OUT)
 pulse = GPIO.PWM(GPIO_DIM,800) # fréquence de 800Hz
 pulse.start(100.0)
 
-gotoConfig = GPIO.input(GPIO_OK)
+# Test bouton au démarrage pour menu de configuration
+gotoConfig = not GPIO.input(GPIO_OK)
 
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
@@ -119,54 +120,64 @@ def input_roue_callback(channel):
     distancetmp += roue
 
 def input_left_callback(channel):
+    GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    while not GPIO.input(channel) :# on attend le retour du bouton
+        time.sleep(.5) 
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
-        bouton_time = time.time() - b4_time
-    if bouton_time < 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
-    else:
+    if bouton_time >= 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=300)
 
 def input_right_callback(channel):
+    GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    while not GPIO.input(channel) :# on attend le retour du bouton
+        time.sleep(.5) 
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
-        bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=300)
 
 def input_ok_callback(channel):
+    GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    while not GPIO.input(channel) :# on attend le retour du bouton
+        time.sleep(.5) 
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
-        bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
 
 def input_up_callback(channel):
+    GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    while not GPIO.input(channel) :# on attend le retour du bouton
+        time.sleep(.5) 
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
-        bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=300)
 
 def input_down_callback(channel):
+    GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    while not GPIO.input(channel) :# on attend le retour du bouton
+        time.sleep(.5) 
     bouton_time = time.time() - b4_time
-    while GPIO.input(channel) == 0 and bouton_time < 2 : # on attend le retour du bouton ou un appui de plus de 2 secondes 
-        bouton_time = time.time() - b4_time
     if bouton_time < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
@@ -276,7 +287,7 @@ def setup_alphabet():
             alphabet[(chr(i),BLANC200,0)] = font200.render(chr(i),0,(0,0,0),(255,255,255))
             alphabet[(chr(i),ROUGE25,0)] = font25.render(chr(i),0,(255,0,0),(255,255,255))
             alphabet[(chr(i),ROUGE25inv,0)] = font25.render(chr(i),0,(255,0,0),(0,0,0))
-            alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,255,0),(255,255,255))
+            alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,0,255),(255,255,255))
             alphabet[(chr(i),GRIS75,0)] = font75.render(chr(i),0,(125,125,125),(255,255,255))
             alphabet[(chr(i),BLANC25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90)
             alphabet[(chr(i),BLANC25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90)
@@ -511,6 +522,7 @@ class TitleScene(SceneBase):
     def Update(self):
         global gotoConfig
         if gotoConfig :
+            gotoConfig = False
             self.SwitchToScene(ConfigScene())
         else :
             self.rallye = maconfig['Parametres']['mode'] == 'Rallye'
@@ -548,9 +560,6 @@ class SelectionScene(SceneBase):
         sprites = {}
         old_sprites = {}
 
-        self.menu_config = pygame.image.load('./images/icone_config.jpg')
-        self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
-        sprites['config'] = (self.menu_config,(int(maconfig[self.orientation]['select_config_x']),int(maconfig[self.orientation]['select_config_y'])))
         self.gotoConfig = False
 
         if self.orientation == 'Paysage' :
@@ -583,14 +592,18 @@ class SelectionScene(SceneBase):
             self.filename = ''
         
         self.column = 1
-        self.j = time.time()
 
         if mode_jour :
+            self.menu_config_white = pygame.image.load('./images/icone_config.jpg')
+            self.menu_config = pygame.image.load('./images/icone_config_white.jpg')
             pygame.display.get_surface().fill((255,255,255))
         else :
+            self.menu_config = pygame.image.load('./images/icone_config.jpg')
+            self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
             pygame.display.get_surface().fill((0,0,0))
+        sprites['config'] = (self.menu_config,(int(maconfig[self.orientation]['select_config_x']),int(maconfig[self.orientation]['select_config_y'])))
         pygame.display.update()
-
+        self.j = time.time()
 
 
     def ProcessInput(self, events, pressed_keys):
@@ -947,8 +960,8 @@ class ConfigScene(SceneBase):
             try:
                 with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
                     maconfig.write(configfile)
-                except: 
-                    pass
+            except: 
+                pass
             self.SwitchToScene(TitleScene())
 
 
@@ -1261,7 +1274,7 @@ class RoadbookScene(SceneBase):
                     self.case += 1
                 elif event.key == BOUTON_PGDOWN:
                     self.case = self.nb_cases - self.ncases
-                elif event.key == BOUTON_OK:
+                elif event.key == BOUTON_BACKSPACE:
                     distance = 0.0
                     cmavant = distance 
                     vmoy = 0
@@ -1271,8 +1284,8 @@ class RoadbookScene(SceneBase):
                     self.totalisateur_log.info('{}'.format(totalisateur))
                     self.odometre_log.info('{}'.format(distance))
                     distancetmp = 0
-                elif event.key == BOUTON_BACKSPACE:
-                    self.SwitchToScene(TitleScene())
+                #elif event.key == BOUTON_BACKSPACE:
+                    #self.SwitchToScene(TitleScene())
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - self.ncases :
@@ -1311,7 +1324,7 @@ class RoadbookScene(SceneBase):
             distancetmp = 0
 
         labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-        labels['distance'] = ('{:6.2f}'.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3])
+        labels['distance'] = ('{:6.2f} '.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3])
         labels['vitesse'] = ('{:3.0f}  '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
         labels['vmoy'] = ('{:3.0f}  '.format(vmoy), labels['vmoy'][1],labels['vmoy'][2],labels['vmoy'][3])
         labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
@@ -1438,7 +1451,7 @@ class OdometerScene(SceneBase):
 
         if self.next == self :
             labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-            labels['totalisateur'] = ('{:6.2f}'.format(totalisateur/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
+            labels['totalisateur'] = ('{:6.2f} '.format(totalisateur/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
             labels['vitesse'] = ('{:3.0f}    '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
             labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
             labels['cpu'] = ('{:4.1f}% '.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
