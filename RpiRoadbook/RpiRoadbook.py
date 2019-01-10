@@ -107,6 +107,8 @@ GPIO.setup(GPIO_DIM, GPIO.OUT)
 pulse = GPIO.PWM(GPIO_DIM,800) # fréquence de 800Hz
 pulse.start(100.0)
 
+gotoConfig = GPIO.input(GPIO_OK)
+
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
@@ -507,11 +509,15 @@ class TitleScene(SceneBase):
         pass
 
     def Update(self):
-        self.rallye = maconfig['Parametres']['mode'] == 'Rallye'
-        if self.rallye :
-            self.SwitchToScene(SelectionScene())
+        global gotoConfig
+        if gotoConfig :
+            self.SwitchToScene(ConfigScene())
         else :
-            self.SwitchToScene(OdometerScene())
+            self.rallye = maconfig['Parametres']['mode'] == 'Rallye'
+            if self.rallye :
+                self.SwitchToScene(SelectionScene())
+            else :
+                self.SwitchToScene(OdometerScene())
 
     def Render(self, screen):
         if mode_jour :
@@ -519,8 +525,6 @@ class TitleScene(SceneBase):
         else :
             screen.fill((0,0,0))
         pygame.display.update()
-
-
 
 
 #*******************************************************************************************************#
@@ -788,6 +792,7 @@ class ConfigScene(SceneBase):
         else:
             pygame.display.get_surface().fill((0,0,0))
         pygame.display.update()
+        self.t = time.time()
         
 
     def update_time(self):
@@ -819,6 +824,7 @@ class ConfigScene(SceneBase):
             if event.type == pygame.QUIT:
                 self.Terminate()
             if event.type == pygame.KEYDOWN:
+                self.t = time.time()
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
                 elif event.key == BOUTON_RIGHT:
@@ -933,9 +939,17 @@ class ConfigScene(SceneBase):
         sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
+        global maconfig
         update_labels(screen)
         update_sprites(screen)
-        
+        k = time.time()
+        if k-self.t >= 5:
+            try:
+                with open('/mnt/piusb/RpiRoadbook.cfg', 'w') as configfile:
+                    maconfig.write(configfile)
+                except: 
+                    pass
+            self.SwitchToScene(TitleScene())
 
 
 #*******************************************************************************************************#
@@ -1247,14 +1261,17 @@ class RoadbookScene(SceneBase):
                     self.case += 1
                 elif event.key == BOUTON_PGDOWN:
                     self.case = self.nb_cases - self.ncases
-                elif event.key == BOUTON_BACKSPACE:
+                elif event.key == BOUTON_OK:
                     distance = 0.0
                     cmavant = distance 
                     vmoy = 0
                     speed = 0
                     tpsinit = time.time()
                     vmax = 0;
-                elif event.key == BOUTON_OK:
+                    self.totalisateur_log.info('{}'.format(totalisateur))
+                    self.odometre_log.info('{}'.format(distance))
+                    distancetmp = 0
+                elif event.key == BOUTON_BACKSPACE:
                     self.SwitchToScene(TitleScene())
 
         # Action sur le dérouleur
@@ -1384,16 +1401,18 @@ class OdometerScene(SceneBase):
             if event.type == pygame.QUIT:
                 self.Terminate()
             elif event.type == pygame.KEYDOWN :
-                if event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
-                    self.SwitchToScene(ConfigScene())
-                elif event.key == BOUTON_BACKSPACE:
+                # Seule action possible : reinitialisation du trip partiel
+                if event.key == BOUTON_BACKSPACE:
                     distance = 0.0
                     cmavant = distance
                     vmoy = 0
                     speed = 0
                     tpsinit = time.time()
                     vmax = 0;
-
+                    # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
+                    self.totalisateur_log.info('{}'.format(totalisateur))
+                    self.odometre_log.info('{}'.format(distance))
+                    distancetmp = 0
             elif event.type == GMASSSTORAGE:
                 self.SwitchToScene(G_MassStorageScene())
 
@@ -1422,7 +1441,7 @@ class OdometerScene(SceneBase):
             labels['totalisateur'] = ('{:6.2f}'.format(totalisateur/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
             labels['vitesse'] = ('{:3.0f}    '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
             labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
-            labels['cpu'] = ('{:4.1f}%'.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
+            labels['cpu'] = ('{:4.1f}% '.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
 
     def Render(self, screen):
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
