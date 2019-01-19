@@ -611,12 +611,12 @@ class SelectionScene(SceneBase):
         self.column = 1
 
         if mode_jour :
-            self.menu_edit_white = pygame.image.load('./images/icone_edit.jpg')
+            self.menu_edit_white = pygame.image.load('./images/icone_edit_white_selected.jpg')
             self.menu_edit = pygame.image.load('./images/icone_edit_white.jpg')
             pygame.display.get_surface().fill((255,255,255))
         else :
             self.menu_edit = pygame.image.load('./images/icone_edit.jpg')
-            self.menu_edit_white = pygame.image.load('./images/icone_edit_white.jpg')
+            self.menu_edit_white = pygame.image.load('./images/icone_edit_selected.jpg')
             pygame.display.get_surface().fill((0,0,0))
         sprites['edit'] = (self.menu_edit,(int(maconfig[self.orientation]['select_edit_x']),int(maconfig[self.orientation]['select_edit_y'])))
         pygame.display.update()
@@ -921,7 +921,7 @@ class ModeScene(SceneBase):
         else :
             labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
 
-        labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 3 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
+        labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 4 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
         sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 5 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
