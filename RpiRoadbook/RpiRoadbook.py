@@ -54,6 +54,13 @@ import subprocess
 
 import RPi.GPIO as GPIO
 
+import sys
+os.environ["SDL_FBDEV"] = "/dev/fb0"
+os.environ["SDL_MOUSEDRV"] = "TSLIB"
+os.environ["SDL_MOUSEDEV"] = "/dev/input/event0"
+
+fps = 5
+
 totalisateur = 0
 distance = 0
 distancetmp = 0
@@ -74,6 +81,7 @@ filedir = ''
 fichiers = []
 
 rb_ratio = 1
+rb_ration_annot = 1
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
@@ -233,7 +241,13 @@ def get_image(key,angle=0):
     global filedir,fichiers,image_cache
     # Chargement des images uniquement si pas encore en cache
     if not (key,angle) in image_cache:
-        image_cache[(key,angle)] = pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[key])),angle,rb_ratio)
+        img = pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[key]))
+        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) : 
+            annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
+            annot = pygame.transform.rotozoom(annot,0,rb_ratio_annot)
+            annot.set_colorkey((255,255,255))
+            img.blit(annot,(0,0))
+        image_cache[(key,angle)] = pygame.transform.rotozoom (img,angle,rb_ratio)
     return image_cache[(key,angle)]
 
 
@@ -450,8 +464,8 @@ class SceneBase:
 #*******************************************************************************************************#
 #--------------------------------------- La boucle principale de l'appli -------------------------------#
 #*******************************************************************************************************#
-def run_RpiRoadbook(width, height, fps, starting_scene):
-    global font25,font50,font75,font100,font200
+def run_RpiRoadbook(width, height,  starting_scene):
+    global font25,font50,font75,font100,font200,fps
     pygame.display.init() 
     
     pygame.mouse.set_visible(False)
@@ -554,6 +568,7 @@ class SelectionScene(SceneBase):
 
         #pygame.font.init()
         
+        
         self.orientation = maconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
@@ -563,7 +578,7 @@ class SelectionScene(SceneBase):
         sprites = {}
         old_sprites = {}
 
-        self.gotoConfig = False
+        self.gotoEdit = False
 
         if self.orientation == 'Paysage' :
             labels['infos'] = ('Demarrage automatique dans 5s...',(int(maconfig[self.orientation]['select_text_x']),int(maconfig[self.orientation]['select_text_y'])),VERT25,angle)
@@ -596,14 +611,14 @@ class SelectionScene(SceneBase):
         self.column = 1
 
         if mode_jour :
-            self.menu_config_white = pygame.image.load('./images/icone_config.jpg')
-            self.menu_config = pygame.image.load('./images/icone_config_white.jpg')
+            self.menu_edit_white = pygame.image.load('./images/icone_edit.jpg')
+            self.menu_edit = pygame.image.load('./images/icone_edit_white.jpg')
             pygame.display.get_surface().fill((255,255,255))
         else :
-            self.menu_config = pygame.image.load('./images/icone_config.jpg')
-            self.menu_config_white = pygame.image.load('./images/icone_config_white.jpg')
+            self.menu_edit = pygame.image.load('./images/icone_edit.jpg')
+            self.menu_edit_white = pygame.image.load('./images/icone_edit_white.jpg')
             pygame.display.get_surface().fill((0,0,0))
-        sprites['config'] = (self.menu_config,(int(maconfig[self.orientation]['select_config_x']),int(maconfig[self.orientation]['select_config_y'])))
+        sprites['edit'] = (self.menu_edit,(int(maconfig[self.orientation]['select_edit_x']),int(maconfig[self.orientation]['select_edit_y'])))
         pygame.display.update()
         self.j = time.time()
 
@@ -644,15 +659,16 @@ class SelectionScene(SceneBase):
                             self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
                             self.SwitchToScene(ConversionScene(self.filename))
                         else :
-                            self.gotoConfig = True
+                            self.filename = self.filenames[self.selection]
+                            self.gotoEdit = True
             elif event.type == GMASSSTORAGE :
                 self.iscountdown = False
                 self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
         global sprites,old_sprites,labels,old_labels,angle, maconfig
-        if self.gotoConfig :
-            self.SwitchToScene(ConfigScene())
+        if self.gotoEdit :
+            self.SwitchToScene(EditScene(self.filename))
         else :
             # Mise à jour de la liste de choix
             if self.fenetre > 0 :
@@ -666,13 +682,13 @@ class SelectionScene(SceneBase):
                     p = 'liste{}'.format(i-self.fenetre)
                     if self.filenames[i] == self.saved :
                         text = self.filenames[i]+' (En cours)'
-                        if i == self.selection and self.column==1 :
+                        if i == self.selection :
                             couleur = ROUGE25inv
                         else :
                             couleur = ROUGE25
                     else :
                         text = self.filenames[i]
-                        if i == self.selection and self.column==1 :
+                        if i == self.selection :
                             couleur = BLANC25inv
                         else :
                             couleur = BLANC25
@@ -683,7 +699,7 @@ class SelectionScene(SceneBase):
 
             self.k = time.time()
             if self.next == self:
-                sprites['config'] = (self.menu_config_white,sprites['config'][1]) if self.column == 2 else (self.menu_config,sprites['config'][1])
+                sprites['edit'] = (self.menu_edit_white,sprites['edit'][1]) if self.column == 2 else (self.menu_edit,sprites['edit'][1])
             if self.iscountdown :
                 if self.k-self.j< self.countdown :
                     #print(labels['infos'])
@@ -1160,11 +1176,12 @@ class G_MassStorageScene(SceneBase):
 #------------------------- La partie Conversion en Image d'un fichier ----------------------------------#
 #*******************************************************************************************************#
 class ConversionScene(SceneBase):
-    def __init__(self, fname = ''):
+    def __init__(self, fname = '',gotoE = False):
         global angle, labels,old_labels,sprites,old_sprites
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
+        self.gotoEdit = gotoE
         self.orientation = maconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
@@ -1301,7 +1318,163 @@ class ConversionScene(SceneBase):
               with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                 maconfig.write(configfile)
 
-        self.SwitchToScene(RoadbookScene(self.filename))
+        if self.gotoEdit:
+            self.SwitchToScene(EditScene(self.filename))
+        else :
+            self.SwitchToScene(RoadbookScene(self.filename))
+
+#*******************************************************************************************************#
+#---------------------------------------- La partie Annotations de Roadbooks  --------------------------#
+#*******************************************************************************************************#
+class EditScene(SceneBase):
+    def __init__(self, fname = ''):
+        global labels,old_labels,sprites,old_sprites,filedir,fichiers,rb_ratio,angle
+        SceneBase.__init__(self)
+        self.next = self
+        self.filename = fname
+        filedir = os.path.splitext(self.filename)[0]
+        if os.path.isdir('/mnt/piusb/Annotations/'+filedir) == False: # Pas de répertoire d'annotation, on creeme repertoire
+            os.mkdir('/mnt/piusb/Annotations/'+filedir)
+
+        labels = {}
+        old_labels = {}
+        sprites = {}
+        old_sprites = {}
+        image_cache = {}
+        angle = 0
+        fps = 60
+
+        #Chargement des images
+        fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
+        self.nb_cases = len(fichiers)
+        samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
+        (w,h) = samplepage.get_rect().size
+        rb_ratio = 800/w
+        # Mise à l'échelle des images
+        self.nh = h * rb_ratio
+        self.case = 0
+        self.old_case = 0
+        sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
+
+        if mode_jour :
+            pygame.display.get_surface().fill((255,255,255))
+            sprites['nav_first'] = (pygame.image.load ('./images/nav_first_white.jpg'),(50,430))
+            sprites['nav_prec_10'] = (pygame.image.load ('./images/nav_prec_10_white.jpg'),(125,430))
+            sprites['nav_prec_1'] = (pygame.image.load ('./images/nav_prec_1_white.jpg'),(200,430))
+            labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25inv,0)
+            sprites['nav_suiv_1'] = (pygame.image.load ('./images/nav_suiv_1_white.jpg'),(400,430))
+            sprites['nav_suiv_10'] = (pygame.image.load ('./images/nav_suiv_10_white.jpg'),(475,430))
+            sprites['nav_end'] = (pygame.image.load ('./images/nav_end_white.jpg'),(550,430))
+            sprites['nav_raz'] = (pygame.image.load ('./images/nav_raz_white.jpg'),(650,430))
+            sprites['nav_ok'] = (pygame.image.load ('./images/nav_ok_white.jpg'),(750,430))
+        else :
+            pygame.display.get_surface().fill((0,0,0))
+            sprites['nav_first'] = (pygame.image.load ('./images/nav_first.jpg'),(50,430))
+            sprites['nav_prec_10'] = (pygame.image.load ('./images/nav_prec_10.jpg'),(125,430))
+            sprites['nav_prec_1'] = (pygame.image.load ('./images/nav_prec_1.jpg'),(200,430))
+            labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25,0)
+            sprites['nav_suiv_1'] = (pygame.image.load ('./images/nav_suiv_1.jpg'),(400,430))
+            sprites['nav_suiv_10'] = (pygame.image.load ('./images/nav_suiv_10.jpg'),(475,430))
+            sprites['nav_end'] = (pygame.image.load ('./images/nav_end.jpg'),(550,430))
+            sprites['nav_raz'] = (pygame.image.load ('./images/nav_raz.jpg'),(650,430))
+            sprites['nav_ok'] = (pygame.image.load ('./images/nav_ok.jpg'),(750,430))
+        pygame.display.update()
+
+        self.r = {}
+        self.r['nav_first'] = pygame.Rect(50,430,50,50)
+        self.r['nav_prec_10'] = pygame.Rect(125,430,50,50)
+        self.r['nav_prec_1'] = pygame.Rect(200,430,50,50)
+        self.r['nav_suiv_1'] = pygame.Rect(400,430,50,50)
+        self.r['nav_suiv_10'] = pygame.Rect(475,430,50,50)
+        self.r['nav_end'] = pygame.Rect(550,430,50,50)
+        self.r['nav_raz'] = pygame.Rect(650,430,50,50)
+        self.r['nav_ok'] = pygame.Rect(750,430,50,50)
+
+        
+        self.last_coords = (800,480)
+        self.canvas = sprites['case'][0].copy()
+        self.canvas.fill((255,255,255))
+        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
+            self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
+        self.canvas.set_colorkey((255,255,255))
+        self.mouse = pygame.mouse
+        self.was_pressed = False
+        self.r['case'] = pygame.Rect((0,0),self.canvas.get_rect().size)
+        
+
+    def ProcessInput(self, events, pressed_keys):
+        global filedir,fps
+        left_pressed, middle_pressed, right_pressed = self.mouse.get_pressed()
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.Terminate()
+            elif event.type == pygame.KEYDOWN :
+                if event.key == BOUTON_BACKSPACE :
+                    pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
+                    self.SwitchToScene(TitleScene())
+            elif left_pressed :
+                self.c = pygame.mouse.get_pos()
+                if self.r['case'].collidepoint(self.c) :
+                    if self.last_coords == (800,480) : self.last_coords = self.c
+                    self.coords = self.c
+                    pygame.draw.line(self.canvas, (255,0,0),self.last_coords, self.coords,5)
+                    self.last_coords = self.coords
+                else :
+                    self.was_pressed = True
+            else :
+                # On vient de relacher le doigt. quelles action faire
+                if self.was_pressed :
+                    pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
+                    if self.r['nav_first'].collidepoint(self.c) :
+                        self.case = 0
+                    elif self.r['nav_prec_10'].collidepoint(self.c) :
+                        self.case -= 10
+                    elif self.r['nav_prec_1'].collidepoint(self.c) :
+                        self.case -= 1
+                    elif self.r['nav_suiv_1'].collidepoint(self.c) :
+                        self.case += 1
+                    elif self.r['nav_suiv_10'].collidepoint(self.c) :
+                        self.case += 10
+                    elif self.r['nav_end'].collidepoint(self.c) :
+                        self.case = self.nb_cases-1
+                    elif self.r['nav_raz'].collidepoint(self.c) :
+                        self.canvas = sprites['case'][0].copy()
+                        self.canvas.fill((255,255,255))
+                        pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
+                    elif self.r['nav_ok'].collidepoint(self.c) :
+                        self.SwitchToScene(SelectionScene())
+                        fps = 5
+                    if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
+                        self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
+                    else :
+                        self.canvas.fill((255,255,255))
+                    self.canvas.set_colorkey((255,255,255))
+                    self.was_pressed = False
+                else :
+                    self.last_coords = (800,480)
+            if self.case < 0 : self.case = 0
+            if self.case >= self.nb_cases : self = self.nb_cases-1
+
+    def Update(self):
+        if self.next == self :
+            if self.old_case != self.case :
+                sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
+                labels['case'] = ('{:3d}/{:3d}'.format(self.case+1,self.nb_cases),labels['case'][1],labels['case'][2],labels['case'][3])
+                self.old_case = self.case
+            
+
+    def Render(self, screen):
+        global sprites
+        if mode_jour :
+            screen.fill((255,255,255))
+        else :
+            screen.fill((0,0,0))
+        for i in list(labels.keys()) :
+            blit_text (screen,labels[i][0],labels[i][1],labels[i][2],labels[i][3])
+        for i in list(sprites.keys()) :
+            screen.blit (sprites[i][0],sprites[i][1])
+        screen.blit (self.canvas,(0,0))
+        pygame.display.flip()
 
 
 #*******************************************************************************************************#
@@ -1309,7 +1482,7 @@ class ConversionScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global developpe,roue,aimants, distance,cmavant,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
+        global developpe,roue,aimants, distance,cmavant,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         labels = {}
@@ -1381,6 +1554,7 @@ class RoadbookScene(SceneBase):
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
         rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(600/w,180/h)
+        rb_ratio_annot = 480/800 if self.orientation == 'Portrait' else 600/800
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
@@ -1619,5 +1793,4 @@ class OdometerScene(SceneBase):
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
 
-run_RpiRoadbook(800, 480, 5, TitleScene())
-
+run_RpiRoadbook(800, 480, TitleScene())
