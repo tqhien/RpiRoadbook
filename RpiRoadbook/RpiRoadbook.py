@@ -64,6 +64,7 @@ fps = 5
 totalisateur = 0
 distance = 0
 distancetmp = 0
+distance2 = 0
 speed = 0.00
 roue = 1864
 aimants = 1
@@ -73,6 +74,7 @@ vmoy = 0.0
 tps = 0.0
 tpsinit=0.0
 cmavant = 0
+cmavant2 = 0
 j = time.time()
 temperature = -1
 cpu = -1
@@ -128,6 +130,7 @@ def input_roue_callback(channel):
     totalisateur += developpe
     distance += developpe
     distancetmp += developpe
+    distance2 += developpe
 
 def input_left_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -1673,23 +1676,23 @@ class RoadbookScene(SceneBase):
 
 class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
-        global roue, aimants,developpe, distance,cmavant,totalisateur,vmoy,vmax,speed,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle
+        global roue, aimants,developpe, distance,cmavant,distance2,cmavant2,totalisateur,speed,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
-        filedir = os.path.splitext(self.filename)[0]
         labels = {}
         old_labels = {}
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        vmoy = 0
-        vmax = 0
         speed = 0
 
         self.orientation = maconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
 
+        self.index = 0 # totalisateur par defaut
+
         # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
         labels['heure'] = ('00:00:00',(int(maconfig[self.orientation]['odo_tps_x']),int(maconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
+        labels['t_totalisateur'] = ('Total : ',(int(maconfig[self.orientation]['odo_t_km_x']),int(maconfig[self.orientation]['odo_t_km_y'])),BLANC25,angle)
         labels['totalisateur'] = ('{:6.2f} '.format(0.0),(int(maconfig[self.orientation]['odo_km_x']),int(maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
         labels['t_vitesse'] = ('Vitesse',(int(maconfig[self.orientation]['odo_t_vi_x']),int(maconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
         labels['vitesse'] = ('{:3.0f} '.format(100.0),(int(maconfig[self.orientation]['odo_vi_x']),int(maconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
@@ -1709,12 +1712,23 @@ class OdometerScene(SceneBase):
                 distance = int(last_line)
         except :
             distance = 0
-
         cmavant = distance
         self.odometre_log = logging.getLogger('Rotating Odometer Log')
         self.odometre_log.setLevel(logging.INFO)
         self.odometre_handler = RotatingFileHandler('/mnt/piusb/.log/odometre.log',maxBytes=8000,backupCount=20)
         self.odometre_log.addHandler(self.odometre_handler)
+
+        try :
+            with open('/mnt/piusb/.log/odometre2.log', "r") as f2:
+                last_line = f2.readlines()[-1]
+                distance2 = int(last_line)
+        except :
+            distance2 = 0
+        cmavant2 = distance2
+        self.odometre2_log = logging.getLogger('Rotating Odometer2 Log')
+        self.odometre2_log.setLevel(logging.INFO)
+        self.odometre2_handler = RotatingFileHandler('/mnt/piusb/.log/odometre2.log',maxBytes=8000,backupCount=20)
+        self.odometre2_log.addHandler(self.odometre2_handler)
 
         try :
             with open('/mnt/piusb/.log/totalisateur.log', "r") as f2:
@@ -1737,36 +1751,46 @@ class OdometerScene(SceneBase):
         j = time.time()
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,cmavant,vmoy,speed,tpsinit,vmax
+        global distance,cmavant,distance2,cmavant2,speed,tpsinit,distancetmp
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
             elif event.type == pygame.KEYDOWN :
                 # Seule action possible : reinitialisation du trip partiel
                 if event.key == BOUTON_BACKSPACE:
-                    distance = 0.0
-                    cmavant = distance
-                    vmoy = 0
-                    speed = 0
-                    tpsinit = time.time()
-                    vmax = 0;
-                    # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
-                    self.totalisateur_log.info('{}'.format(totalisateur))
-                    self.odometre_log.info('{}'.format(distance))
-                    distancetmp = 0
+                    if self.index == 1 :
+                        distance = 0.0
+                        cmavant = distance
+                        speed = 0
+                        tpsinit = time.time()
+                        # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
+                        self.totalisateur_log.info('{}'.format(totalisateur))
+                        self.odometre_log.info('{}'.format(distance))
+                        self.odometre2_log.info('{}'.format(distance2))
+                        distancetmp = 0
+                    elif self.index == 2 :
+                        distance2 = 0.0
+                        cmavant2 = distance2
+                        speed = 0
+                        tpsinit = time.time()
+                        # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
+                        self.totalisateur_log.info('{}'.format(totalisateur))
+                        self.odometre_log.info('{}'.format(distance))
+                        self.odometre2_log.info('{}'.format(distance2))
+                        distancetmp = 0
+                elif event.key == BOUTON_DOWN or event.key == BOUTON_UP :
+                    self.index += 1
             elif event.type == GMASSSTORAGE:
                 self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
-        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature,cpu
+        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,distancetmp2,temperature,cpu
         global labels,old_labels,sprites,old_sprites
 
-        if distance < 20000 or tps < 2 : 
-            vmoy = 0 # On maintient la vitesse moyenne à 0 sur les 20 premiers mètres ou les 2 premières secondes
-        else:
-            vmoy = ((distance/(time.time()-tpsinit))*3.6/1000);
+        if self.index > 2 : self.index = 0
+
         k = time.time() - j
-        if ( k >= 2) : # Vitesse moyenne sur 2 secondes
+        if ( k >= 1) : # Vitesse moyenne sur 1 secondes
             speed = (distance*3.6-cmavant*3.6); 
             speed = 1.0*speed/k/1000; 
             j = time.time()
@@ -1775,11 +1799,23 @@ class OdometerScene(SceneBase):
         if distancetmp > 100000 : #On sauvegarde l'odometre tous les 100 metres
             self.totalisateur_log.info('{}'.format(totalisateur))
             self.odometre_log.info('{}'.format(distance))
+            self.odometre2_log.info('{}'.format(distance2))
             distancetmp = 0
 
         if self.next == self :
             labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-            labels['totalisateur'] = ('{:6.2f} '.format(totalisateur/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
+            d = totalisateur 
+            if self.index == 0 :
+                d = totalisateur
+                t = 'Total :  '
+            elif self.index == 1 :
+                d = distance 
+                t = 'Trip 1 : '
+            else :
+                d = distance2 
+                t = 'Trip 2 : '
+            labels['totalisateur'] = ('{:6.2f} '.format(d/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
+            labels['t_totalisateur'] = (t, labels['t_totalisateur'][1],labels['t_totalisateur'][2],labels['t_totalisateur'][3])
             labels['vitesse'] = ('{:3.0f}    '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
             labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
             labels['cpu'] = ('{:4.1f}% '.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
