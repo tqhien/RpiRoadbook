@@ -142,7 +142,7 @@ def input_left_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=500)
 
 def input_right_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -154,7 +154,7 @@ def input_right_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=500)
 
 def input_ok_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -166,7 +166,7 @@ def input_ok_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=500)
 
 def input_up_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -178,7 +178,7 @@ def input_up_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=500)
 
 def input_down_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -190,15 +190,15 @@ def input_down_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=500)
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=500)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=500)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=500)
+GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=500)
+GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=500)
 
 #*******************************************************************************************************#
 #------------------------- Le callback de la connexion USB ---------------------------------------------#
