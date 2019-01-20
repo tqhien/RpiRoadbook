@@ -1487,7 +1487,7 @@ class EditScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global developpe,roue,aimants, distance,cmavant,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle
+        global developpe,roue,aimants, distance,cmavant,distancetmp,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         labels = {}
@@ -1530,6 +1530,7 @@ class RoadbookScene(SceneBase):
         except :
             distance = 0
         cmavant = distance
+        distancetmp=0
 
         self.odometre_log = logging.getLogger('Rotating Odometer Log')
         self.odometre_log.setLevel(logging.INFO)
@@ -1572,7 +1573,7 @@ class RoadbookScene(SceneBase):
         j = time.time()
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,tpsinit,cmavant,vmoy,vmax
+        global distance,tpsinit,cmavant,vmoy,vmax,distancetmp
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -1678,7 +1679,7 @@ class RoadbookScene(SceneBase):
 
 class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
-        global roue, aimants,developpe, distance,cmavant,distance2,cmavant2,totalisateur,speed,labels, old_labels,sprites, old_sprites,angle
+        global roue, aimants,developpe, distance,cmavant,distancetmp,distance2,cmavant2,totalisateur,speed,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         labels = {}
         old_labels = {}
@@ -1715,6 +1716,7 @@ class OdometerScene(SceneBase):
         except :
             distance = 0
         cmavant = distance
+        distancetmp=0
         self.odometre_log = logging.getLogger('Rotating Odometer Log')
         self.odometre_log.setLevel(logging.INFO)
         self.odometre_handler = RotatingFileHandler('/mnt/piusb/.log/odometre.log',maxBytes=8000,backupCount=20)
