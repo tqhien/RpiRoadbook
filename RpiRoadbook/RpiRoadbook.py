@@ -901,7 +901,7 @@ class ModeScene(SceneBase):
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant
                     self.index +=1
-                    if self.index > 5:
+                    if self.index > 3:
                         self.index = 0        
 
     def Update(self):
@@ -932,7 +932,7 @@ class ModeScene(SceneBase):
         update_labels(screen)
         update_sprites(screen)
         k = time.time()
-        if k-self.t >= 5:
+        if k-self.t >= 10:
             try:
                 with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                     maconfig.write(configfile)
@@ -1091,10 +1091,12 @@ class ConfigScene(SceneBase):
                         self.SwitchToScene(ModeScene())
                     elif self.index == 7 : 
                         self.SwitchToScene(TitleScene())
-                    # on passe au réglage suivant
+                    # on passe au réglage suivant, en evitant les boutons prec et ok
                     self.index +=1
                     if self.index > 9:
                         self.index = 0
+                    elif self.index == 6 or self.index == 7 :
+                        self.index = 8
             
             
         
