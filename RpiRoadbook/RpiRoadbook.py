@@ -135,70 +135,80 @@ def input_roue_callback(channel):
 def input_left_callback(channel):
     GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.5) 
+        time.sleep(.2)
     bouton_time = time.time() - b4_time
     if bouton_time >= 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=500)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=300)
+
 
 def input_right_callback(channel):
     GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.5) 
+        time.sleep(.2)
     bouton_time = time.time() - b4_time
-    if bouton_time < 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
-    else:
+    if bouton_time >= 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=500)
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=300)
+
 
 def input_ok_callback(channel):
     GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.5) 
+        time.sleep(.2)
     bouton_time = time.time() - b4_time
-    if bouton_time < 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
-    else:
+    if bouton_time >= 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=500)
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
+
 
 def input_up_callback(channel):
     GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.5) 
+        time.sleep(.2)
     bouton_time = time.time() - b4_time
-    if bouton_time < 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
-    else:
+    if bouton_time >= 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=500)
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=300)
+
 
 def input_down_callback(channel):
     GPIO.remove_event_detect(channel)
     b4_time = time.time()
+    time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.5) 
+        time.sleep(.2)
     bouton_time = time.time() - b4_time
-    if bouton_time < 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
-    else:
+    if bouton_time >= 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=500)
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
+
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=500)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=500)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=500)
-GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=500)
-GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=500)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
 
 #*******************************************************************************************************#
 #------------------------- Le callback de la connexion USB ---------------------------------------------#
@@ -535,6 +545,7 @@ def run_RpiRoadbook(width, height,  starting_scene):
 class TitleScene(SceneBase):
     def __init__(self, fname = ''):
         pygame.font.init()
+        check_configfile()
 
     def ProcessInput(self, events, pressed_keys):
         pass
@@ -570,6 +581,7 @@ class SelectionScene(SceneBase):
         self.runonce=True
 
         #pygame.font.init()
+        check_configfile()
         
         
         self.orientation = maconfig['Parametres']['orientation']
@@ -772,10 +784,12 @@ class NoneScene(SceneBase):
 #*******************************************************************************************************#
 class ModeScene(SceneBase):
     def __init__(self, fname = ''):
-        global angle,labels,old_labels,sprites,old_sprites, mode_jour
+        global maconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
+
+        #check_configfile()
 
         labels = {}
         old_labels = {}
@@ -823,15 +837,13 @@ class ModeScene(SceneBase):
             pygame.display.get_surface().fill((0,0,0))
         sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['mode_ok_x']),int(maconfig[self.orientation]['mode_ok_y'])))
         pygame.display.update()
-        self.t = time.time()
 
     def ProcessInput(self, events, pressed_keys):
-        global maconfig,mode_jour
+        global maconfig,mode_jour,alphabet,alphabet_size_x,alphabet_size_y,old_labels, old_sprites
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
             if event.type == pygame.KEYDOWN:
-                self.t = time.time()
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
                 elif event.key == BOUTON_RIGHT:
@@ -845,25 +857,76 @@ class ModeScene(SceneBase):
                 elif event.key == BOUTON_DOWN:
                     if self.index == 0 :
                         self.rallye = not self.rallye
+                        maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                     elif self.index == 1 :
                         mode_jour = not mode_jour
+                        maconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                     elif self.index == 2 :
                         self.dim -= 5
                         if self.dim < 5 : self.dim = 5
                         pulse.ChangeDutyCycle(self.dim)
+                        maconfig['Parametres']['luminosite'] = str(self.dim)
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                     elif self.index == 3 :
                         self.paysage = not self.paysage
+                        maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                 elif event.key == BOUTON_UP:
                     if self.index ==0:
                         self.rallye = not self.rallye
+                        maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                     elif self.index == 1:
                         mode_jour = not mode_jour
+                        maconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                     elif self.index == 2 :
                         self.dim += 5
                         if self.dim > 100 : self.dim = 100
                         pulse.ChangeDutyCycle(self.dim)
                     elif self.index == 3 :
                         self.paysage = not self.paysage
+                        maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
+                        try:
+                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                                maconfig.write(configfile)
+                        except:
+                            pass
+
                 elif event.key == BOUTON_OK:
                     # validation
                     if self.index == 0:
@@ -898,6 +961,10 @@ class ModeScene(SceneBase):
                     elif self.index == 4 : 
                         self.SwitchToScene(ConfigScene())
                     elif self.index == 5 : 
+                        alphabet = {}
+                        alphabet_size_x = {}
+                        alphabet_size_y = {}
+                        setup_alphabet()
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant
                     self.index +=1
@@ -906,39 +973,30 @@ class ModeScene(SceneBase):
 
     def Update(self):
         global labels,old_labels,sprites,old_sprites
-        
-        if self.rallye :
-            labels['mode'] = ('Rallye',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else ('Rallye',labels['mode'][1],BLANC50,labels['mode'][3])
-        else :
-            labels['mode'] = ('Route',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else ('Route   ',labels['mode'][1],BLANC50,labels['mode'][3])
+        if self.next == self :
+            if self.rallye :
+                labels['mode'] = ('Rallye',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else ('Rallye',labels['mode'][1],BLANC50,labels['mode'][3])
+            else :
+                labels['mode'] = ('Route',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else ('Route   ',labels['mode'][1],BLANC50,labels['mode'][3])
 
-        if mode_jour :
-            labels['jour_nuit'] = ('Jour   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Jour   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
-        else :
-            labels['jour_nuit'] = ('Nuit   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Nuit   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
+            if mode_jour :
+                labels['jour_nuit'] = ('Jour   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Jour   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
+            else :
+                labels['jour_nuit'] = ('Nuit   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Nuit   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
 
-        labels['dim'] = ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50inv,labels['dim'][3]) if self.index == 2 else ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50,labels['dim'][3])
+            labels['dim'] = ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50inv,labels['dim'][3]) if self.index == 2 else ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50,labels['dim'][3])
 
-        if self.paysage :
-            labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
-        else :
-            labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+            if self.paysage :
+                labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+            else :
+                labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
 
-        labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 4 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
-        sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 5 else (self.bouton_ok,sprites['ok'][1])
+            labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 4 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
+            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 5 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
-        global maconfig
         update_labels(screen)
         update_sprites(screen)
-        k = time.time()
-        if k-self.t >= 10:
-            try:
-                with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                    maconfig.write(configfile)
-            except: 
-                pass
-            self.SwitchToScene(TitleScene())
 
 
 #*******************************************************************************************************#
@@ -950,6 +1008,8 @@ class ConfigScene(SceneBase):
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
+
+        #check_configfile()
 
         labels = {}
         old_labels = {}
@@ -974,6 +1034,22 @@ class ConfigScene(SceneBase):
         labels ['ss'] = ('00 ',(int(maconfig[self.orientation]['config_seconde_x']),int(maconfig[self.orientation]['config_seconde_y'])),BLANC50,angle,)
         
         labels ['prec'] = ('<- ',(int(maconfig[self.orientation]['config_prec_x']),int(maconfig[self.orientation]['config_prec_y'])),BLANC50,angle,)
+
+        if mode_jour :
+            if angle == 0 :
+                self.bouton_ok_white = pygame.image.load('./images/ok.jpg')
+                self.bouton_ok = pygame.image.load('./images/ok_white.jpg')
+            else :
+                self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
+                self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
+            pygame.display.get_surface().fill((255,255,255))
+        else:
+            if angle == 0 :
+                self.bouton_ok = pygame.image.load('./images/ok.jpg')
+                self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
+            else :
+                self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
+                self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
         sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['config_ok_x']),int(maconfig[self.orientation]['config_ok_y'])))
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
@@ -1090,6 +1166,10 @@ class ConfigScene(SceneBase):
                     elif self.index == 6 : 
                         self.SwitchToScene(ModeScene())
                     elif self.index == 7 : 
+                        alphabet = {}
+                        alphabet_size_x = {}
+                        alphabet_size_y = {}
+                        setup_alphabet()
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant, en evitant les boutons prec et ok
                     self.index +=1
@@ -1106,17 +1186,18 @@ class ConfigScene(SceneBase):
         self.now = time.localtime()
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
-        labels['jj'] = ('{:02d}/'.format(self.data[0]),labels['jj'][1],BLANC50inv,labels['jj'][3]) if self.index == 0 else ('{:02d}/'.format(self.data[0]),labels['jj'][1],BLANC50,labels['jj'][3])
-        labels['mm'] = ('{:02d}/'.format(self.data[1]),labels['mm'][1],BLANC50inv,labels['mm'][3]) if self.index == 1 else ('{:02d}/'.format(self.data[1]),labels['mm'][1],BLANC50,labels['mm'][3])
-        labels['aaaa'] = ('{:4d}'.format(self.data[2]),labels['aaaa'][1],BLANC50inv,labels['aaaa'][3]) if self.index == 2 else ('{:4d}'.format(self.data[2]),labels['aaaa'][1],BLANC50,labels['aaaa'][3])
-        labels['hh'] = ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50inv,labels['hh'][3]) if self.index == 3 else ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50,labels['hh'][3])
-        labels['min'] = ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50inv,labels['min'][3]) if self.index == 4 else ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50,labels['min'][3])
-        labels['ss'] = ('{:02d}'.format(self.data[5]),labels['ss'][1],BLANC50inv,labels['ss'][3]) if self.index == 5 else ('{:02d} '.format(self.data[5]),labels['ss'][1],BLANC50,labels['ss'][3])
-        labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 8 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
-        labels['aimants'] = ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50inv,labels['aimants'][3]) if self.index == 9 else ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50,labels['aimants'][3])
-        
-        labels['prec'] = ('<-  ',labels['prec'][1],BLANC50inv,labels['prec'][3]) if self.index == 6 else ('<-  ',labels['prec'][1],BLANC50,labels['prec'][3])
-        sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
+        if self.next == self :
+            labels['jj'] = ('{:02d}/'.format(self.data[0]),labels['jj'][1],BLANC50inv,labels['jj'][3]) if self.index == 0 else ('{:02d}/'.format(self.data[0]),labels['jj'][1],BLANC50,labels['jj'][3])
+            labels['mm'] = ('{:02d}/'.format(self.data[1]),labels['mm'][1],BLANC50inv,labels['mm'][3]) if self.index == 1 else ('{:02d}/'.format(self.data[1]),labels['mm'][1],BLANC50,labels['mm'][3])
+            labels['aaaa'] = ('{:4d}'.format(self.data[2]),labels['aaaa'][1],BLANC50inv,labels['aaaa'][3]) if self.index == 2 else ('{:4d}'.format(self.data[2]),labels['aaaa'][1],BLANC50,labels['aaaa'][3])
+            labels['hh'] = ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50inv,labels['hh'][3]) if self.index == 3 else ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50,labels['hh'][3])
+            labels['min'] = ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50inv,labels['min'][3]) if self.index == 4 else ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50,labels['min'][3])
+            labels['ss'] = ('{:02d}'.format(self.data[5]),labels['ss'][1],BLANC50inv,labels['ss'][3]) if self.index == 5 else ('{:02d} '.format(self.data[5]),labels['ss'][1],BLANC50,labels['ss'][3])
+            labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 8 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
+            labels['aimants'] = ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50inv,labels['aimants'][3]) if self.index == 9 else ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50,labels['aimants'][3])
+            
+            labels['prec'] = ('<-  ',labels['prec'][1],BLANC50inv,labels['prec'][3]) if self.index == 6 else ('<-  ',labels['prec'][1],BLANC50,labels['prec'][3])
+            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
         global maconfig
@@ -1490,6 +1571,7 @@ class RoadbookScene(SceneBase):
         global developpe,roue,aimants, distance,cmavant,distancetmp,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
+        check_configfile()
         labels = {}
         old_labels = {}
         sprites = {}
@@ -1605,7 +1687,7 @@ class RoadbookScene(SceneBase):
                 elif event.key == BOUTON_PGDOWN:
                     self.case = self.nb_cases - self.ncases
                 elif event.key == BOUTON_BACKSPACE:
-                    distance = 0.0
+                    distance = 0
                     cmavant = distance 
                     vmoy = 0
                     speed = 0
@@ -1681,6 +1763,7 @@ class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
         global roue, aimants,developpe, distance,cmavant,distancetmp,distance2,cmavant2,totalisateur,speed,labels, old_labels,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
+        check_configfile()
         labels = {}
         old_labels = {}
         sprites = {}
@@ -1763,17 +1846,17 @@ class OdometerScene(SceneBase):
                 # Seule action possible : reinitialisation du trip partiel
                 if event.key == BOUTON_BACKSPACE:
                     if self.index == 1 :
-                        distance = 0.0
+                        distance = 0
                         cmavant = distance
                         speed = 0
                         tpsinit = time.time()
                         # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
-                        self.totalisateur_log.info('{}'.format(totalisateur))
-                        self.odometre_log.info('{}'.format(distance))
-                        self.odometre2_log.info('{}'.format(distance2))
+                        self.totalisateur_log.info('{:3d}'.format(totalisateur))
+                        self.odometre_log.info('{:3d}'.format(distance))
+                        self.odometre2_log.info('{:3d}'.format(distance2))
                         distancetmp = 0
                     elif self.index == 2 :
-                        distance2 = 0.0
+                        distance2 = 0
                         cmavant2 = distance2
                         speed = 0
                         tpsinit = time.time()
