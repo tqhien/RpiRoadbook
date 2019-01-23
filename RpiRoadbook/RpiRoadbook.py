@@ -258,7 +258,7 @@ def get_image(key,angle=0):
         if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) : 
             annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
             annot = pygame.transform.rotozoom(annot,0,rb_ratio_annot)
-            annot.set_colorkey((255,255,255))
+            annot.set_colorkey(BLANC)
             img.blit(annot,(0,0))
         image_cache[(key,angle)] = pygame.transform.rotozoom (img,angle,rb_ratio)
     return image_cache[(key,angle)]
@@ -269,25 +269,13 @@ def get_image(key,angle=0):
 #-------------------------------------------------------------------------------------------#
 
 mode_jour = True
-
-alphabet = {}
-alphabet_size_x = {}
-alphabet_size_y = {}
-font25 = ''
-font50 = ''
-font75 = ''
-font100=''
-font200=''
-
-labels = {}
-old_labels = {}
-
-BLANC = 0
-ROUGE = 1
-VERT = 2
-BLEU = 3
-JAUNE = 4
-GRIS = 5
+# Definition des couleurs
+BLANC = (255,255,255)
+NOIR = (0,0,0)
+ROUGE = (255,0,0)
+VERT = (0,255,0)
+BLEU = (0,0,255)
+GRIS = (125,125,125)
 
 #Styles utilises :
 BLANC25     = 0
@@ -301,113 +289,75 @@ ROUGE25     = 7
 ROUGE25inv  = 8
 VERT25      = 9
 GRIS75      =10
-SALPHA = {'0':25,'1':50,'2':75,'3':100,'4':200,'5':25,'6':50,'7':25,'8':25,'9':25,'10':75}
+#Taille des polices pour chaque style
+SALPHA = {BLANC25:25,BLANC50:50,BLANC75:75,BLANC100:100,BLANC200:200,BLANC25inv:25,BLANC50inv:50,ROUGE25:25,ROUGE25inv:25,VERT25:25,GRIS75:75}
 
-def setup_alphabet():
-    global alphabet,alphabet_size_x,alphabet_size_y,font25,font50,font75,font100,font200
+alphabet = {}
+alphabet_size_x = {}
+alphabet_size_y = {}
+
+myfont = {}
+def load_font(police=BLANC25) :
+    global myfont
+    # Chargement d'une font si pas encore en cache
+    if not police in myfont :
+        if police in SALPHA:
+            myfont[police]  = pygame.font.SysFont("cantarell", SALPHA[police])
+        else :
+            myfont[police]  = pygame.font.SysFont("cantarell", 25)
+        
+
+labels = {}
+old_labels = {}
+
+def setup_alphabet(police=BLANC25):
+    global alphabet,alphabet_size_x,alphabet_size_y,myfont,angle
+    load_font(police)
+    #printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ àâäçéèêëîïôöùûü'
+    printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
+    fg_jour = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:ROUGE, ROUGE25inv:BLANC, VERT25:BLEU,  GRIS75:GRIS}
+    bg_jour = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:BLANC, ROUGE25inv:ROUGE, VERT25:BLANC, GRIS75:BLANC}
+    fg_nuit = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:ROUGE, ROUGE25inv:ROUGE,  VERT25:VERT,  GRIS75:GRIS}
+    bg_nuit = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:NOIR,  ROUGE25inv:BLANC, VERT25:NOIR,  GRIS75:NOIR}
+
     if mode_jour :
-        for i in range(1,256) :
-            alphabet[(chr(i),BLANC25,0)] = font25.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),BLANC25inv,0)] = font25.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),BLANC50,0)] = font50.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),BLANC50inv,0)] = font50.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),BLANC75,0)] = font75.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),BLANC100,0)] = font100.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),BLANC200,0)] = font200.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),ROUGE25,0)] = font25.render(chr(i),0,(255,0,0),(255,255,255))
-            alphabet[(chr(i),ROUGE25inv,0)] = font25.render(chr(i),0,(255,0,0),(0,0,0))
-            alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,0,255),(255,255,255))
-            alphabet[(chr(i),GRIS75,0)] = font75.render(chr(i),0,(125,125,125),(255,255,255))
-            alphabet[(chr(i),BLANC25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),BLANC25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),BLANC50,90)] = pygame.transform.rotate (font50.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),BLANC50inv,90)] = pygame.transform.rotate (font50.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),BLANC75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),BLANC100,90)] = pygame.transform.rotate (font100.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),BLANC200,90)] = pygame.transform.rotate (font200.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),ROUGE25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(255,255,255)),90)
-            alphabet[(chr(i),ROUGE25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(0,0,0)),90)
-            alphabet[(chr(i),VERT25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(255,255,255)),90)
-            alphabet[(chr(i),GRIS75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(255,255,255)),90)
-            alphabet_size_x[(chr(i),25,0)] = alphabet[(chr(i),BLANC25,0)].get_size()[0]
-            alphabet_size_y[(chr(i),25,0)] = 0
-            alphabet_size_x[(chr(i),25,90)] = 0 
-            alphabet_size_y[(chr(i),25,90)] = -alphabet[(chr(i),BLANC25,90)].get_size()[1]
-            alphabet_size_x[(chr(i),50,0)] = alphabet[(chr(i),BLANC50,0)].get_size()[0]
-            alphabet_size_y[(chr(i),50,0)] = 0
-            alphabet_size_x[(chr(i),50,90)] = 0 
-            alphabet_size_y[(chr(i),50,90)] = -alphabet[(chr(i),BLANC50,90)].get_size()[1]
-            alphabet_size_x[(chr(i),75,0)] = alphabet[(chr(i),BLANC75,0)].get_size()[0]
-            alphabet_size_y[(chr(i),75,0)] = 0
-            alphabet_size_x[(chr(i),75,90)] = 0 
-            alphabet_size_y[(chr(i),75,90)] = -alphabet[(chr(i),BLANC75,90)].get_size()[1]
-            alphabet_size_x[(chr(i),100,0)] = alphabet[(chr(i),BLANC100,0)].get_size()[0]
-            alphabet_size_y[(chr(i),100,0)] = 0
-            alphabet_size_x[(chr(i),100,90)] = 0 
-            alphabet_size_y[(chr(i),100,90)] = -alphabet[(chr(i),BLANC100,90)].get_size()[1]
-            alphabet_size_x[(chr(i),200,0)] = alphabet[(chr(i),BLANC200,0)].get_size()[0]
-            alphabet_size_y[(chr(i),200,0)] = 0
-            alphabet_size_x[(chr(i),200,90)] = 0 
-            alphabet_size_y[(chr(i),200,90)] = -alphabet[(chr(i),BLANC200,90)].get_size()[1]
+        if angle == 90 :
+            for i in printable :
+                alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,0,fg_jour[police],bg_jour[police]),90)
+                alphabet_size_x[(i,police,angle)] = 0 
+                alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]    
+        else :
+            for i in printable :
+                alphabet[(i,police,angle)] = myfont[police].render(i,0,fg_jour[police],bg_jour[police])
+                alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
+                alphabet_size_y[(i,police,angle)] = 0
     else :
-        for i in range(1,256) :
-            alphabet[(chr(i),BLANC25,0)] = font25.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),BLANC25inv,0)] = font25.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),BLANC50,0)] = font50.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),BLANC50inv,0)] = font50.render(chr(i),0,(0,0,0),(255,255,255))
-            alphabet[(chr(i),BLANC75,0)] = font75.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),BLANC100,0)] = font100.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),BLANC200,0)] = font200.render(chr(i),0,(255,255,255),(0,0,0))
-            alphabet[(chr(i),ROUGE25,0)] = font25.render(chr(i),0,(255,0,0),(0,0,0))
-            alphabet[(chr(i),ROUGE25inv,0)] = font25.render(chr(i),0,(255,0,0),(255,255,255))
-            alphabet[(chr(i),VERT25,0)] = font25.render(chr(i),0,(0,255,0),(0,0,0))
-            alphabet[(chr(i),GRIS75,0)] = font75.render(chr(i),0,(125,125,125),(0,0,0))
-            alphabet[(chr(i),BLANC25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),BLANC25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),BLANC50,90)] = pygame.transform.rotate (font50.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),BLANC50inv,90)] = pygame.transform.rotate (font50.render(chr(i),0,(0,0,0),(255,255,255)),90)
-            alphabet[(chr(i),BLANC75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),BLANC100,90)] = pygame.transform.rotate (font100.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),BLANC200,90)] = pygame.transform.rotate (font200.render(chr(i),0,(255,255,255),(0,0,0)),90)
-            alphabet[(chr(i),ROUGE25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(0,0,0)),90)
-            alphabet[(chr(i),ROUGE25inv,90)] = pygame.transform.rotate (font25.render(chr(i),0,(255,0,0),(255,255,255)),90)
-            alphabet[(chr(i),VERT25,90)] = pygame.transform.rotate (font25.render(chr(i),0,(0,255,0),(0,0,0)),90)
-            alphabet[(chr(i),GRIS75,90)] = pygame.transform.rotate (font75.render(chr(i),0,(125,125,125),(0,0,0)),90)
-            alphabet_size_x[(chr(i),25,0)] = alphabet[(chr(i),BLANC25,0)].get_size()[0]
-            alphabet_size_y[(chr(i),25,0)] = 0
-            alphabet_size_x[(chr(i),25,90)] = 0 
-            alphabet_size_y[(chr(i),25,90)] = -alphabet[(chr(i),BLANC25,90)].get_size()[1]
-            alphabet_size_x[(chr(i),50,0)] = alphabet[(chr(i),BLANC50,0)].get_size()[0]
-            alphabet_size_y[(chr(i),50,0)] = 0
-            alphabet_size_x[(chr(i),50,90)] = 0 
-            alphabet_size_y[(chr(i),50,90)] = -alphabet[(chr(i),BLANC50,90)].get_size()[1]
-            alphabet_size_x[(chr(i),75,0)] = alphabet[(chr(i),BLANC75,0)].get_size()[0]
-            alphabet_size_y[(chr(i),75,0)] = 0
-            alphabet_size_x[(chr(i),75,90)] = 0 
-            alphabet_size_y[(chr(i),75,90)] = -alphabet[(chr(i),BLANC75,90)].get_size()[1]
-            alphabet_size_x[(chr(i),100,0)] = alphabet[(chr(i),BLANC100,0)].get_size()[0]
-            alphabet_size_y[(chr(i),100,0)] = 0
-            alphabet_size_x[(chr(i),100,90)] = 0 
-            alphabet_size_y[(chr(i),100,90)] = -alphabet[(chr(i),BLANC100,90)].get_size()[1]
-            alphabet_size_x[(chr(i),200,0)] = alphabet[(chr(i),BLANC200,0)].get_size()[0]
-            alphabet_size_y[(chr(i),200,0)] = 0
-            alphabet_size_x[(chr(i),200,90)] = 0 
-            alphabet_size_y[(chr(i),200,90)] = -alphabet[(chr(i),BLANC200,90)].get_size()[1]
+        if angle == 90 :
+            for i in printable :
+                alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,0,fg_nuit[police],bg_nuit[police]),90)
+                alphabet_size_x[(i,police,angle)] = 0 
+                alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]    
+        else :
+            for i in printable :
+                alphabet[(i,police,angle)] = myfont[police].render(i,0,fg_nuit[police],bg_nuit[police])
+                alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
+                alphabet_size_y[(i,police,angle)] = 0
+            
 
 def blit_text (screen,st,coords, col=BLANC25,angle=0):
     if (not angle in (0,90)) : angle = 0
     (x,y) = coords
     if angle == 0 :
-        for i in range(len(st)) :
-            r = screen.blit(alphabet[(st[i],col,angle)],(x,y))
-            x += alphabet_size_x[(st[i],SALPHA[str(col)],angle)]
-            y += alphabet_size_y[(st[i],SALPHA[str(col)],angle)]
+        for i in st :
+            r = screen.blit(alphabet[(i,col,angle)],(x,y))
+            x += alphabet_size_x[(i,col,angle)]
+            y += alphabet_size_y[(i,col,angle)]
             pygame.display.update(r)
     else :
-        for i in range(len(st)) :
-            x += alphabet_size_x[(st[i],SALPHA[str(col)],angle)]
-            y += alphabet_size_y[(st[i],SALPHA[str(col)],angle)]
-            r = screen.blit(alphabet[(st[i],col,angle)],(x,y))
+        for i in st :
+            x += alphabet_size_x[(i,col,angle)]
+            y += alphabet_size_y[(i,col,angle)]
+            r = screen.blit(alphabet[(i,col,angle)],(x,y))
             pygame.display.update(r)
 
 def update_labels(screen):
@@ -478,7 +428,7 @@ class SceneBase:
 #--------------------------------------- La boucle principale de l'appli -------------------------------#
 #*******************************************************************************************************#
 def run_RpiRoadbook(width, height,  starting_scene):
-    global font25,font50,font75,font100,font200,fps
+    global fps
     pygame.display.init() 
     
     pygame.mouse.set_visible(False)
@@ -486,17 +436,11 @@ def run_RpiRoadbook(width, height,  starting_scene):
 
     clock = pygame.time.Clock()
     pygame.font.init()
-    font25 = pygame.font.SysFont("cantarell", 25)
-    font50 = pygame.font.SysFont("cantarell", 50)
-    font75 = pygame.font.SysFont("cantarell", 75)
-    font100 = pygame.font.SysFont("cantarell", 100)
-    font200 = pygame.font.SysFont("cantarell", 200)
+    
 
     active_scene = starting_scene
     t_usb = time.time()
     check_configfile()
-
-    setup_alphabet()
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
@@ -564,9 +508,9 @@ class TitleScene(SceneBase):
 
     def Render(self, screen):
         if mode_jour :
-            screen.fill((255,255,255))
+            screen.fill(BLANC)
         else :
-            screen.fill((0,0,0))
+            screen.fill(NOIR)
         pygame.display.update()
 
 
@@ -575,7 +519,7 @@ class TitleScene(SceneBase):
 #*******************************************************************************************************#
 class SelectionScene(SceneBase):
     def __init__(self):
-        global angle,labels,old_labels,sprites,old_sprites
+        global angle,labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
 
         self.runonce=True
@@ -592,6 +536,17 @@ class SelectionScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
+
+        # On ne charge que les polices dont on a besoin
+        setup_alphabet(BLANC25)
+        setup_alphabet(BLANC25inv)
+        setup_alphabet(ROUGE25)
+        setup_alphabet(ROUGE25inv)
+        setup_alphabet(VERT25)
 
         self.gotoEdit = False
 
@@ -628,11 +583,11 @@ class SelectionScene(SceneBase):
         if mode_jour :
             self.menu_edit_white = pygame.image.load('./images/icone_edit_white_selected.jpg')
             self.menu_edit = pygame.image.load('./images/icone_edit_white.jpg')
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else :
             self.menu_edit = pygame.image.load('./images/icone_edit.jpg')
             self.menu_edit_white = pygame.image.load('./images/icone_edit_selected.jpg')
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
         sprites['edit'] = (self.menu_edit,(int(maconfig[self.orientation]['select_edit_x']),int(maconfig[self.orientation]['select_edit_y'])))
         pygame.display.update()
         self.j = time.time()
@@ -744,18 +699,24 @@ class SelectionScene(SceneBase):
 #*******************************************************************************************************#
 class NoneScene(SceneBase):
     def __init__(self, fname = ''):
-        global labels,old_labels,sprites,old_sprites
+        global labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
 
         labels = {}
         old_labels = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
+
+        setup_alphabet(ROUGE25)
 
         if mode_jour :
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else :
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
         pygame.display.update()
 
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
@@ -784,7 +745,7 @@ class NoneScene(SceneBase):
 #*******************************************************************************************************#
 class ModeScene(SceneBase):
     def __init__(self, fname = ''):
-        global maconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour
+        global maconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -795,10 +756,17 @@ class ModeScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
         self.now = time.localtime()
         self.orientation = maconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
+
+        setup_alphabet(BLANC50)
+        setup_alphabet(BLANC50inv)
         
         labels ['t_mode'] = ('Mode :',(int(maconfig[self.orientation]['mode_l_mode_x']),int(maconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
         labels ['mode'] = ('Rallye',(int(maconfig[self.orientation]['mode_mode_x']),int(maconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
@@ -826,7 +794,7 @@ class ModeScene(SceneBase):
             else :
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else:
             if angle == 0 :
                 self.bouton_ok = pygame.image.load('./images/ok.jpg')
@@ -834,7 +802,7 @@ class ModeScene(SceneBase):
             else :
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
         sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['mode_ok_x']),int(maconfig[self.orientation]['mode_ok_y'])))
         pygame.display.update()
 
@@ -1004,7 +972,7 @@ class ModeScene(SceneBase):
 #*******************************************************************************************************#
 class ConfigScene(SceneBase):
     def __init__(self, fname = ''):
-        global angle,labels,old_labels,sprites,old_sprites
+        global angle,labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -1015,10 +983,17 @@ class ConfigScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
         self.now = time.localtime()
         self.orientation = maconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
+
+        setup_alphabet(BLANC50)
+        setup_alphabet(BLANC50inv)
         
         labels ['t_roue'] = ('Roue :',(int(maconfig[self.orientation]['config_l_roue_x']),int(maconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
         labels ['roue'] = ('{:4d}'.format(0),(int(maconfig[self.orientation]['config_roue_x']),int(maconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
@@ -1042,7 +1017,7 @@ class ConfigScene(SceneBase):
             else :
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else:
             if angle == 0 :
                 self.bouton_ok = pygame.image.load('./images/ok.jpg')
@@ -1067,7 +1042,7 @@ class ConfigScene(SceneBase):
             else :
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else:
             if angle == 0 :
                 self.bouton_ok = pygame.image.load('./images/ok.jpg')
@@ -1075,7 +1050,7 @@ class ConfigScene(SceneBase):
             else :
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
         sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['mode_ok_x']),int(maconfig[self.orientation]['mode_ok_y'])))
         pygame.display.update()
         self.t = time.time()
@@ -1218,7 +1193,7 @@ class ConfigScene(SceneBase):
 #*******************************************************************************************************#
 class G_MassStorageScene(SceneBase):
     def __init__(self, fname = ''):
-        global labels,old_labels,sprites,old_sprites
+        global labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -1228,6 +1203,11 @@ class G_MassStorageScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
+        myfont={}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
+        setup_alphabet(ROUGE25)
         sprites['usb'] = (pygame.image.load ('./images/usb_connected_white.jpg'),(0,0))
         labels ['text'] = ('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',(10,450),ROUGE25,0)
         #os.system('umount /mnt/piusb')
@@ -1263,7 +1243,7 @@ class G_MassStorageScene(SceneBase):
 #*******************************************************************************************************#
 class ConversionScene(SceneBase):
     def __init__(self, fname = '',gotoE = False):
-        global angle, labels,old_labels,sprites,old_sprites
+        global angle, labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -1275,6 +1255,12 @@ class ConversionScene(SceneBase):
         labels = {}
         old_labels = {}
         image_cache = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
+
+        setup_alphabet(VERT25)
 
         labels ['text'] = ('',(int(maconfig[self.orientation]['conv_text_x']),int(maconfig[self.orientation]['conv_text_y'])),VERT25,angle)
         labels ['text1'] = ('',(int(maconfig[self.orientation]['conv_text1_x']),int(maconfig[self.orientation]['conv_text1_y'])),VERT25,angle)
@@ -1290,9 +1276,9 @@ class ConversionScene(SceneBase):
     def Render(self, screen):
         global labels,old_labels,sprites,old_sprites,maconfig
         if mode_jour :
-            screen.fill((255,255,255))
+            screen.fill(BLANC)
         else:
-            screen.fill((0,0,0))
+            screen.fill(NOIR)
         pygame.display.update()
         labels['text1'] = ('Preparation du roadbook... Patience...',labels['text1'][1],labels['text1'][2],labels['text1'][3])
         filedir = os.path.splitext(self.filename)[0]
@@ -1414,7 +1400,7 @@ class ConversionScene(SceneBase):
 #*******************************************************************************************************#
 class EditScene(SceneBase):
     def __init__(self, fname = ''):
-        global labels,old_labels,sprites,old_sprites,filedir,fichiers,rb_ratio,angle
+        global labels,old_labels,sprites,old_sprites,filedir,fichiers,rb_ratio,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -1427,8 +1413,15 @@ class EditScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
+        myfont={}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
         angle = 0
         fps = 60
+
+        setup_alphabet(BLANC25inv)
+        setup_alphabet(BLANC25)
 
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
@@ -1443,7 +1436,7 @@ class EditScene(SceneBase):
         sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
 
         if mode_jour :
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
             sprites['nav_first'] = (pygame.image.load ('./images/nav_first_white.jpg'),(50,430))
             sprites['nav_prec_10'] = (pygame.image.load ('./images/nav_prec_10_white.jpg'),(125,430))
             sprites['nav_prec_1'] = (pygame.image.load ('./images/nav_prec_1_white.jpg'),(200,430))
@@ -1454,7 +1447,7 @@ class EditScene(SceneBase):
             sprites['nav_raz'] = (pygame.image.load ('./images/nav_raz_white.jpg'),(650,430))
             sprites['nav_ok'] = (pygame.image.load ('./images/nav_ok_white.jpg'),(750,430))
         else :
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
             sprites['nav_first'] = (pygame.image.load ('./images/nav_first.jpg'),(50,430))
             sprites['nav_prec_10'] = (pygame.image.load ('./images/nav_prec_10.jpg'),(125,430))
             sprites['nav_prec_1'] = (pygame.image.load ('./images/nav_prec_1.jpg'),(200,430))
@@ -1479,10 +1472,10 @@ class EditScene(SceneBase):
         
         self.last_coords = (800,480)
         self.canvas = sprites['case'][0].copy()
-        self.canvas.fill((255,255,255))
+        self.canvas.fill(BLANC)
         if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
             self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
-        self.canvas.set_colorkey((255,255,255))
+        self.canvas.set_colorkey(BLANC)
         self.mouse = pygame.mouse
         self.was_pressed = False
         self.r['case'] = pygame.Rect((0,0),self.canvas.get_rect().size)
@@ -1503,7 +1496,7 @@ class EditScene(SceneBase):
                 if self.r['case'].collidepoint(self.c) :
                     if self.last_coords == (800,480) : self.last_coords = self.c
                     self.coords = self.c
-                    pygame.draw.line(self.canvas, (255,0,0),self.last_coords, self.coords,5)
+                    pygame.draw.line(self.canvas, ROUGE,self.last_coords, self.coords,5)
                     self.last_coords = self.coords
                 else :
                     self.was_pressed = True
@@ -1525,7 +1518,7 @@ class EditScene(SceneBase):
                         self.case = self.nb_cases-1
                     elif self.r['nav_raz'].collidepoint(self.c) :
                         self.canvas = sprites['case'][0].copy()
-                        self.canvas.fill((255,255,255))
+                        self.canvas.fill(BLANC)
                         pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
                     elif self.r['nav_ok'].collidepoint(self.c) :
                         self.SwitchToScene(SelectionScene())
@@ -1533,8 +1526,8 @@ class EditScene(SceneBase):
                     if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
                         self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
                     else :
-                        self.canvas.fill((255,255,255))
-                    self.canvas.set_colorkey((255,255,255))
+                        self.canvas.fill(BLANC)
+                    self.canvas.set_colorkey(BLANC)
                     self.was_pressed = False
                 else :
                     self.last_coords = (800,480)
@@ -1552,9 +1545,9 @@ class EditScene(SceneBase):
     def Render(self, screen):
         global sprites
         if mode_jour :
-            screen.fill((255,255,255))
+            screen.fill(BLANC)
         else :
-            screen.fill((0,0,0))
+            screen.fill(NOIR)
         for i in list(labels.keys()) :
             blit_text (screen,labels[i][0],labels[i][1],labels[i][2],labels[i][3])
         for i in list(sprites.keys()) :
@@ -1568,7 +1561,7 @@ class EditScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global developpe,roue,aimants, distance,cmavant,distancetmp,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle
+        global developpe,roue,aimants, distance,cmavant,distancetmp,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         check_configfile()
@@ -1577,12 +1570,21 @@ class RoadbookScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
         vmoy = 0
         vmax = 0
         speed = 0
 
         self.orientation = maconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
+
+        setup_alphabet(BLANC75)
+        setup_alphabet(BLANC100)
+        setup_alphabet(ROUGE25)
+        setup_alphabet(GRIS75)
 
         # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
         labels['heure'] = ('00:00:00',(int(maconfig[self.orientation]['rb_tps_x']),int(maconfig[self.orientation]['rb_tps_y'])),BLANC75,angle)
@@ -1647,9 +1649,9 @@ class RoadbookScene(SceneBase):
         self.nh = h * rb_ratio
 
         if mode_jour :
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else :
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
         pygame.display.update()
 
         j = time.time()
@@ -1761,7 +1763,7 @@ class RoadbookScene(SceneBase):
 
 class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
-        global roue, aimants,developpe, distance,cmavant,distancetmp,distance2,cmavant2,totalisateur,speed,labels, old_labels,sprites, old_sprites,angle
+        global roue, aimants,developpe, distance,cmavant,distancetmp,distance2,cmavant2,totalisateur,speed,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self,fname)
         check_configfile()
         labels = {}
@@ -1769,10 +1771,20 @@ class OdometerScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
+        myfont = {}
+        alphabet = {}
+        alphabet_size_x = {}
+        alphabet_size_y = {}
         speed = 0
 
         self.orientation = maconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
+
+        setup_alphabet (BLANC75)
+        setup_alphabet(BLANC25)
+        setup_alphabet(BLANC100)
+        setup_alphabet(ROUGE25)
+        setup_alphabet(BLANC200)
 
         self.index = 0 # totalisateur par defaut
 
@@ -1830,9 +1842,9 @@ class OdometerScene(SceneBase):
         self.totalisateur_log.addHandler(self.totalisateur_handler)
 
         if mode_jour:
-            pygame.display.get_surface().fill((255,255,255))
+            pygame.display.get_surface().fill(BLANC)
         else:
-            pygame.display.get_surface().fill((0,0,0))
+            pygame.display.get_surface().fill(NOIR)
         pygame.display.update()
 
         j = time.time()
