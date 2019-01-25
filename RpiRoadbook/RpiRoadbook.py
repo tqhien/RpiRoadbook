@@ -1576,7 +1576,7 @@ class RoadbookScene(SceneBase):
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
         rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(600/w,180/h)
-        rb_ratio_annot = 480/800 if self.orientation == 'Portrait' else 600/800
+        rb_ratio_annot = 480/w if self.orientation == 'Portrait' else 600/800
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
@@ -1865,7 +1865,7 @@ class RoadbookZoomScene(SceneBase):
         
         self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
-        self.ncases = 5 if self.orientation == 'Portrait' else 2
+        self.ncases = 6 if self.orientation == 'Portrait' else 2
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.pages = {}
