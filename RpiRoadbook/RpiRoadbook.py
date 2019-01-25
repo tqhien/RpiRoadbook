@@ -391,16 +391,56 @@ def update_sprites(screen):
             old_sprites [i] = sprites[i]
 
 #----------------------------------------------------------------------------------------------#
-#-------------------------- Vérification configfile -------------------------------------------#
+#-------------------------- Vérification configfiles ------------------------------------------#
 #----------------------------------------------------------------------------------------------#
-maconfig = configparser.ConfigParser()
+setupconfig = configparser.ConfigParser()
+guiconfig = configparser.ConfigParser()
+rbconfig = configparser.ConfigParser()
+
+def save_setupconfig():
+    global setupconfig
+    for attempt in range(5):
+        try :
+            with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:
+                setupconfig.write(configfile)
+        except :
+            time.sleep(.2)
+        else : 
+            break
+    else :
+        print('Write Error RpiRoadbook_setup.cfg after 5 tries')
+
+def save_rbconfig():
+    global rbconfig
+    for attempt in range(5):
+        try :
+            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                rbconfig.write(configfile)
+        except :
+            time.sleep(.2)
+        else : 
+            break
+    else :
+        print('Write Error RpiRoadbook.cfg after 5 tries')
+
 def check_configfile():
-    global maconfig,mode_jour
-    candidates = ['/home/rpi/RpiRoadbook/gui.cfg','/home/rpi/RpiRoadbook/default.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
-    maconfig.read(candidates)
-    with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-        maconfig.write(configfile)
-    mode_jour = maconfig['Parametres']['jour_nuit'] == 'Jour'
+    global guiconfig,setupconfig,mode_jour,rbconfig
+    # On charge les emplacements des elements d'affichage
+    guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
+
+    # On charge les reglages : mode, orientation, etc
+    candidates = ['/home/rpi/RpiRoadbook/default.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+    setupconfig.read(candidates)
+    save_setupconfig()
+
+    mode_jour = setupconfig['Parametres']['jour_nuit'] == 'Jour'
+
+    # On charge le roadbook en cours et sa case
+    candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
+    rbconfig.read(candidates)
+    save_rbconfig()
+
+
 
 #*******************************************************************************************************#
 #---------------------------------------- Le template de classe / écran  -------------------------------#
@@ -503,7 +543,7 @@ class TitleScene(SceneBase):
             gotoConfig = False
             self.SwitchToScene(ModeScene())
         else :
-            self.rallye = maconfig['Parametres']['mode']
+            self.rallye = setupconfig['Parametres']['mode']
             if self.rallye in ('Rallye','Zoom') :
                 self.SwitchToScene(SelectionScene())
             elif self.rallye == 'Route' :
@@ -532,7 +572,7 @@ class SelectionScene(SceneBase):
         check_configfile()
         
         
-        self.orientation = maconfig['Parametres']['orientation']
+        self.orientation = setupconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
@@ -551,14 +591,14 @@ class SelectionScene(SceneBase):
         self.gotoEdit = False
 
         if self.orientation == 'Paysage' :
-            labels['infos'] = ('Demarrage automatique dans 5s...',(int(maconfig[self.orientation]['select_text_x']),int(maconfig[self.orientation]['select_text_y'])),VERT25,angle)
+            labels['infos'] = ('Demarrage automatique dans 5s...',(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
             labels['invite'] = ('Selectionnez le roadbook a charger :',(10,10),BLANC25,angle)
             labels['up'] = ('        ',(10,50),BLANC25,angle)
             labels['down'] = ('        ',(10,380),BLANC25,angle)
             for i in range (10) :
                 labels['liste{}'.format(i)] = ('',(10,80+i*30),BLANC25,angle)
         else :
-            labels['infos'] = ('Demarrage automatique dans 5s...',(int(maconfig[self.orientation]['select_text_x']),int(maconfig[self.orientation]['select_text_y'])),VERT25,angle)
+            labels['infos'] = ('Demarrage automatique dans 5s...',(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
             labels['invite'] = ('Selectionnez le roadbook a charger :',(0,480),BLANC25,angle)
             labels['up'] = ('        ',(50,480),BLANC25,angle)
             labels['down'] = ('        ',(380,480),BLANC25,angle)
@@ -569,7 +609,7 @@ class SelectionScene(SceneBase):
         self.iscountdown = True ;
         self.selection= 0 ;
         self.fenetre = 0 ;
-        self.saved = maconfig['Roadbooks']['etape'] ;
+        self.saved = rbconfig['Roadbooks']['etape'] ;
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
         if len(self.filenames) == 0 : self.SwitchToScene(NoneScene())
         if self.saved in self.filenames : # le fichier rb existe, on le préselectionne
@@ -588,13 +628,13 @@ class SelectionScene(SceneBase):
             self.menu_edit = pygame.image.load('./images/icone_edit.jpg')
             self.menu_edit_white = pygame.image.load('./images/icone_edit_selected.jpg')
             pygame.display.get_surface().fill(NOIR)
-        sprites['edit'] = (self.menu_edit,(int(maconfig[self.orientation]['select_edit_x']),int(maconfig[self.orientation]['select_edit_y'])))
+        sprites['edit'] = (self.menu_edit,(int(guiconfig[self.orientation]['select_edit_x']),int(guiconfig[self.orientation]['select_edit_y'])))
         pygame.display.update()
         self.j = time.time()
 
 
     def ProcessInput(self, events, pressed_keys):
-        global maconfig
+        global rbconfig
         for event in events:
             if event.type == pygame.KEYDOWN :
                 self.iscountdown = False 
@@ -622,10 +662,9 @@ class SelectionScene(SceneBase):
                         if self.column == 1 :
                             if self.filename != self.filenames[self.selection] : # on a sélectionné un nouveau rb, on va se positionner au début
                                 self.filename = self.filenames[self.selection]
-                                maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                                maconfig['Roadbooks']['case'] = '0'
-                                with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                    maconfig.write(configfile)
+                                rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
+                                rbconfig['Roadbooks']['case'] = '0'
+                                save_rbconfig()
                             self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
                             self.SwitchToScene(ConversionScene(self.filename))
                         else :
@@ -636,7 +675,7 @@ class SelectionScene(SceneBase):
                 self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
-        global sprites,old_sprites,labels,old_labels,angle, maconfig
+        global sprites,old_sprites,labels,old_labels,angle, rbconfig
         if self.gotoEdit :
             self.SwitchToScene(EditScene(self.filename))
         else :
@@ -684,9 +723,8 @@ class SelectionScene(SceneBase):
             if self.iscountdown:
                 self.k = time.time();
                 if (self.k-self.j>=self.countdown) :
-                    maconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                    with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                        maconfig.write(configfile)
+                    rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
+                    save_rbconfig()
                     self.SwitchToScene(ConversionScene(self.filename))
 
 
@@ -741,7 +779,7 @@ class NoneScene(SceneBase):
 #*******************************************************************************************************#
 class ModeScene(SceneBase):
     def __init__(self, fname = ''):
-        global maconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global setupconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -754,31 +792,31 @@ class ModeScene(SceneBase):
         old_sprites = {}
         
         self.now = time.localtime()
-        self.orientation = maconfig['Parametres']['orientation']
+        self.orientation = setupconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
         
-        labels ['t_mode'] = ('Mode :',(int(maconfig[self.orientation]['mode_l_mode_x']),int(maconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
-        labels ['mode'] = ('Rallye',(int(maconfig[self.orientation]['mode_mode_x']),int(maconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
-        labels ['t_nuit'] = ('Jour/Nuit :',(int(maconfig[self.orientation]['mode_l_jour_nuit_x']),int(maconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
-        labels ['jour_nuit'] = ('Rallye',(int(maconfig[self.orientation]['mode_jour_nuit_x']),int(maconfig[self.orientation]['mode_jour_nuit_y'])),BLANC50,angle)
-        labels ['t_dim'] = ('Luminosite :',(int(maconfig[self.orientation]['mode_l_dim_x']),int(maconfig[self.orientation]['mode_l_dim_y'])),BLANC50,angle)
-        labels ['dim'] = ('100',(int(maconfig[self.orientation]['mode_dim_x']),int(maconfig[self.orientation]['mode_dim_y'])),BLANC50,angle)
-        labels ['t_orientation'] = ('Orientation :',(int(maconfig[self.orientation]['mode_l_orientation_x']),int(maconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
-        labels ['orientation'] = ('Portrait ',(int(maconfig[self.orientation]['mode_orientation_x']),int(maconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
+        labels ['t_mode'] = ('Mode :',(int(guiconfig[self.orientation]['mode_l_mode_x']),int(guiconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
+        labels ['mode'] = ('Rallye',(int(guiconfig[self.orientation]['mode_mode_x']),int(guiconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
+        labels ['t_nuit'] = ('Jour/Nuit :',(int(guiconfig[self.orientation]['mode_l_jour_nuit_x']),int(guiconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
+        labels ['jour_nuit'] = ('Rallye',(int(guiconfig[self.orientation]['mode_jour_nuit_x']),int(guiconfig[self.orientation]['mode_jour_nuit_y'])),BLANC50,angle)
+        labels ['t_dim'] = ('Luminosite :',(int(guiconfig[self.orientation]['mode_l_dim_x']),int(guiconfig[self.orientation]['mode_l_dim_y'])),BLANC50,angle)
+        labels ['dim'] = ('100',(int(guiconfig[self.orientation]['mode_dim_x']),int(guiconfig[self.orientation]['mode_dim_y'])),BLANC50,angle)
+        labels ['t_orientation'] = ('Orientation :',(int(guiconfig[self.orientation]['mode_l_orientation_x']),int(guiconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
+        labels ['orientation'] = ('Portrait ',(int(guiconfig[self.orientation]['mode_orientation_x']),int(guiconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
         
-        labels ['suivant'] = ('->',(int(maconfig[self.orientation]['mode_suiv_x']),int(maconfig[self.orientation]['mode_suiv_y'])),BLANC50,angle)
+        labels ['suivant'] = ('->',(int(guiconfig[self.orientation]['mode_suiv_x']),int(guiconfig[self.orientation]['mode_suiv_y'])),BLANC50,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.index = 0 # 0= mode, 1=nuit, 2=luminosite, 3=orientation, 4=suivant, 5 = ok
 
-        self.rallye = maconfig['Parametres']['mode']
-        mode_jour = maconfig['Parametres']['jour_nuit'] == 'Jour'
-        self.dim = int(maconfig['Parametres']['luminosite'])
-        self.paysage = maconfig['Parametres']['orientation'] == 'Paysage'
+        self.rallye = setupconfig['Parametres']['mode']
+        mode_jour = setupconfig['Parametres']['jour_nuit'] == 'Jour'
+        self.dim = int(setupconfig['Parametres']['luminosite'])
+        self.paysage = setupconfig['Parametres']['orientation'] == 'Paysage'
 
         if mode_jour :
             if angle == 0 :
@@ -796,11 +834,11 @@ class ModeScene(SceneBase):
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
             pygame.display.get_surface().fill(NOIR)
-        sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['mode_ok_x']),int(maconfig[self.orientation]['mode_ok_y'])))
+        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['mode_ok_x']),int(guiconfig[self.orientation]['mode_ok_y'])))
         pygame.display.update()
 
     def ProcessInput(self, events, pressed_keys):
-        global maconfig,mode_jour,alphabet,alphabet_size_x,alphabet_size_y,old_labels, old_sprites
+        global setupconfig,mode_jour,alphabet,alphabet_size_x,alphabet_size_y,old_labels, old_sprites
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -823,42 +861,26 @@ class ModeScene(SceneBase):
                             self.rallye = 'Zoom'
                         elif self.rallye == 'Zoom' :
                             self.rallye = 'Rallye'
-                        maconfig['Parametres']['mode'] = self.rallye 
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        setupconfig['Parametres']['mode'] = self.rallye 
+                        save_setupconfig()
 
                     elif self.index == 1 :
                         mode_jour = not mode_jour
-                        maconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
+                        save_setupconfig()
 
                     elif self.index == 2 :
                         self.dim -= 5
                         if self.dim < 5 : self.dim = 5
                         pulse.ChangeDutyCycle(self.dim)
-                        maconfig['Parametres']['luminosite'] = str(self.dim)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        setupconfig['Parametres']['luminosite'] = str(self.dim)
+                        save_setupconfig()
 
                     elif self.index == 3 :
                         self.paysage = not self.paysage
-                        maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        save_setupconfig()
 
                 elif event.key == BOUTON_UP:
                     if self.index ==0:
@@ -868,21 +890,13 @@ class ModeScene(SceneBase):
                             self.rallye = 'Route'
                         elif self.rallye == 'Route' :
                             self.rallye = 'Rallye'
-                        maconfig['Parametres']['mode'] = self.rallye 
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        setupconfig['Parametres']['mode'] = self.rallye 
+                        save_setupconfig()
 
                     elif self.index == 1:
                         mode_jour = not mode_jour
-                        maconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
+                        save_setupconfig
 
                     elif self.index == 2 :
                         self.dim += 5
@@ -890,45 +904,25 @@ class ModeScene(SceneBase):
                         pulse.ChangeDutyCycle(self.dim)
                     elif self.index == 3 :
                         self.paysage = not self.paysage
-                        maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except:
-                            pass
+                        save_setupconfig()
 
                 elif event.key == BOUTON_OK:
                     # validation
                     if self.index == 0:
-                        maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except: 
-                            pass
+                        setupconfig['Parametres']['mode'] = self.rallye
+                        save_setupconfig()
                     elif self.index == 1:
-                        maconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except: 
-                            pass
+                        setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
+                        save_setupconfig()
                     elif self.index == 2 :
-                        maconfig['Parametres']['luminosite'] = str(self.dim)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except: 
-                            pass
+                        setupconfig['Parametres']['luminosite'] = str(self.dim)
+                        save_setupconfig()
                     elif self.index == 3:
-                        maconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
+                        setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except: 
-                            pass       
+                        save_setupconfig()       
                     elif self.index == 4 : 
                         self.SwitchToScene(ConfigScene())
                     elif self.index == 5 : 
@@ -985,27 +979,27 @@ class ConfigScene(SceneBase):
         old_sprites = {}
         
         self.now = time.localtime()
-        self.orientation = maconfig['Parametres']['orientation']
+        self.orientation = setupconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
         
-        labels ['t_roue'] = ('Roue :',(int(maconfig[self.orientation]['config_l_roue_x']),int(maconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
-        labels ['roue'] = ('{:4d}'.format(0),(int(maconfig[self.orientation]['config_roue_x']),int(maconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
-        labels ['t_aimants'] = ('Nb aimants :',(int(maconfig[self.orientation]['config_l_aimants_x']),int(maconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
-        labels ['aimants'] = ('{:2d}  '.format(0),(int(maconfig[self.orientation]['config_aimants_x']),int(maconfig[self.orientation]['config_aimants_y'])),BLANC50,angle)
-        labels ['t_date'] = ('Date :',(int(maconfig[self.orientation]['config_l_date_x']),int(maconfig[self.orientation]['config_l_date_y'])),BLANC50,angle)
-        labels ['jj'] = ('01/',(int(maconfig[self.orientation]['config_d_x']),int(maconfig[self.orientation]['config_d_y'])),BLANC50,angle)
-        labels ['mm'] = ('01/',(int(maconfig[self.orientation]['config_m_x']),int(maconfig[self.orientation]['config_m_y'])),BLANC50,angle,)
-        labels ['aaaa'] = ('2018',(int(maconfig[self.orientation]['config_y_x']),int(maconfig[self.orientation]['config_y_y'])),BLANC50,angle)
-        labels ['t_heure'] = ('Heure:',(int(maconfig[self.orientation]['config_l_heure_x']),int(maconfig[self.orientation]['config_l_heure_y'])),BLANC50,angle)
-        labels ['hh'] = ('00:',(int(maconfig[self.orientation]['config_hour_x']),int(maconfig[self.orientation]['config_hour_y'])),BLANC50,angle)
-        labels ['min'] = ('00:',(int(maconfig[self.orientation]['config_minute_x']),int(maconfig[self.orientation]['config_minute_y'])),BLANC50,angle)
-        labels ['ss'] = ('00 ',(int(maconfig[self.orientation]['config_seconde_x']),int(maconfig[self.orientation]['config_seconde_y'])),BLANC50,angle,)
+        labels ['t_roue'] = ('Roue :',(int(guiconfig[self.orientation]['config_l_roue_x']),int(guiconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
+        labels ['roue'] = ('{:4d}'.format(0),(int(guiconfig[self.orientation]['config_roue_x']),int(guiconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
+        labels ['t_aimants'] = ('Nb aimants :',(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
+        labels ['aimants'] = ('{:2d}  '.format(0),(int(guiconfig[self.orientation]['config_aimants_x']),int(guiconfig[self.orientation]['config_aimants_y'])),BLANC50,angle)
+        labels ['t_date'] = ('Date :',(int(guiconfig[self.orientation]['config_l_date_x']),int(guiconfig[self.orientation]['config_l_date_y'])),BLANC50,angle)
+        labels ['jj'] = ('01/',(int(guiconfig[self.orientation]['config_d_x']),int(guiconfig[self.orientation]['config_d_y'])),BLANC50,angle)
+        labels ['mm'] = ('01/',(int(guiconfig[self.orientation]['config_m_x']),int(guiconfig[self.orientation]['config_m_y'])),BLANC50,angle,)
+        labels ['aaaa'] = ('2018',(int(guiconfig[self.orientation]['config_y_x']),int(guiconfig[self.orientation]['config_y_y'])),BLANC50,angle)
+        labels ['t_heure'] = ('Heure:',(int(guiconfig[self.orientation]['config_l_heure_x']),int(guiconfig[self.orientation]['config_l_heure_y'])),BLANC50,angle)
+        labels ['hh'] = ('00:',(int(guiconfig[self.orientation]['config_hour_x']),int(guiconfig[self.orientation]['config_hour_y'])),BLANC50,angle)
+        labels ['min'] = ('00:',(int(guiconfig[self.orientation]['config_minute_x']),int(guiconfig[self.orientation]['config_minute_y'])),BLANC50,angle)
+        labels ['ss'] = ('00 ',(int(guiconfig[self.orientation]['config_seconde_x']),int(guiconfig[self.orientation]['config_seconde_y'])),BLANC50,angle,)
         
-        labels ['prec'] = ('<- ',(int(maconfig[self.orientation]['config_prec_x']),int(maconfig[self.orientation]['config_prec_y'])),BLANC50,angle,)
+        labels ['prec'] = ('<- ',(int(guiconfig[self.orientation]['config_prec_x']),int(guiconfig[self.orientation]['config_prec_y'])),BLANC50,angle,)
 
         if mode_jour :
             if angle == 0 :
@@ -1022,12 +1016,12 @@ class ConfigScene(SceneBase):
             else :
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-        sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['config_ok_x']),int(maconfig[self.orientation]['config_ok_y'])))
+        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['config_ok_x']),int(guiconfig[self.orientation]['config_ok_y'])))
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.index = 8 # de 0 à 5 : date et heure, 6=precedent, 7=ok, 8=roue, 9=nb aimants
-        self.d_roue = int(maconfig['Parametres']['roue'])
-        self.aimants = int(maconfig['Parametres']['aimants'])
+        self.d_roue = int(setupconfig['Parametres']['roue'])
+        self.aimants = int(setupconfig['Parametres']['aimants'])
 
         self.data = []
         self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
@@ -1048,7 +1042,7 @@ class ConfigScene(SceneBase):
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
             pygame.display.get_surface().fill(NOIR)
-        sprites ['ok'] = (self.bouton_ok,(int(maconfig[self.orientation]['mode_ok_x']),int(maconfig[self.orientation]['mode_ok_y'])))
+        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['mode_ok_x']),int(guiconfig[self.orientation]['mode_ok_y'])))
         pygame.display.update()
         self.t = time.time()
         
@@ -1077,7 +1071,7 @@ class ConfigScene(SceneBase):
 
 
     def ProcessInput(self, events, pressed_keys):
-        global maconfig
+        global setupconfig
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -1122,19 +1116,11 @@ class ConfigScene(SceneBase):
                 elif event.key == BOUTON_OK:
                     # validation
                     if self.index == 8:
-                        maconfig['Parametres']['roue'] = str(self.d_roue)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except: 
-                            pass
+                        setupconfig['Parametres']['roue'] = str(self.d_roue)
+                        save_setupconfig()
                     elif self.index == 9:
-                        maconfig['Parametres']['aimants'] = str(self.aimants)
-                        try:
-                            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                                maconfig.write(configfile)
-                        except: 
-                            pass       
+                        setupconfig['Parametres']['aimants'] = str(self.aimants)
+                        save_setupconfig()      
                     elif self.index == 6 : 
                         self.SwitchToScene(ModeScene())
                     elif self.index == 7 : 
@@ -1172,16 +1158,12 @@ class ConfigScene(SceneBase):
             sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
-        global maconfig
+        global setupconfig
         update_labels(screen)
         update_sprites(screen)
         k = time.time()
         if k-self.t >= 5:
-            try:
-                with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                    maconfig.write(configfile)
-            except: 
-                pass
+            save_setupconfig()
             self.SwitchToScene(TitleScene())
 
 
@@ -1242,8 +1224,8 @@ class ConversionScene(SceneBase):
         self.next = self
         self.filename = fname
         self.gotoEdit = gotoE
-        self.orientation = maconfig['Parametres']['orientation']
-        self.rallye = maconfig['Parametres']['mode']
+        self.orientation = setupconfig['Parametres']['orientation']
+        self.rallye = setupconfig['Parametres']['mode']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
@@ -1257,9 +1239,9 @@ class ConversionScene(SceneBase):
 
         setup_alphabet(VERT25)
 
-        labels ['text'] = ('',(int(maconfig[self.orientation]['conv_text_x']),int(maconfig[self.orientation]['conv_text_y'])),VERT25,angle)
-        labels ['text1'] = ('',(int(maconfig[self.orientation]['conv_text1_x']),int(maconfig[self.orientation]['conv_text1_y'])),VERT25,angle)
-        labels ['text2'] = ('',(int(maconfig[self.orientation]['conv_text2_x']),int(maconfig[self.orientation]['conv_text2_y'])),VERT25,angle)
+        labels ['text'] = ('',(int(guiconfig[self.orientation]['conv_text_x']),int(guiconfig[self.orientation]['conv_text_y'])),VERT25,angle)
+        labels ['text1'] = ('',(int(guiconfig[self.orientation]['conv_text1_x']),int(guiconfig[self.orientation]['conv_text1_y'])),VERT25,angle)
+        labels ['text2'] = ('',(int(guiconfig[self.orientation]['conv_text2_x']),int(guiconfig[self.orientation]['conv_text2_y'])),VERT25,angle)
  
 
     def ProcessInput(self, events, pressed_keys):
@@ -1269,7 +1251,7 @@ class ConversionScene(SceneBase):
         pass
 
     def Render(self, screen):
-        global labels,old_labels,sprites,old_sprites,maconfig
+        global labels,old_labels,sprites,old_sprites,rbconfig
         if mode_jour :
             screen.fill(BLANC)
         else:
@@ -1324,9 +1306,8 @@ class ConversionScene(SceneBase):
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                         update_labels(screen)
             # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
-            maconfig['Roadbooks']['case'] = str(total-2)
-            with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-              maconfig.write(configfile)
+            rbconfig['Roadbooks']['case'] = str(total-2)
+            save_rbconfig()
         else:
             #print('On fait une verification de coherence')
             filedir = os.path.splitext(self.filename)[0]
@@ -1379,11 +1360,10 @@ class ConversionScene(SceneBase):
                             labels['text'] = ('Case {}/{}'.format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3])
                             self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                             update_labels(screen)
-            if int(maconfig['Roadbooks']['case']) < 0 or int(maconfig['Roadbooks']['case']) > total -2 :
+            if int(rbconfig['Roadbooks']['case']) < 0 or int(rbconfig['Roadbooks']['case']) > total -2 :
               # Pb avec la position sauvegardée. On se positionne au début du rb
-              maconfig['Roadbooks']['case'] = '0'
-              with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                maconfig.write(configfile)
+              rbconfig['Roadbooks']['case'] = '0'
+              save_rbconfig()
 
         if self.gotoEdit:
             self.SwitchToScene(EditScene(self.filename))
@@ -1530,7 +1510,7 @@ class RoadbookScene(SceneBase):
         vmax = 0
         speed = 0
 
-        self.orientation = maconfig['Parametres']['orientation']
+        self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
 
         setup_alphabet(BLANC75)
@@ -1539,21 +1519,21 @@ class RoadbookScene(SceneBase):
         setup_alphabet(GRIS75)
 
         # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
-        labels['heure'] = ('00:00:00',(int(maconfig[self.orientation]['rb_tps_x']),int(maconfig[self.orientation]['rb_tps_y'])),BLANC75,angle)
-        labels['distance'] = ('{:6.2f}'.format(0.0),(int(maconfig[self.orientation]['rb_km_x']),int(maconfig[self.orientation]['rb_km_y'])),BLANC100,angle)
-        labels['t_vitesse'] = ('Vitesse',(int(maconfig[self.orientation]['rb_t_vi_x']),int(maconfig[self.orientation]['rb_t_vi_y'])),ROUGE25,angle)
-        labels['vitesse'] = ('{:3.0f} '.format(0.0),(int(maconfig[self.orientation]['rb_vi_x']),int(maconfig[self.orientation]['rb_vi_y'])),BLANC75,angle)
-        labels['t_vmoy'] = ('Vit. moy.',(int(maconfig[self.orientation]['rb_t_vm_x']),int(maconfig[self.orientation]['rb_t_vm_y'])),ROUGE25,angle)
-        labels['vmoy'] = ('{:3.0f} '.format(0.0),(int(maconfig[self.orientation]['rb_vm_x']),int(maconfig[self.orientation]['rb_vm_y'])),GRIS75,angle)
-        labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(maconfig[self.orientation]['rb_temp_x']),int(maconfig[self.orientation]['rb_temp_y'])),ROUGE25,angle)
-        labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(maconfig[self.orientation]['rb_cpu_x']),int(maconfig[self.orientation]['rb_cpu_y'])),ROUGE25,angle)
+        labels['heure'] = ('00:00:00',(int(guiconfig[self.orientation]['rb_tps_x']),int(guiconfig[self.orientation]['rb_tps_y'])),BLANC75,angle)
+        labels['distance'] = ('{:6.2f}'.format(0.0),(int(guiconfig[self.orientation]['rb_km_x']),int(guiconfig[self.orientation]['rb_km_y'])),BLANC100,angle)
+        labels['t_vitesse'] = ('Vitesse',(int(guiconfig[self.orientation]['rb_t_vi_x']),int(guiconfig[self.orientation]['rb_t_vi_y'])),ROUGE25,angle)
+        labels['vitesse'] = ('{:3.0f} '.format(0.0),(int(guiconfig[self.orientation]['rb_vi_x']),int(guiconfig[self.orientation]['rb_vi_y'])),BLANC75,angle)
+        labels['t_vmoy'] = ('Vit. moy.',(int(guiconfig[self.orientation]['rb_t_vm_x']),int(guiconfig[self.orientation]['rb_t_vm_y'])),ROUGE25,angle)
+        labels['vmoy'] = ('{:3.0f} '.format(0.0),(int(guiconfig[self.orientation]['rb_vm_x']),int(guiconfig[self.orientation]['rb_vm_y'])),GRIS75,angle)
+        labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(guiconfig[self.orientation]['rb_temp_x']),int(guiconfig[self.orientation]['rb_temp_y'])),ROUGE25,angle)
+        labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(guiconfig[self.orientation]['rb_cpu_x']),int(guiconfig[self.orientation]['rb_cpu_y'])),ROUGE25,angle)
         
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.ncases = int(maconfig[self.orientation]['ncases'])
+        self.ncases = int(guiconfig[self.orientation]['ncases'])
         self.pages = {}
 
-        roue = int(maconfig['Parametres']['roue'])
-        aimants = int(maconfig['Parametres']['aimants'])
+        roue = int(setupconfig['Parametres']['roue'])
+        aimants = int(setupconfig['Parametres']['aimants'])
         developpe = 1.0*roue / aimants
 
         import logging
@@ -1588,7 +1568,7 @@ class RoadbookScene(SceneBase):
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
         self.nb_cases = len(fichiers)
-        self.case = int(maconfig['Roadbooks']['case'])
+        self.case = int(rbconfig['Roadbooks']['case'])
         if self.case < 0 :
             self.case = 0 # on compte de 0 à longueur-1
         self.oldcase = self.case + 1
@@ -1661,14 +1641,11 @@ class RoadbookScene(SceneBase):
 
     def Update(self):
         global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature,cpu
-        global labels,old_labels,sprites,old_sprites,maconfig
+        global labels,old_labels,sprites,old_sprites,rbconfig
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
-            maconfig['Roadbooks']['case'] = str(self.case)
-            try:
-              with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                maconfig.write(configfile)
-            except: pass
+            rbconfig['Roadbooks']['case'] = str(self.case)
+            save_rbconfig()
 
         if distance < 200000 or tps < 2 : 
             vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 20 premiers metres ou les 2 premieres secondes
@@ -1726,7 +1703,7 @@ class OdometerScene(SceneBase):
         
         speed = 0
 
-        self.orientation = maconfig['Parametres']['orientation']
+        self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
 
         setup_alphabet (BLANC75)
@@ -1738,16 +1715,16 @@ class OdometerScene(SceneBase):
         self.index = 0 # totalisateur par defaut
 
         # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
-        labels['heure'] = ('00:00:00',(int(maconfig[self.orientation]['odo_tps_x']),int(maconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
-        labels['t_totalisateur'] = ('Total : ',(int(maconfig[self.orientation]['odo_t_km_x']),int(maconfig[self.orientation]['odo_t_km_y'])),BLANC25,angle)
-        labels['totalisateur'] = ('{:6.2f} '.format(0.0),(int(maconfig[self.orientation]['odo_km_x']),int(maconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
-        labels['t_vitesse'] = ('Vitesse',(int(maconfig[self.orientation]['odo_t_vi_x']),int(maconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
-        labels['vitesse'] = ('{:3.0f} '.format(100.0),(int(maconfig[self.orientation]['odo_vi_x']),int(maconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
-        labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(maconfig[self.orientation]['odo_temp_x']),int(maconfig[self.orientation]['odo_temp_y'])),ROUGE25,angle)
-        labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(maconfig[self.orientation]['odo_cpu_x']),int(maconfig[self.orientation]['odo_cpu_y'])),ROUGE25,angle)
+        labels['heure'] = ('00:00:00',(int(guiconfig[self.orientation]['odo_tps_x']),int(guiconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
+        labels['t_totalisateur'] = ('Total : ',(int(guiconfig[self.orientation]['odo_t_km_x']),int(guiconfig[self.orientation]['odo_t_km_y'])),BLANC25,angle)
+        labels['totalisateur'] = ('{:6.2f} '.format(0.0),(int(guiconfig[self.orientation]['odo_km_x']),int(guiconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
+        labels['t_vitesse'] = ('Vitesse',(int(guiconfig[self.orientation]['odo_t_vi_x']),int(guiconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
+        labels['vitesse'] = ('{:3.0f} '.format(100.0),(int(guiconfig[self.orientation]['odo_vi_x']),int(guiconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
+        labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(guiconfig[self.orientation]['odo_temp_x']),int(guiconfig[self.orientation]['odo_temp_y'])),ROUGE25,angle)
+        labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(guiconfig[self.orientation]['odo_cpu_x']),int(guiconfig[self.orientation]['odo_cpu_y'])),ROUGE25,angle)
 
-        roue = int(maconfig['Parametres']['roue'])
-        aimants = int(maconfig['Parametres']['aimants'])
+        roue = int(setupconfig['Parametres']['roue'])
+        aimants = int(setupconfig['Parametres']['aimants'])
         developpe = 1.0*roue / aimants
 
         import logging
@@ -1886,7 +1863,7 @@ class RoadbookZoomScene(SceneBase):
         old_sprites = {}
         image_cache = {}
         
-        self.orientation = maconfig['Parametres']['orientation']
+        self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
         self.ncases = 5 if self.orientation == 'Portrait' else 2
 
@@ -1896,7 +1873,7 @@ class RoadbookZoomScene(SceneBase):
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
         self.nb_cases = len(fichiers)
-        self.case = int(maconfig['Roadbooks']['case'])
+        self.case = int(rbconfig['Roadbooks']['case'])
         if self.case < 0 :
             self.case = 0 # on compte de 0 à longueur-1
         self.oldcase = self.case + 1
@@ -1939,14 +1916,11 @@ class RoadbookZoomScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global sprites,old_sprites,maconfig
+        global sprites,old_sprites,rbconfig
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
-            maconfig['Roadbooks']['case'] = str(self.case)
-            try:
-              with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-                maconfig.write(configfile)
-            except: pass
+            rbconfig['Roadbooks']['case'] = str(self.case)
+            save_rbconfig()
             if angle == 0 :
                 for n in range(self.ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,480-(n+1)*self.nh))
