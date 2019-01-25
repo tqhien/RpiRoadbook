@@ -503,11 +503,12 @@ class TitleScene(SceneBase):
             gotoConfig = False
             self.SwitchToScene(ModeScene())
         else :
-            self.rallye = maconfig['Parametres']['mode'] == 'Rallye'
-            if self.rallye :
+            self.rallye = maconfig['Parametres']['mode']
+            if self.rallye in ('Rallye','Zoom') :
                 self.SwitchToScene(SelectionScene())
-            else :
+            elif self.rallye == 'Route' :
                 self.SwitchToScene(OdometerScene())
+            
 
     def Render(self, screen):
         if mode_jour :
@@ -774,7 +775,7 @@ class ModeScene(SceneBase):
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.index = 0 # 0= mode, 1=nuit, 2=luminosite, 3=orientation, 4=suivant, 5 = ok
 
-        self.rallye = maconfig['Parametres']['mode'] == 'Rallye'
+        self.rallye = maconfig['Parametres']['mode']
         mode_jour = maconfig['Parametres']['jour_nuit'] == 'Jour'
         self.dim = int(maconfig['Parametres']['luminosite'])
         self.paysage = maconfig['Parametres']['orientation'] == 'Paysage'
@@ -816,8 +817,13 @@ class ModeScene(SceneBase):
                         self.index = 5    
                 elif event.key == BOUTON_DOWN:
                     if self.index == 0 :
-                        self.rallye = not self.rallye
-                        maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
+                        if self.rallye == 'Rallye' :
+                            self.rallye = 'Route'
+                        elif self.rallye == 'Route' :
+                            self.rallye = 'Zoom'
+                        elif self.rallye == 'Zoom' :
+                            self.rallye = 'Rallye'
+                        maconfig['Parametres']['mode'] = self.rallye 
                         try:
                             with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                 maconfig.write(configfile)
@@ -856,8 +862,13 @@ class ModeScene(SceneBase):
 
                 elif event.key == BOUTON_UP:
                     if self.index ==0:
-                        self.rallye = not self.rallye
-                        maconfig['Parametres']['mode'] = 'Rallye' if self.rallye else 'Route'
+                        if self.rallye == 'Rallye' :
+                            self.rallye = 'Zoom'
+                        elif self.rallye == 'Zoom' :
+                            self.rallye = 'Route'
+                        elif self.rallye == 'Route' :
+                            self.rallye = 'Rallye'
+                        maconfig['Parametres']['mode'] = self.rallye 
                         try:
                             with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                                 maconfig.write(configfile)
@@ -934,10 +945,7 @@ class ModeScene(SceneBase):
     def Update(self):
         global labels,old_labels,sprites,old_sprites
         if self.next == self :
-            if self.rallye :
-                labels['mode'] = ('Rallye',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else ('Rallye',labels['mode'][1],BLANC50,labels['mode'][3])
-            else :
-                labels['mode'] = ('Route',labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else ('Route   ',labels['mode'][1],BLANC50,labels['mode'][3])
+            labels['mode'] = (self.rallye,labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else (self.rallye,labels['mode'][1],BLANC50,labels['mode'][3])
 
             if mode_jour :
                 labels['jour_nuit'] = ('Jour   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Jour   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
@@ -1235,6 +1243,7 @@ class ConversionScene(SceneBase):
         self.filename = fname
         self.gotoEdit = gotoE
         self.orientation = maconfig['Parametres']['orientation']
+        self.rallye = maconfig['Parametres']['mode']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
@@ -1379,7 +1388,10 @@ class ConversionScene(SceneBase):
         if self.gotoEdit:
             self.SwitchToScene(EditScene(self.filename))
         else :
-            self.SwitchToScene(RoadbookScene(self.filename))
+            if self.rallye == 'Zoom' :
+                self.SwitchToScene(RoadbookZoomScene(self.filename))
+            else :
+                self.SwitchToScene(RoadbookScene(self.filename))
 
 #*******************************************************************************************************#
 #---------------------------------------- La partie Annotations de Roadbooks  --------------------------#
@@ -1860,6 +1872,92 @@ class OdometerScene(SceneBase):
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
         update_labels(screen)
         update_sprites(screen)
+
+#*******************************************************************************************************#
+#------------------------- La partie Derouleur Zoom   --------------------------------------------------#
+#*******************************************************************************************************#
+class RoadbookZoomScene(SceneBase):
+    def __init__(self, fname = ''):
+        global image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,sprites, old_sprites,angle
+        SceneBase.__init__(self,fname)
+        filedir = os.path.splitext(self.filename)[0]
+        check_configfile()
+        sprites = {}
+        old_sprites = {}
+        image_cache = {}
+        
+        self.orientation = maconfig['Parametres']['orientation']
+        angle = 90 if self.orientation == 'Portrait' else 0
+        self.ncases = 5 if self.orientation == 'Portrait' else 2
+
+        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
+        self.pages = {}
+        
+        #Chargement des images
+        fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
+        self.nb_cases = len(fichiers)
+        self.case = int(maconfig['Roadbooks']['case'])
+        if self.case < 0 :
+            self.case = 0 # on compte de 0 à longueur-1
+        self.oldcase = self.case + 1
+        
+        samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
+        (w,h) = samplepage.get_rect().size
+        rb_ratio = 480/w if self.orientation == 'Portrait' else 800/w
+        rb_ratio_annot = 480/w if self.orientation == 'Portrait' else 600/800
+        # Mise à l'échelle des images
+        self.nh = h * rb_ratio
+
+        if mode_jour :
+            pygame.display.get_surface().fill(BLANC)
+        else :
+            pygame.display.get_surface().fill(NOIR)
+        pygame.display.update()
+
+    def ProcessInput(self, events, pressed_keys):
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.Terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.Terminate()
+                elif event.key == BOUTON_UP:
+                    self.oldcase = self.case
+                    self.case -= 1
+                elif event.key == BOUTON_PGUP:
+                        self.case = 0
+                elif event.key == BOUTON_DOWN:
+                    self.oldcase = self.case
+                    self.case += 1
+                elif event.key == BOUTON_PGDOWN:
+                    self.case = self.nb_cases - self.ncases
+
+        # Action sur le dérouleur
+        if self.case > self.nb_cases - self.ncases :
+            self.case = self.nb_cases -self.ncases
+        if self.case < 0 :
+            self.case = 0
+
+    def Update(self):
+        global sprites,old_sprites,maconfig
+        if self.case != self.oldcase :
+            # On sauvegarde la nouvelle position
+            maconfig['Roadbooks']['case'] = str(self.case)
+            try:
+              with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
+                maconfig.write(configfile)
+            except: pass
+            if angle == 0 :
+                for n in range(self.ncases):
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,480-(n+1)*self.nh))
+            else :
+                for n in range(self.ncases):
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(800-(n+1)*self.nh,0))
+
+    def Render(self, screen):
+        # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
+        update_sprites(screen)
+
 
 # Pour optimisation
 #import cProfile
