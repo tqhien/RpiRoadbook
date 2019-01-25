@@ -171,7 +171,10 @@ def input_ok_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
+    try :
+        GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
+    except :
+        pass
 
 
 def input_up_callback(channel):
@@ -536,10 +539,6 @@ class SelectionScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
-        myfont = {}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
 
         # On ne charge que les polices dont on a besoin
         setup_alphabet(BLANC25)
@@ -706,10 +705,6 @@ class NoneScene(SceneBase):
 
         labels = {}
         old_labels = {}
-        myfont = {}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
 
         setup_alphabet(ROUGE25)
 
@@ -756,10 +751,7 @@ class ModeScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
-        myfont = {}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
+        
         self.now = time.localtime()
         self.orientation = maconfig['Parametres']['orientation']
 
@@ -983,10 +975,7 @@ class ConfigScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
-        myfont = {}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
+        
         self.now = time.localtime()
         self.orientation = maconfig['Parametres']['orientation']
 
@@ -1203,10 +1192,7 @@ class G_MassStorageScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
-        myfont={}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
+        
         setup_alphabet(ROUGE25)
         sprites['usb'] = (pygame.image.load ('./images/usb_connected_white.jpg'),(0,0))
         labels ['text'] = ('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',(10,450),ROUGE25,0)
@@ -1400,7 +1386,7 @@ class ConversionScene(SceneBase):
 #*******************************************************************************************************#
 class EditScene(SceneBase):
     def __init__(self, fname = ''):
-        global labels,old_labels,sprites,old_sprites,filedir,fichiers,rb_ratio,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global labels,old_labels,sprites,old_sprites,filedir,fichiers,rb_ratio,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y,fps
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -1413,10 +1399,7 @@ class EditScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        myfont={}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
+        
         angle = 0
         fps = 60
 
@@ -1432,42 +1415,16 @@ class EditScene(SceneBase):
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
         self.case = 0
-        self.old_case = 0
+        self.old_case = -1
         sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
 
         if mode_jour :
             pygame.display.get_surface().fill(BLANC)
-            sprites['nav_first'] = (pygame.image.load ('./images/nav_first_white.jpg'),(50,430))
-            sprites['nav_prec_10'] = (pygame.image.load ('./images/nav_prec_10_white.jpg'),(125,430))
-            sprites['nav_prec_1'] = (pygame.image.load ('./images/nav_prec_1_white.jpg'),(200,430))
             labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25inv,0)
-            sprites['nav_suiv_1'] = (pygame.image.load ('./images/nav_suiv_1_white.jpg'),(400,430))
-            sprites['nav_suiv_10'] = (pygame.image.load ('./images/nav_suiv_10_white.jpg'),(475,430))
-            sprites['nav_end'] = (pygame.image.load ('./images/nav_end_white.jpg'),(550,430))
-            sprites['nav_raz'] = (pygame.image.load ('./images/nav_raz_white.jpg'),(650,430))
-            sprites['nav_ok'] = (pygame.image.load ('./images/nav_ok_white.jpg'),(750,430))
         else :
             pygame.display.get_surface().fill(NOIR)
-            sprites['nav_first'] = (pygame.image.load ('./images/nav_first.jpg'),(50,430))
-            sprites['nav_prec_10'] = (pygame.image.load ('./images/nav_prec_10.jpg'),(125,430))
-            sprites['nav_prec_1'] = (pygame.image.load ('./images/nav_prec_1.jpg'),(200,430))
             labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25,0)
-            sprites['nav_suiv_1'] = (pygame.image.load ('./images/nav_suiv_1.jpg'),(400,430))
-            sprites['nav_suiv_10'] = (pygame.image.load ('./images/nav_suiv_10.jpg'),(475,430))
-            sprites['nav_end'] = (pygame.image.load ('./images/nav_end.jpg'),(550,430))
-            sprites['nav_raz'] = (pygame.image.load ('./images/nav_raz.jpg'),(650,430))
-            sprites['nav_ok'] = (pygame.image.load ('./images/nav_ok.jpg'),(750,430))
         pygame.display.update()
-
-        self.r = {}
-        self.r['nav_first'] = pygame.Rect(50,430,50,50)
-        self.r['nav_prec_10'] = pygame.Rect(125,430,50,50)
-        self.r['nav_prec_1'] = pygame.Rect(200,430,50,50)
-        self.r['nav_suiv_1'] = pygame.Rect(400,430,50,50)
-        self.r['nav_suiv_10'] = pygame.Rect(475,430,50,50)
-        self.r['nav_end'] = pygame.Rect(550,430,50,50)
-        self.r['nav_raz'] = pygame.Rect(650,430,50,50)
-        self.r['nav_ok'] = pygame.Rect(750,430,50,50)
 
         
         self.last_coords = (800,480)
@@ -1477,8 +1434,6 @@ class EditScene(SceneBase):
             self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
         self.canvas.set_colorkey(BLANC)
         self.mouse = pygame.mouse
-        self.was_pressed = False
-        self.r['case'] = pygame.Rect((0,0),self.canvas.get_rect().size)
         
 
     def ProcessInput(self, events, pressed_keys):
@@ -1488,51 +1443,39 @@ class EditScene(SceneBase):
             if event.type == pygame.QUIT:
                 self.Terminate()
             elif event.type == pygame.KEYDOWN :
-                if event.key == BOUTON_BACKSPACE :
-                    pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
+                pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
+                if event.key == BOUTON_OK :
                     self.SwitchToScene(TitleScene())
+                    fps = 5
+                elif event.key == BOUTON_DOWN :
+                    self.case += 1
+                elif event.key == BOUTON_UP :
+                    self.case -= 1
+                elif event.key == BOUTON_BACKSPACE :
+                    self.canvas = sprites['case'][0].copy()
+                    self.canvas.fill(BLANC)
+                    pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
+                elif event.key == BOUTON_LEFT :
+                    self.case -= 10
+                elif event.key == BOUTON_RIGHT :
+                    self.case += 10
+                if self.case < 0 : self.case = 0
+                if self.case >= self.nb_cases : self = self.nb_cases-1
+                # On charge l'ancienne annotation si elle existe
+                if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
+                    self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
+                else :
+                    self.canvas.fill(BLANC)
+                self.canvas.set_colorkey(BLANC)
             elif left_pressed :
                 self.c = pygame.mouse.get_pos()
-                if self.r['case'].collidepoint(self.c) :
-                    if self.last_coords == (800,480) : self.last_coords = self.c
-                    self.coords = self.c
-                    pygame.draw.line(self.canvas, ROUGE,self.last_coords, self.coords,5)
-                    self.last_coords = self.coords
-                else :
-                    self.was_pressed = True
+                if self.last_coords == (800,480) : self.last_coords = self.c
+                self.coords = self.c
+                pygame.draw.line(self.canvas, ROUGE,self.last_coords, self.coords,5)
+                self.last_coords = self.coords
             else :
-                # On vient de relacher le doigt. quelles action faire
-                if self.was_pressed :
-                    pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
-                    if self.r['nav_first'].collidepoint(self.c) :
-                        self.case = 0
-                    elif self.r['nav_prec_10'].collidepoint(self.c) :
-                        self.case -= 10
-                    elif self.r['nav_prec_1'].collidepoint(self.c) :
-                        self.case -= 1
-                    elif self.r['nav_suiv_1'].collidepoint(self.c) :
-                        self.case += 1
-                    elif self.r['nav_suiv_10'].collidepoint(self.c) :
-                        self.case += 10
-                    elif self.r['nav_end'].collidepoint(self.c) :
-                        self.case = self.nb_cases-1
-                    elif self.r['nav_raz'].collidepoint(self.c) :
-                        self.canvas = sprites['case'][0].copy()
-                        self.canvas.fill(BLANC)
-                        pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
-                    elif self.r['nav_ok'].collidepoint(self.c) :
-                        self.SwitchToScene(SelectionScene())
-                        fps = 5
-                    if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
-                        self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
-                    else :
-                        self.canvas.fill(BLANC)
-                    self.canvas.set_colorkey(BLANC)
-                    self.was_pressed = False
-                else :
+                if self.last_coords != (800,480) :
                     self.last_coords = (800,480)
-            if self.case < 0 : self.case = 0
-            if self.case >= self.nb_cases : self = self.nb_cases-1
 
     def Update(self):
         if self.next == self :
@@ -1570,10 +1513,7 @@ class RoadbookScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        myfont = {}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
+        
         vmoy = 0
         vmax = 0
         speed = 0
@@ -1771,10 +1711,7 @@ class OdometerScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        myfont = {}
-        alphabet = {}
-        alphabet_size_x = {}
-        alphabet_size_y = {}
+        
         speed = 0
 
         self.orientation = maconfig['Parametres']['orientation']
