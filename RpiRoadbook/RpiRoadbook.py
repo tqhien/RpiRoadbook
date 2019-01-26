@@ -404,6 +404,7 @@ def save_setupconfig():
             with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:
                 setupconfig.write(configfile)
         except :
+            subprocess.Popen('sudo fsck.vfat -a /dev/mmcblk0p3',shell=True)
             time.sleep(.2)
         else : 
             break
@@ -417,6 +418,7 @@ def save_rbconfig():
             with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                 rbconfig.write(configfile)
         except :
+            subprocess.Popen('sudo fsck.vfat -a /dev/mmcblk0p3',shell=True)
             time.sleep(.2)
         else : 
             break
@@ -879,7 +881,14 @@ class ModeScene(SceneBase):
                     elif self.index == 3 :
                         self.paysage = not self.paysage
                         setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
-                        subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
+                        if self.paysage :
+                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+                            subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount', shell=True) 
+                        else :
+                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+                            subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
                         save_setupconfig()
 
                 elif event.key == BOUTON_UP:
@@ -905,7 +914,14 @@ class ModeScene(SceneBase):
                     elif self.index == 3 :
                         self.paysage = not self.paysage
                         setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
-                        subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
+                        if self.paysage :
+                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+                            subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
+                        else :
+                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+                            subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
                         save_setupconfig()
 
                 elif event.key == BOUTON_OK:
@@ -921,7 +937,14 @@ class ModeScene(SceneBase):
                         save_setupconfig()
                     elif self.index == 3:
                         setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
-                        subprocess.Popen('sudo ./paysage.sh',shell=True) if self.paysage else subprocess.Popen('sudo ./portrait.sh',shell=True)
+                        if self.paysage :
+                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+                            subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
+                        else :
+                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+                            subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
                         save_setupconfig()       
                     elif self.index == 4 : 
                         self.SwitchToScene(ConfigScene())
