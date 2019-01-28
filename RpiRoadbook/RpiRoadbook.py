@@ -1352,8 +1352,8 @@ class ConversionScene(SceneBase):
                         labels['text'] = ('Case {}/{}'.format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3])
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                         update_labels(screen)
-            # On se positionne à l'avant dernière case (ou la 2ème dans l'ordre de lecteur du rb
-            rbconfig['Roadbooks']['case'] = str(total-2)
+            # On se positionne à la premiere case
+            rbconfig['Roadbooks']['case'] = '0'
             save_rbconfig()
         else:
             #print('On fait une verification de coherence')
