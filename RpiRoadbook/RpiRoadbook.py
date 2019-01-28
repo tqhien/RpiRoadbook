@@ -97,8 +97,6 @@ BOUTON_UP       = pygame.K_UP # Bouton Up (1er en bas)
 BOUTON_PGUP     = pygame.K_PAGEUP # Bouton UP long
 BOUTON_DOWN     = pygame.K_DOWN # Bouton Down (tout en bas)
 BOUTON_PGDOWN  = pygame.K_PAGEDOWN # Bouton Down long
-GMASSSTORAGE    = USEREVENT+1 # Event branchement en mode cle usb
-USB_DISCONNECTED = USEREVENT+2 # Event Cable usb debranche
 
 GPIO_ROUE = 17
 GPIO_LEFT = 27
@@ -216,22 +214,8 @@ GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncet
 GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
 
 #*******************************************************************************************************#
-#------------------------- Le callback de la connexion USB ---------------------------------------------#
+#------------------------- Le callbacks des suivis systeme : temp et cpu -------------------------------#
 #*******************************************************************************************************#
-
-def g_mass_storage_callback():
-    try:
-        rfile = open('/sys/class/udc/20980000.usb/state')
-        r = rfile.read()
-        if r == 'configured\n' :
-             pygame.event.post(pygame.event.Event(GMASSSTORAGE))
-        else:
-             pygame.event.post(pygame.event.Event(USB_DISCONNECTED))
-        rfile.close()
-    except:
-        pass
-
-
 
 def rpi_temp():
     global temperature
@@ -508,17 +492,16 @@ def run_RpiRoadbook(width, height,  starting_scene):
     
 
     active_scene = starting_scene
-    t_usb = time.time()
     check_configfile()
+    t_sys = time.time()
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
-        # On ne checke la connectivité usb, la température et la charge cpu que toutes les 5 secondes
-        if time.time() - 5 > t_usb : 
-            g_mass_storage_callback()
-            t_usb = time.time()   
+        # On ne checke la température et la charge cpu que toutes les 5 secondes
+        if time.time() - 5 > t_sys : 
             rpi_temp()    
             cpu_load()
+            t_sys = time.time()
 
         # Event filtering
         filtered_events = []
@@ -533,8 +516,6 @@ def run_RpiRoadbook(width, height,  starting_scene):
                     quit_attempt = True
                 elif event.key == pygame.K_F4 and alt_pressed:
                     quit_attempt = True
-            elif event.type == GMASSSTORAGE:
-                active_scene.SwitchToScene(G_MassStorageScene())
 
             if quit_attempt:
                 active_scene.Terminate()
@@ -696,9 +677,6 @@ class SelectionScene(SceneBase):
                         else :
                             self.filename = self.filenames[self.selection]
                             self.gotoEdit = True
-            elif event.type == GMASSSTORAGE :
-                self.iscountdown = False
-                self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
         global sprites,old_sprites,labels,old_labels,angle, rbconfig
@@ -791,8 +769,6 @@ class NoneScene(SceneBase):
             elif event.type == pygame.KEYDOWN :
                 if event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
                     self.SwitchToScene(TitleScene())
-            elif event.type == GMASSSTORAGE:
-                self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
         pass
@@ -1212,53 +1188,6 @@ class ConfigScene(SceneBase):
         if k-self.t >= 5:
             save_setupconfig()
             self.SwitchToScene(TitleScene())
-
-
-#*******************************************************************************************************#
-#---------------------------------------- La partie Gadget Mass Storage --------------------------------#
-#*******************************************************************************************************#
-class G_MassStorageScene(SceneBase):
-    def __init__(self, fname = ''):
-        global labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
-        SceneBase.__init__(self)
-        self.next = self
-        self.filename = fname
-
-        pygame.font.init()
-        labels = {}
-        old_labels = {}
-        sprites = {}
-        old_sprites = {}
-        
-        setup_alphabet(ROUGE25)
-        sprites['usb'] = (pygame.image.load ('./images/usb_connected_white.jpg'),(0,0))
-        labels ['text'] = ('Appuyez sur un bouton une fois le cable debranche pour retourner au menu',(10,450),ROUGE25,0)
-        #os.system('umount /mnt/piusb')
-
-    def ProcessInput(self, events, pressed_keys):
-        for event in events:
-            if event.type == pygame.QUIT:
-                self.Terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.Terminate()
-                elif event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
-                    #os.system('modprobe -r g_mass_storage')
-                    #time.sleep(1)
-                    #os.system('modprobe g_mass_storage file=/home/rpi/piusb.bin stall=0 ro=0 removable=1')
-                    #time.sleep(1)
-                    #os.system('mount -t vfat /home/rpi/piusb.bin /mnt/piusb')
-                    #time.sleep(1)
-                    self.SwitchToScene(TitleScene())
-        
-
-    def Update(self):
-        pass
-
-    def Render(self, screen):
-        update_labels(screen)
-        update_sprites(screen)
-
 
 
 #*******************************************************************************************************#
@@ -1810,8 +1739,6 @@ class OdometerScene(SceneBase):
                         distancetmp = 0
                 elif event.key == BOUTON_DOWN or event.key == BOUTON_UP :
                     self.index += 1
-            elif event.type == GMASSSTORAGE:
-                self.SwitchToScene(G_MassStorageScene())
 
     def Update(self):
         global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,distancetmp2,temperature,cpu
