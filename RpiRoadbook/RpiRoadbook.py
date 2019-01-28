@@ -54,6 +54,7 @@ import subprocess
 
 import RPi.GPIO as GPIO
 
+# Pour la gestion du touchscreen
 import sys
 os.environ["SDL_FBDEV"] = "/dev/fb0"
 os.environ["SDL_MOUSEDRV"] = "TSLIB"
@@ -121,6 +122,7 @@ pulse.start(100.0)
 
 # Test bouton au démarrage pour menu de configuration
 gotoConfig = not GPIO.input(GPIO_OK)
+
 
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
@@ -396,6 +398,7 @@ def update_sprites(screen):
 setupconfig = configparser.ConfigParser()
 guiconfig = configparser.ConfigParser()
 rbconfig = configparser.ConfigParser()
+odoconfig = configparser.ConfigParser()
 
 def save_setupconfig():
     global setupconfig
@@ -404,7 +407,7 @@ def save_setupconfig():
             with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:
                 setupconfig.write(configfile)
         except :
-            subprocess.Popen('sudo fsck.vfat -a /dev/mmcblk0p3',shell=True)
+            subprocess.Popen('sudo mount -a',shell=True)
             time.sleep(.2)
         else : 
             break
@@ -418,15 +421,29 @@ def save_rbconfig():
             with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
                 rbconfig.write(configfile)
         except :
-            subprocess.Popen('sudo fsck.vfat -a /dev/mmcblk0p3',shell=True)
+            subprocess.Popen('sudo mount -a',shell=True)
             time.sleep(.2)
         else : 
             break
     else :
         print('Write Error RpiRoadbook.cfg after 5 tries')
 
+def save_odoconfig():
+    global odoconfig
+    for attempt in range (5):
+        try:
+            with open('/mnt/piusb/.log/odo.cfg','w') as configfile:
+                odoconfig.write(configfile)
+        except:
+            subprocess.Popen('sudo mount -a',shell=True)
+            time.sleep(.2)
+        else :
+            break
+    else :
+        print('Write Error odo.cfg afetr 5 tries')
+
 def check_configfile():
-    global guiconfig,setupconfig,mode_jour,rbconfig
+    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -442,6 +459,13 @@ def check_configfile():
     rbconfig.read(candidates)
     save_rbconfig()
 
+    # On charge le trip
+    candidates = ['/home/rpi/RpiRoadbook/odo.cfg','/mnt/piusb/.log/odo.cfg']
+    odoconfig.read(candidates)
+    save_odoconfig()
+    totalisateur = int(odoconfig['Odometre']['Totalisateur'])
+    distance = int(odoconfig['Odometre']['Distance1'])
+    distance2 = int(odoconfig['Odometre']['Distance2'])
 
 
 #*******************************************************************************************************#
@@ -1559,34 +1583,8 @@ class RoadbookScene(SceneBase):
         aimants = int(setupconfig['Parametres']['aimants'])
         developpe = 1.0*roue / aimants
 
-        import logging
-        from logging.handlers import RotatingFileHandler
-
-        try :
-            with open('/mnt/piusb/.log/odometre.log', "r") as f1:
-                last_line = f1.readlines()[-1]
-                distance = int(last_line)
-        except :
-            distance = 0
         cmavant = distance
         distancetmp=0
-
-        self.odometre_log = logging.getLogger('Rotating Odometer Log')
-        self.odometre_log.setLevel(logging.INFO)
-        self.odometre_handler = RotatingFileHandler('/mnt/piusb/.log/odometre.log',maxBytes=8000,backupCount=20)
-        self.odometre_log.addHandler(self.odometre_handler)
-
-        try :
-            with open('/mnt/piusb/.log/totalisateur.log', "r") as f2:
-                last_line = f2.readlines()[-1]
-                totalisateur = int(last_line)
-        except :
-            totalisateur = 0
-
-        self.totalisateur_log = logging.getLogger('Rotating Totalisateur Log')
-        self.totalisateur_log.setLevel(logging.INFO)
-        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/.log/totalisateur.log',maxBytes=8000,backupCount=20)
-        self.totalisateur_log.addHandler(self.totalisateur_handler)
 
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
@@ -1622,17 +1620,26 @@ class RoadbookScene(SceneBase):
                 elif event.key == BOUTON_RIGHT:
                     distance+=10000
                     cmavant=distance
+                    odoconfig['Odometre']['Distance1'] = str(distance)
+                    save_odoconfig()
                 elif event.key == BOUTON_END:
                     distance+=50000
                     cmavant=distance
+                    odoconfig['Odometre']['Distance1'] = str(distance)
+                    save_odoconfig()
                 elif event.key == BOUTON_LEFT:
                     distance-=10000
                     if distance <= 0 : distance = 0
                     cmavant = distance
+                    odoconfig['Odometre']['Distance1'] = str(distance)
+                    save_odoconfig()
                 elif event.key == BOUTON_HOME:
                     distance-=50000
                     if distance <= 0 : distance = 0
                     cmavant = distance
+                    odoconfig['Odometre']['Distance1'] = str(distance)
+                    save_odoconfig()
+
                 elif event.key == BOUTON_UP:
                     self.oldcase = self.case
                     self.case -= 1
@@ -1650,8 +1657,11 @@ class RoadbookScene(SceneBase):
                     speed = 0
                     tpsinit = time.time()
                     vmax = 0;
-                    self.totalisateur_log.info('{}'.format(totalisateur))
-                    self.odometre_log.info('{}'.format(distance))
+                    odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+                    odoconfig['Odometre']['Distance1'] = str(distance)
+                    odoconfig['Odometre']['Distance2'] = str(distance2)
+                    save_odoconfig()
+
                     distancetmp = 0
                 #elif event.key == BOUTON_BACKSPACE:
                     #self.SwitchToScene(TitleScene())
@@ -1685,8 +1695,11 @@ class RoadbookScene(SceneBase):
         if speed > vmax : vmax = speed
 
         if distancetmp > 100000 : # On sauvegarde l'odometre tous les 100 metres
-            self.totalisateur_log.info('{}'.format(totalisateur))
-            self.odometre_log.info('{}'.format(distance))
+            odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+            odoconfig['Odometre']['Distance1'] = str(distance)
+            odoconfig['Odometre']['Distance2'] = str(distance2)
+            save_odoconfig()
+
             distancetmp = 0
 
         labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
@@ -1750,45 +1763,10 @@ class OdometerScene(SceneBase):
         aimants = int(setupconfig['Parametres']['aimants'])
         developpe = 1.0*roue / aimants
 
-        import logging
-        from logging.handlers import RotatingFileHandler
-
-        try :
-            with open('/mnt/piusb/.log/odometre.log', "r") as f1:
-                last_line = f1.readlines()[-1]
-                distance = int(last_line)
-        except :
-            distance = 0
         cmavant = distance
         distancetmp=0
-        self.odometre_log = logging.getLogger('Rotating Odometer Log')
-        self.odometre_log.setLevel(logging.INFO)
-        self.odometre_handler = RotatingFileHandler('/mnt/piusb/.log/odometre.log',maxBytes=8000,backupCount=20)
-        self.odometre_log.addHandler(self.odometre_handler)
 
-        try :
-            with open('/mnt/piusb/.log/odometre2.log', "r") as f2:
-                last_line = f2.readlines()[-1]
-                distance2 = int(last_line)
-        except :
-            distance2 = 0
         cmavant2 = distance2
-        self.odometre2_log = logging.getLogger('Rotating Odometer2 Log')
-        self.odometre2_log.setLevel(logging.INFO)
-        self.odometre2_handler = RotatingFileHandler('/mnt/piusb/.log/odometre2.log',maxBytes=8000,backupCount=20)
-        self.odometre2_log.addHandler(self.odometre2_handler)
-
-        try :
-            with open('/mnt/piusb/.log/totalisateur.log', "r") as f2:
-                last_line = f2.readlines()[-1]
-                totalisateur = int(last_line)
-        except :
-            totalisateur = 0
-
-        self.totalisateur_log = logging.getLogger('Rotating Totalisateur Log')
-        self.totalisateur_log.setLevel(logging.INFO)
-        self.totalisateur_handler = RotatingFileHandler('/mnt/piusb/.log/totalisateur.log',maxBytes=8000,backupCount=20)
-        self.totalisateur_log.addHandler(self.totalisateur_handler)
 
         if mode_jour:
             pygame.display.get_surface().fill(BLANC)
@@ -1812,9 +1790,11 @@ class OdometerScene(SceneBase):
                         speed = 0
                         tpsinit = time.time()
                         # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
-                        self.totalisateur_log.info('{:3d}'.format(totalisateur))
-                        self.odometre_log.info('{:3d}'.format(distance))
-                        self.odometre2_log.info('{:3d}'.format(distance2))
+                        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+                        odoconfig['Odometre']['Distance1'] = str(distance)
+                        odoconfig['Odometre']['Distance2'] = str(distance2)
+                        save_odoconfig()
+
                         distancetmp = 0
                     elif self.index == 2 :
                         distance2 = 0
@@ -1822,9 +1802,11 @@ class OdometerScene(SceneBase):
                         speed = 0
                         tpsinit = time.time()
                         # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
-                        self.totalisateur_log.info('{}'.format(totalisateur))
-                        self.odometre_log.info('{}'.format(distance))
-                        self.odometre2_log.info('{}'.format(distance2))
+                        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+                        odoconfig['Odometre']['Distance1'] = str(distance)
+                        odoconfig['Odometre']['Distance2'] = str(distance2)
+                        save_odoconfig()
+
                         distancetmp = 0
                 elif event.key == BOUTON_DOWN or event.key == BOUTON_UP :
                     self.index += 1
@@ -1845,9 +1827,10 @@ class OdometerScene(SceneBase):
             cmavant = distance
 
         if distancetmp > 100000 : #On sauvegarde l'odometre tous les 100 metres
-            self.totalisateur_log.info('{}'.format(totalisateur))
-            self.odometre_log.info('{}'.format(distance))
-            self.odometre2_log.info('{}'.format(distance2))
+            odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+            odoconfig['Odometre']['Distance1'] = str(distance)
+            odoconfig['Odometre']['Distance2'] = str(distance2)
+            save_odoconfig()
             distancetmp = 0
 
         if self.next == self :
