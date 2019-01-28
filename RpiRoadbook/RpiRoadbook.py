@@ -760,14 +760,17 @@ class NoneScene(SceneBase):
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
         labels['text1'] = ('Aucun roadbook present.', (100,200),ROUGE25,0)
         labels['text2'] = ('Appuyez sur un bouton pour revenir', (100,230),ROUGE25,0)
-        labels['text3'] = ('au menu apres telechargement', (100,260),ROUGE25,0)
+        labels['text3'] = ('au menu en mode Route', (100,260),ROUGE25,0)
 
     def ProcessInput(self, events, pressed_keys):
+        global setupconfig
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
             elif event.type == pygame.KEYDOWN :
                 if event.key == BOUTON_LEFT or event.key == BOUTON_RIGHT or event.key == BOUTON_OK or event.key == BOUTON_UP or event.key == BOUTON_DOWN :
+                    setupconfig['Parametres']['mode'] = 'Route'
+                    save_setupconfig()
                     self.SwitchToScene(TitleScene())
 
     def Update(self):
