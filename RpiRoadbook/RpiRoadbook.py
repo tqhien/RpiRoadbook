@@ -66,6 +66,8 @@ totalisateur = 0
 distance = 0
 distancetmp = 0
 distance2 = 0
+temps1 = 0.0
+temps2 = 0.0
 speed = 0.00
 roue = 1864
 aimants = 1
@@ -77,6 +79,7 @@ tpsinit=0.0
 cmavant = 0
 cmavant2 = 0
 j = time.time()
+old_t = time.time()
 temperature = -1
 cpu = -1
 
@@ -121,16 +124,20 @@ pulse.start(100.0)
 # Test bouton au démarrage pour menu de configuration
 gotoConfig = not GPIO.input(GPIO_OK)
 
-
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
-    global totalisateur,distance,distancetmp
+    global totalisateur,distance,distancetmp,distance2,temps1,temps2,old_t
     totalisateur += developpe
     distance += developpe
     distancetmp += developpe
     distance2 += developpe
+    t = time.time() 
+    if t - old_t < 5 :
+        temps1 += t-old_t
+        temps2 += t-old_t
+    old_t = t    
 
 def input_left_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -424,7 +431,7 @@ def save_odoconfig():
         else :
             break
     else :
-        print('Write Error odo.cfg afetr 5 tries')
+        print('Write Error odo.cfg after 5 tries')
 
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2
@@ -447,9 +454,11 @@ def check_configfile():
     candidates = ['/home/rpi/RpiRoadbook/odo.cfg','/mnt/piusb/.log/odo.cfg']
     odoconfig.read(candidates)
     save_odoconfig()
-    totalisateur = int(odoconfig['Odometre']['Totalisateur'])
-    distance = int(odoconfig['Odometre']['Distance1'])
-    distance2 = int(odoconfig['Odometre']['Distance2'])
+    totalisateur = float(odoconfig['Odometre']['Totalisateur'])
+    distance = float(odoconfig['Odometre']['Distance1'])
+    distance2 = float(odoconfig['Odometre']['Distance2'])
+    temps1 = float(odoconfig['Odometre']['Temps1'])
+    temps2 = float(odoconfig['Odometre']['Temps2'])
 
 
 #*******************************************************************************************************#
@@ -1445,8 +1454,7 @@ class EditScene(SceneBase):
                 pygame.draw.line(self.canvas, ROUGE,self.last_coords, self.coords,5)
                 self.last_coords = self.coords
             else :
-                if self.last_coords != (800,480) :
-                    self.last_coords = (800,480)
+                self.last_coords = (800,480)
 
     def Update(self):
         if self.next == self :
@@ -1542,7 +1550,7 @@ class RoadbookScene(SceneBase):
         j = time.time()
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,tpsinit,cmavant,vmoy,vmax,distancetmp
+        global distance,temps1,tpsinit,cmavant,vmoy,vmax,distancetmp
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -1584,6 +1592,7 @@ class RoadbookScene(SceneBase):
                     self.case = self.nb_cases - self.ncases
                 elif event.key == BOUTON_BACKSPACE:
                     distance = 0
+                    temps1 = 0.0
                     cmavant = distance 
                     vmoy = 0
                     speed = 0
@@ -1592,6 +1601,8 @@ class RoadbookScene(SceneBase):
                     odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
                     odoconfig['Odometre']['Distance1'] = str(distance)
                     odoconfig['Odometre']['Distance2'] = str(distance2)
+                    odoconfig['Odometre']['Temps1'] = str(temps1)
+                    odoconfig['Odometre']['Temps2'] = str(temps2)
                     save_odoconfig()
 
                     distancetmp = 0
@@ -1605,17 +1616,17 @@ class RoadbookScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global distance,speed,vmax,cmavant,tps,j,vmoy,distancetmp,temperature,cpu
+        global distance,speed,vmax,cmavant,temps1,j,vmoy,distancetmp,temperature,cpu
         global labels,old_labels,sprites,old_sprites,rbconfig
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
 
-        if distance < 200000 or tps < 2 : 
+        if distance < 20000 or temps1 < 2 : 
             vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 20 premiers metres ou les 2 premieres secondes
         else:
-            vmoy = ((distance/(time.time()-tpsinit))*3.6/1000);
+            vmoy = distance/temps1*3.6/1000;
             
         k = time.time() - j
         if ( k >= 1) : # Vitesse moyenne sur 1 secondes
@@ -1630,6 +1641,8 @@ class RoadbookScene(SceneBase):
             odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
             odoconfig['Odometre']['Distance1'] = str(distance)
             odoconfig['Odometre']['Distance2'] = str(distance2)
+            odoconfig['Odometre']['Temps1'] = str(temps1)
+            odoconfig['Odometre']['Temps2'] = str(temps2)
             save_odoconfig()
 
             distancetmp = 0
@@ -1709,7 +1722,7 @@ class OdometerScene(SceneBase):
         j = time.time()
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,cmavant,distance2,cmavant2,speed,tpsinit,distancetmp
+        global distance,cmavant,distance2,cmavant2,speed,tpsinit,distancetmp,temps1,temps2
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -1718,6 +1731,7 @@ class OdometerScene(SceneBase):
                 if event.key == BOUTON_BACKSPACE:
                     if self.index == 1 :
                         distance = 0
+                        temps1 = 0.0
                         cmavant = distance
                         speed = 0
                         tpsinit = time.time()
@@ -1725,11 +1739,14 @@ class OdometerScene(SceneBase):
                         odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
                         odoconfig['Odometre']['Distance1'] = str(distance)
                         odoconfig['Odometre']['Distance2'] = str(distance2)
+                        odoconfig['Odometre']['Temps1'] = str(temps1)
+                        odoconfig['Odometre']['Temps2'] = str(temps2)
                         save_odoconfig()
 
                         distancetmp = 0
                     elif self.index == 2 :
                         distance2 = 0
+                        temps2 = 0.0
                         cmavant2 = distance2
                         speed = 0
                         tpsinit = time.time()
@@ -1737,6 +1754,8 @@ class OdometerScene(SceneBase):
                         odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
                         odoconfig['Odometre']['Distance1'] = str(distance)
                         odoconfig['Odometre']['Distance2'] = str(distance2)
+                        odoconfig['Odometre']['Temps1'] = str(temps1)
+                        odoconfig['Odometre']['Temps2'] = str(temps2)
                         save_odoconfig()
 
                         distancetmp = 0
@@ -1760,6 +1779,8 @@ class OdometerScene(SceneBase):
             odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
             odoconfig['Odometre']['Distance1'] = str(distance)
             odoconfig['Odometre']['Distance2'] = str(distance2)
+            odoconfig['Odometre']['Temps1'] = str(temps1)
+            odoconfig['Odometre']['Temps2'] = str(temps2)
             save_odoconfig()
             distancetmp = 0
 
