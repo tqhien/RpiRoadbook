@@ -434,7 +434,7 @@ def save_odoconfig():
         print('Write Error odo.cfg after 5 tries')
 
 def check_configfile():
-    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2
+    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2,temps1,temps2
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -1484,6 +1484,7 @@ class EditScene(SceneBase):
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
         global developpe,roue,aimants, distance,cmavant,distancetmp,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global temps1
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         check_configfile()
@@ -1493,7 +1494,10 @@ class RoadbookScene(SceneBase):
         old_sprites = {}
         image_cache = {}
         
-        vmoy = 0
+        if temps1 > 0 :
+            vmoy = distance/temps1*3.6/1000
+        else:
+            vmoy = 0
         vmax = 0
         speed = 0
 
