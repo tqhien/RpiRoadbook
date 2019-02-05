@@ -1631,7 +1631,7 @@ class RoadbookScene(SceneBase):
         k = time.time()
         if ( k-save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
             speed = (distance*3.6-cmavant*3.6); 
-            speed = 1.0*speed/k/1000; 
+            speed = 1.0*speed/(k-save_t_moy)/1000; 
             save_t_moy = time.time()
             cmavant = distance
 
@@ -1767,7 +1767,7 @@ class OdometerScene(SceneBase):
         k = time.time()
         if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
             speed = (distance*3.6-cmavant*3.6); 
-            speed = 1.0*speed/k/1000; 
+            speed = 1.0*speed/(k-save_t_moy)/1000; 
             save_t_moy = time.time()
             cmavant = distance
 
