@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# Start the wifi network....
+#
+
+do_start_default () {
+    hostapd  /etc/hostapd.conf &
+}
+
+do_start_custom () {
+    hostapd /mnt/piusb/.conf/hostapd.conf &
+}
+
+# Wait 10 seconds before action
+sleep 10
+
+# Load wifi driver
+/sbin/modprobe brcmfmac
+
+# Debian ifupdown needs the /run/network lock directory
+mkdir -p /run/network
+printf "Starting network: "
+/sbin/ifup -a
+
+
+#
+# Starts dropbear sshd.
+#
+# Allow a few customizations from a config file
+test -r /etc/default/dropbear && . /etc/default/dropbear
+DROPBEAR_ARGS="$DROPBEAR_ARGS -R"
+# If /etc/dropbear is a symlink to /var/run/dropbear, and
+#   - the filesystem is RO (i.e. we can not rm the symlink),
+#     create the directory pointed to by the symlink.
+#   - the filesystem is RW (i.e. we can rm the symlink),
+#     replace the symlink with an actual directory
+if [ -L /etc/dropbear \
+     -a "$(readlink /etc/dropbear)" = "/var/run/dropbear" ]
+then
+	if rm -f /etc/dropbear >/dev/null 2>&1; then
+		mkdir -p /etc/dropbear
+	else
+		echo "No persistent location to store SSH host keys. New keys will be"
+		echo "generated at each boot. Are you sure this is what you want to do?"
+		mkdir -p "$(readlink /etc/dropbear)"
+	fi
+fi
+printf "Starting dropbear sshd: "
+umask 077
+start-stop-daemon -S -q -p /var/run/dropbear.pid \
+	--exec /usr/sbin/dropbear -- $DROPBEAR_ARGS
+
+# Starting dnsmasq
+printf "Starting dnsmasq: "
+start-stop-daemon -S -x /usr/sbin/dnsmasq
+
+# Starting hostapd
+if [ -e /mnt/piusb/.conf/hostapd.conf ]
+then
+	do_start_custom
+else
+	do_start_default
+fi
+
+#
+# Starts lighttpd.
+#
+NAME=lighttpd
+DAEMON=/usr/sbin/$NAME
+PID_FILE="/var/run/$NAME.pid"
+CONF_FILE="/etc/$NAME/$NAME.conf"
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+printf "Starting lighttpd: "
+start-stop-daemon -S -q -p $PID_FILE --exec $DAEMON -- -f $CONF_FILE
+
