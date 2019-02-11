@@ -23,7 +23,7 @@ gpu_mem_1024=100
 
 #disable blutooth module
 dtoverlay=pi3-disable-bt
-#dtoverlay=dwc2
+dtoverlay=dwc2
 dtparam=i2c_arm=on
 
 #HDMI settings. Adafruit 7 inch backpack

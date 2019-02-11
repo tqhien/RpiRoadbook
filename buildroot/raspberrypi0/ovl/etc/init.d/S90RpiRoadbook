@@ -11,7 +11,7 @@
 
 do_start () {
     cd /home/rpi/RpiRoadbook
-    python RpiRoadbook.py &
+    python RpiRoadbook.py
 }
 
 case "$1" in

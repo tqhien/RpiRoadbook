@@ -10,7 +10,6 @@
 ### END INIT INFO
 
 do_start () {
-    sleep 1
     hwclock -s
 }
 
