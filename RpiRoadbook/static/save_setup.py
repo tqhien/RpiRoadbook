@@ -60,6 +60,9 @@ if 'user_time' in form:
   st_time = form['user_time'].value
   print (st_time)
 
+subprocess.Popen ('date "{} {}"'.format(st_date,st_time),shell=True)
+subprocess.Popen ('hwclock --set --date "{} {}" --noadjfile --utc'.format(st_date,st_time),shell=True)
+
 for attempt in range(5):
   try :
     with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:

@@ -18,5 +18,6 @@ for fileitem in files:
 print ("<p></p>")
 print ("<p></p>")
 print ('<a href="upload.html"> <input type="button" value="T&eacute;l&eacute;charger des fichiers"></a>')
+print ('<a href="setup.py"> <input type="button" value="Configuration"></a>')
 print ("</body>")
 print ("</html>")
