@@ -18,16 +18,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 
-Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier 
-suivant les termes de la GNU General Public License telle que publiée par la 
-Free Software Foundation ; soit la version 3 de la licence, soit (à votre gré) 
+Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier
+suivant les termes de la GNU General Public License telle que publiée par la
+Free Software Foundation ; soit la version 3 de la licence, soit (à votre gré)
 toute version ultérieure.
 
-Ce programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ; 
-sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER. 
+Ce programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ;
+sans même la garantie tacite de QUALITÉ MARCHANDE ou d'ADÉQUATION à UN BUT PARTICULIER.
 Consultez la GNU General Public License pour plus de détails.
 
-Vous devez avoir reçu une copie de la GNU General Public License en même temps que ce programme ; 
+Vous devez avoir reçu une copie de la GNU General Public License en même temps que ce programme ;
 si ce n'est pas le cas, consultez <http://www.gnu.org/licenses>
 
 Ce programme s'appuie sur la bibliothèque gratuit et open-source Pygame pour Python : <http://www.pygame.org>
@@ -60,6 +60,15 @@ os.environ["SDL_FBDEV"] = "/dev/fb0"
 os.environ["SDL_MOUSEDRV"] = "TSLIB"
 os.environ["SDL_MOUSEDEV"] = "/dev/input/event0"
 
+# Pour l'ecran deporte via wifi
+from flask import Flask, url_for
+from flask import render_template
+from flask_socketio import SocketIO,send,emit
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
+
 fps = 5
 
 totalisateur = 0
@@ -70,7 +79,7 @@ temps2 = 0.0
 speed = 0.00
 roue = 1864
 aimants = 1
-developpe = 1864
+developpe = 1.0*roue / aimants
 vmax = 0.00
 vmoy = 0.0
 cmavant = 0
@@ -126,15 +135,15 @@ gotoConfig = not GPIO.input(GPIO_OK)
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
-    global totalisateur,distance,distance2,temps1,temps2,old_t
+    global totalisateur,distance,distance2,temps1,temps2,old_t,developpe
     totalisateur += developpe
     distance += developpe
     distance2 += developpe
-    t = time.time() 
+    t = time.time()
     if t - old_t < 5 :
         temps1 += t-old_t
         temps2 += t-old_t
-    old_t = t    
+    old_t = t
 
 def input_left_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -248,7 +257,7 @@ def get_image(key,angle=0):
     # Chargement des images uniquement si pas encore en cache
     if not (key,angle) in image_cache:
         img = pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[key]))
-        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) : 
+        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) :
             annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
             annot = pygame.transform.rotozoom(annot,0,rb_ratio_annot)
             annot.set_colorkey(BLANC)
@@ -298,7 +307,7 @@ def load_font(police=BLANC25) :
             myfont[police]  = pygame.font.SysFont("cantarell", SALPHA[police])
         else :
             myfont[police]  = pygame.font.SysFont("cantarell", 25)
-        
+
 
 labels = {}
 old_labels = {}
@@ -317,8 +326,8 @@ def setup_alphabet(police=BLANC25):
         if angle == 90 :
             for i in printable :
                 alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,0,fg_jour[police],bg_jour[police]),90)
-                alphabet_size_x[(i,police,angle)] = 0 
-                alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]    
+                alphabet_size_x[(i,police,angle)] = 0
+                alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]
         else :
             for i in printable :
                 alphabet[(i,police,angle)] = myfont[police].render(i,0,fg_jour[police],bg_jour[police])
@@ -328,14 +337,14 @@ def setup_alphabet(police=BLANC25):
         if angle == 90 :
             for i in printable :
                 alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,0,fg_nuit[police],bg_nuit[police]),90)
-                alphabet_size_x[(i,police,angle)] = 0 
-                alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]    
+                alphabet_size_x[(i,police,angle)] = 0
+                alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]
         else :
             for i in printable :
                 alphabet[(i,police,angle)] = myfont[police].render(i,0,fg_nuit[police],bg_nuit[police])
                 alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
                 alphabet_size_y[(i,police,angle)] = 0
-            
+
 
 def blit_text (screen,st,coords, col=BLANC25,angle=0):
     if (not angle in (0,90)) : angle = 0
@@ -357,9 +366,10 @@ def update_labels(screen):
     global labels,old_labels
     for i in list(labels.keys()) :
        if (i not in old_labels.keys()) or (old_labels [i] != labels[i]) :
-            if (i in old_labels.keys()) and (len(old_labels[i]) < len (labels[i])) :
-                 blit_text (screen,' '*len(old_labels[i]),old_labels[i][1],old_labels[i][2],old_labels[i][3])
+            if (i in old_labels.keys()) and (len(old_labels[i][0]) > len (labels[i][0])) :
+                 blit_text (screen,' '*len(old_labels[i][0]),old_labels[i][1],old_labels[i][2],old_labels[i][3])
             blit_text (screen,labels[i][0],labels[i][1],labels[i][2],labels[i][3])
+            emit('Rallye',{i : labels[i][0]})
             old_labels [i] = labels[i]
 
 #--------------------------------------------------------------------------------- ----------#
@@ -378,6 +388,7 @@ def update_sprites(screen):
     for i in list(sprites.keys()) :
         if (i not in old_sprites.keys()) or (old_sprites [i] != sprites[i]) :
             blit_sprite (screen,sprites[i][0],sprites[i][1])
+            #emit(i,sprites[i][0])
             old_sprites [i] = sprites[i]
 
 #----------------------------------------------------------------------------------------------#
@@ -397,7 +408,7 @@ def save_setupconfig():
         except :
             subprocess.Popen('sudo mount -a',shell=True)
             time.sleep(.2)
-        else : 
+        else :
             break
     else :
         print('Write Error RpiRoadbook_setup.cfg after 5 tries')
@@ -411,7 +422,7 @@ def save_rbconfig():
         except :
             subprocess.Popen('sudo mount -a',shell=True)
             time.sleep(.2)
-        else : 
+        else :
             break
     else :
         print('Write Error RpiRoadbook.cfg after 5 tries')
@@ -431,7 +442,7 @@ def save_odoconfig():
         print('Write Error odo.cfg after 5 tries')
 
 def check_configfile():
-    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2,temps1,temps2
+    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2,temps1,temps2,developpe
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -441,6 +452,7 @@ def check_configfile():
     save_setupconfig()
 
     mode_jour = setupconfig['Parametres']['jour_nuit'] == 'Jour'
+    developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
 
     # On charge le roadbook en cours et sa case
     candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -488,14 +500,14 @@ class SceneBase:
 #*******************************************************************************************************#
 def run_RpiRoadbook(width, height,  starting_scene):
     global fps
-    pygame.display.init() 
-    
+    pygame.display.init()
+
     pygame.mouse.set_visible(False)
     screen = pygame.display.set_mode((width, height))
 
     clock = pygame.time.Clock()
     pygame.font.init()
-    
+
 
     active_scene = starting_scene
     check_configfile()
@@ -504,8 +516,8 @@ def run_RpiRoadbook(width, height,  starting_scene):
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
         # On ne checke la température et la charge cpu que toutes les 5 secondes
-        if time.time() - 5 > t_sys : 
-            rpi_temp()    
+        if time.time() - 5 > t_sys :
+            rpi_temp()
             cpu_load()
             t_sys = time.time()
 
@@ -561,7 +573,7 @@ class TitleScene(SceneBase):
                 self.SwitchToScene(SelectionScene())
             elif self.rallye == 'Route' :
                 self.SwitchToScene(OdometerScene())
-            
+
 
     def Render(self, screen):
         if mode_jour :
@@ -583,8 +595,8 @@ class SelectionScene(SceneBase):
 
         #pygame.font.init()
         check_configfile()
-        
-        
+
+
         self.orientation = setupconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
@@ -626,11 +638,11 @@ class SelectionScene(SceneBase):
         self.filenames = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
         if len(self.filenames) == 0 : self.SwitchToScene(NoneScene())
         if self.saved in self.filenames : # le fichier rb existe, on le préselectionne
-            self.filename = self.saved 
+            self.filename = self.saved
             self.selection = self.filenames.index(self.filename)
         else : # le fichier rb n'existe plus
             self.filename = ''
-        
+
         self.column = 1
 
         if mode_jour :
@@ -650,17 +662,17 @@ class SelectionScene(SceneBase):
         global rbconfig
         for event in events:
             if event.type == pygame.KEYDOWN :
-                self.iscountdown = False 
+                self.iscountdown = False
                 if event.key == BOUTON_UP :
-                    self.iscountdown = False 
-                    if self.column ==1 : self.selection -= 1 
-                    if self.selection < 0: self.selection = 0 
+                    self.iscountdown = False
+                    if self.column ==1 : self.selection -= 1
+                    if self.selection < 0: self.selection = 0
                     if self.selection < self.fenetre: self.fenetre -= 1
                     if self.fenetre < 0 : self.fenetre = 0
                 elif event.key == BOUTON_DOWN :
-                    self.iscountdown = False 
-                    if self.column == 1 : self.selection += 1 
-                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1 
+                    self.iscountdown = False
+                    if self.column == 1 : self.selection += 1
+                    if self.selection == len(self.filenames): self.selection = len(self.filenames)-1
                     if self.selection >= self.fenetre+10: self.fenetre+=1
                 elif event.key == BOUTON_LEFT :
                     self.iscountdown = False
@@ -669,7 +681,7 @@ class SelectionScene(SceneBase):
                 elif event.key == BOUTON_RIGHT :
                     self.iscountdown = False
                     self.column += 1
-                    if self.column > 2 : self.column = 1        
+                    if self.column > 2 : self.column = 1
                 elif event.key == BOUTON_OK :
                         self.iscountdown = False ;
                         if self.column == 1 :
@@ -801,7 +813,7 @@ class ModeScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
-        
+
         self.now = time.localtime()
         self.orientation = setupconfig['Parametres']['orientation']
 
@@ -809,7 +821,7 @@ class ModeScene(SceneBase):
 
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
-        
+
         labels ['t_mode'] = ('Mode :',(int(guiconfig[self.orientation]['mode_l_mode_x']),int(guiconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
         labels ['mode'] = ('Rallye',(int(guiconfig[self.orientation]['mode_mode_x']),int(guiconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
         labels ['t_nuit'] = ('Jour/Nuit :',(int(guiconfig[self.orientation]['mode_l_jour_nuit_x']),int(guiconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
@@ -818,7 +830,7 @@ class ModeScene(SceneBase):
         labels ['dim'] = ('100',(int(guiconfig[self.orientation]['mode_dim_x']),int(guiconfig[self.orientation]['mode_dim_y'])),BLANC50,angle)
         labels ['t_orientation'] = ('Orientation :',(int(guiconfig[self.orientation]['mode_l_orientation_x']),int(guiconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
         labels ['orientation'] = ('Portrait ',(int(guiconfig[self.orientation]['mode_orientation_x']),int(guiconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
-        
+
         labels ['suivant'] = ('->',(int(guiconfig[self.orientation]['mode_suiv_x']),int(guiconfig[self.orientation]['mode_suiv_y'])),BLANC50,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
@@ -863,7 +875,7 @@ class ModeScene(SceneBase):
                 elif event.key == BOUTON_LEFT:
                     self.index -= 1
                     if self.index < 0 :
-                        self.index = 5    
+                        self.index = 5
                 elif event.key == BOUTON_DOWN:
                     if self.index == 0 :
                         if self.rallye == 'Rallye' :
@@ -872,7 +884,7 @@ class ModeScene(SceneBase):
                             self.rallye = 'Zoom'
                         elif self.rallye == 'Zoom' :
                             self.rallye = 'Rallye'
-                        setupconfig['Parametres']['mode'] = self.rallye 
+                        setupconfig['Parametres']['mode'] = self.rallye
                         save_setupconfig()
 
                     elif self.index == 1 :
@@ -893,7 +905,7 @@ class ModeScene(SceneBase):
                         if self.paysage :
                             subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
                             subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount', shell=True) 
+                            subprocess.Popen('sudo mount /dev/root / -o ro,remount', shell=True)
                         else :
                             subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
                             subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
@@ -908,7 +920,7 @@ class ModeScene(SceneBase):
                             self.rallye = 'Route'
                         elif self.rallye == 'Route' :
                             self.rallye = 'Rallye'
-                        setupconfig['Parametres']['mode'] = self.rallye 
+                        setupconfig['Parametres']['mode'] = self.rallye
                         save_setupconfig()
 
                     elif self.index == 1:
@@ -954,10 +966,10 @@ class ModeScene(SceneBase):
                             subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
                             subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
                             subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
-                        save_setupconfig()       
-                    elif self.index == 4 : 
+                        save_setupconfig()
+                    elif self.index == 4 :
                         self.SwitchToScene(ConfigScene())
-                    elif self.index == 5 : 
+                    elif self.index == 5 :
                         alphabet = {}
                         alphabet_size_x = {}
                         alphabet_size_y = {}
@@ -966,7 +978,7 @@ class ModeScene(SceneBase):
                     # on passe au réglage suivant
                     self.index +=1
                     if self.index > 3:
-                        self.index = 0        
+                        self.index = 0
 
     def Update(self):
         global labels,old_labels,sprites,old_sprites
@@ -1009,7 +1021,7 @@ class ConfigScene(SceneBase):
         old_labels = {}
         sprites = {}
         old_sprites = {}
-        
+
         self.now = time.localtime()
         self.orientation = setupconfig['Parametres']['orientation']
 
@@ -1017,7 +1029,7 @@ class ConfigScene(SceneBase):
 
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
-        
+
         labels ['t_roue'] = ('Roue :',(int(guiconfig[self.orientation]['config_l_roue_x']),int(guiconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
         labels ['roue'] = ('{:4d}'.format(0),(int(guiconfig[self.orientation]['config_roue_x']),int(guiconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
         labels ['t_aimants'] = ('Nb aimants :',(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
@@ -1030,7 +1042,7 @@ class ConfigScene(SceneBase):
         labels ['hh'] = ('00:',(int(guiconfig[self.orientation]['config_hour_x']),int(guiconfig[self.orientation]['config_hour_y'])),BLANC50,angle)
         labels ['min'] = ('00:',(int(guiconfig[self.orientation]['config_minute_x']),int(guiconfig[self.orientation]['config_minute_y'])),BLANC50,angle)
         labels ['ss'] = ('00 ',(int(guiconfig[self.orientation]['config_seconde_x']),int(guiconfig[self.orientation]['config_seconde_y'])),BLANC50,angle,)
-        
+
         labels ['prec'] = ('<- ',(int(guiconfig[self.orientation]['config_prec_x']),int(guiconfig[self.orientation]['config_prec_y'])),BLANC50,angle,)
 
         if mode_jour :
@@ -1077,7 +1089,7 @@ class ConfigScene(SceneBase):
         sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['mode_ok_x']),int(guiconfig[self.orientation]['mode_ok_y'])))
         pygame.display.update()
         self.t = time.time()
-        
+
 
     def update_time(self):
         # Vérification validité des valeurs
@@ -1095,7 +1107,7 @@ class ConfigScene(SceneBase):
         if self.data[3] < 0 : self.data[3] = 0
         if self.data[3] > 23 : self.data[3] = 23
         if self.data[4] < 0 : self.data[4] = 0
-        if self.data[4] > 59 : self.data[4] = 59 
+        if self.data[4] > 59 : self.data[4] = 59
         if self.data[5] < 0 : self.data[5] = 0
         if self.data[5] > 59 : self.data[5] = 59
         subprocess.Popen ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
@@ -1118,7 +1130,7 @@ class ConfigScene(SceneBase):
                 elif event.key == BOUTON_LEFT:
                     self.index -= 1
                     if self.index < 0 :
-                        self.index = 9    
+                        self.index = 9
                 elif event.key == BOUTON_DOWN:
                     if self.index < 5 :
                         self.data[self.index] -= 1
@@ -1143,7 +1155,7 @@ class ConfigScene(SceneBase):
                         self.d_roue += 1
                         if self.d_roue > 9999 : self.d_roue = 9999
                     elif self.index == 9 :
-                        self.aimants += 1 
+                        self.aimants += 1
                         if self.aimants > 20 : self.aimants = 20
                 elif event.key == BOUTON_OK:
                     # validation
@@ -1152,10 +1164,10 @@ class ConfigScene(SceneBase):
                         save_setupconfig()
                     elif self.index == 9:
                         setupconfig['Parametres']['aimants'] = str(self.aimants)
-                        save_setupconfig()      
-                    elif self.index == 6 : 
+                        save_setupconfig()
+                    elif self.index == 6 :
                         self.SwitchToScene(ModeScene())
-                    elif self.index == 7 : 
+                    elif self.index == 7 :
                         alphabet = {}
                         alphabet_size_x = {}
                         alphabet_size_y = {}
@@ -1167,9 +1179,9 @@ class ConfigScene(SceneBase):
                         self.index = 0
                     elif self.index == 6 or self.index == 7 :
                         self.index = 8
-            
-            
-        
+
+
+
 
     def Update(self):
         global labels,old_labels,sprites,old_sprites
@@ -1185,7 +1197,7 @@ class ConfigScene(SceneBase):
             labels['ss'] = ('{:02d}'.format(self.data[5]),labels['ss'][1],BLANC50inv,labels['ss'][3]) if self.index == 5 else ('{:02d} '.format(self.data[5]),labels['ss'][1],BLANC50,labels['ss'][3])
             labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 8 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
             labels['aimants'] = ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50inv,labels['aimants'][3]) if self.index == 9 else ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50,labels['aimants'][3])
-            
+
             labels['prec'] = ('<-  ',labels['prec'][1],BLANC50inv,labels['prec'][3]) if self.index == 6 else ('<-  ',labels['prec'][1],BLANC50,labels['prec'][3])
             sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
 
@@ -1227,7 +1239,7 @@ class ConversionScene(SceneBase):
         labels ['text'] = ('',(int(guiconfig[self.orientation]['conv_text_x']),int(guiconfig[self.orientation]['conv_text_y'])),VERT25,angle)
         labels ['text1'] = ('',(int(guiconfig[self.orientation]['conv_text1_x']),int(guiconfig[self.orientation]['conv_text1_y'])),VERT25,angle)
         labels ['text2'] = ('',(int(guiconfig[self.orientation]['conv_text2_x']),int(guiconfig[self.orientation]['conv_text2_y'])),VERT25,angle)
- 
+
 
     def ProcessInput(self, events, pressed_keys):
         pass
@@ -1256,7 +1268,7 @@ class ConversionScene(SceneBase):
                     labels['text'] = ('Case {}/{}'.format(i,total),labels['text'][1],labels['text'][2],labels['text'][3])
                     update_labels(screen)
                     self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
-                    
+
             else:
                 # conversion et découpage des cases
                 labels['text2'] = ('Format Tripy. Conversion en cours...',labels['text2'][1],labels['text2'][2],labels['text2'][3])
@@ -1376,7 +1388,7 @@ class EditScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        
+
         angle = 0
         fps = 60
 
@@ -1403,15 +1415,15 @@ class EditScene(SceneBase):
             labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25,0)
         pygame.display.update()
 
-        
+
         self.last_coords = (800,480)
         self.canvas = sprites['case'][0].copy()
         self.canvas.fill(BLANC)
-        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
+        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) :
             self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
         self.canvas.set_colorkey(BLANC)
         self.mouse = pygame.mouse
-        
+
 
     def ProcessInput(self, events, pressed_keys):
         global filedir,fps
@@ -1439,7 +1451,7 @@ class EditScene(SceneBase):
                 if self.case < 0 : self.case = 0
                 if self.case >= self.nb_cases : self = self.nb_cases-1
                 # On charge l'ancienne annotation si elle existe
-                if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) : 
+                if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) :
                     self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
                 else :
                     self.canvas.fill(BLANC)
@@ -1459,7 +1471,7 @@ class EditScene(SceneBase):
                 sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
                 labels['case'] = ('{:3d}/{:3d}'.format(self.case+1,self.nb_cases),labels['case'][1],labels['case'][2],labels['case'][3])
                 self.old_case = self.case
-            
+
 
     def Render(self, screen):
         global sprites
@@ -1490,7 +1502,7 @@ class RoadbookScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        
+
         if temps1 > 0 :
             vmoy = distance/temps1*3.6/1000
         else:
@@ -1515,7 +1527,7 @@ class RoadbookScene(SceneBase):
         labels['vmoy'] = ('{:3.0f} '.format(0.0),(int(guiconfig[self.orientation]['rb_vm_x']),int(guiconfig[self.orientation]['rb_vm_y'])),GRIS75,angle)
         labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(guiconfig[self.orientation]['rb_temp_x']),int(guiconfig[self.orientation]['rb_temp_y'])),ROUGE25,angle)
         labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(guiconfig[self.orientation]['rb_cpu_x']),int(guiconfig[self.orientation]['rb_cpu_y'])),ROUGE25,angle)
-        
+
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.ncases = int(guiconfig[self.orientation]['ncases'])
         self.pages = {}
@@ -1533,7 +1545,7 @@ class RoadbookScene(SceneBase):
         if self.case < 0 :
             self.case = 0 # on compte de 0 à longueur-1
         self.oldcase = self.case + 1
-        
+
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
         rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(600/w,180/h)
@@ -1594,7 +1606,7 @@ class RoadbookScene(SceneBase):
                 elif event.key == BOUTON_BACKSPACE:
                     distance = 0
                     temps1 = 0.0
-                    cmavant = distance 
+                    cmavant = distance
                     vmoy = 0
                     speed = 0
                     vmax = 0;
@@ -1623,15 +1635,15 @@ class RoadbookScene(SceneBase):
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
 
-        if distance < 20000 or temps1 < 2 : 
+        if distance < 20000 or temps1 < 2 :
             vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 20 premiers metres ou les 2 premieres secondes
         else:
             vmoy = distance/temps1*3.6/1000;
-            
+
         k = time.time()
         if ( k-save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-            speed = (distance*3.6-cmavant*3.6); 
-            speed = 1.0*speed/(k-save_t_moy)/1000; 
+            speed = (distance*3.6-cmavant*3.6);
+            speed = 1.0*speed/(k-save_t_moy)/1000;
             save_t_moy = time.time()
             cmavant = distance
 
@@ -1680,7 +1692,7 @@ class OdometerScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        
+
         speed = 0
 
         self.orientation = setupconfig['Parametres']['orientation']
@@ -1766,8 +1778,8 @@ class OdometerScene(SceneBase):
 
         k = time.time()
         if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-            speed = (distance*3.6-cmavant*3.6); 
-            speed = 1.0*speed/(k-save_t_moy)/1000; 
+            speed = (distance*3.6-cmavant*3.6);
+            speed = 1.0*speed/(k-save_t_moy)/1000;
             save_t_moy = time.time()
             cmavant = distance
 
@@ -1783,15 +1795,15 @@ class OdometerScene(SceneBase):
 
         if self.next == self :
             labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-            d = totalisateur 
+            d = totalisateur
             if self.index == 0 :
                 d = totalisateur
                 t = 'Total :  '
             elif self.index == 1 :
-                d = distance 
+                d = distance
                 t = 'Trip 1 : '
             else :
-                d = distance2 
+                d = distance2
                 t = 'Trip 2 : '
             labels['totalisateur'] = ('{:6.2f} '.format(d/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
             labels['t_totalisateur'] = (t, labels['t_totalisateur'][1],labels['t_totalisateur'][2],labels['t_totalisateur'][3])
@@ -1816,14 +1828,14 @@ class RoadbookZoomScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
-        
+
         self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
         self.ncases = 6 if self.orientation == 'Portrait' else 2
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.pages = {}
-        
+
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
         self.nb_cases = len(fichiers)
@@ -1831,7 +1843,7 @@ class RoadbookZoomScene(SceneBase):
         if self.case < 0 :
             self.case = 0 # on compte de 0 à longueur-1
         self.oldcase = self.case + 1
-        
+
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
         rb_ratio = 480/w if self.orientation == 'Portrait' else 800/w
@@ -1886,9 +1898,19 @@ class RoadbookZoomScene(SceneBase):
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
         update_sprites(screen)
 
+#*******************************************************************************************************#
+#------------------------- Definition des routes Flask   -----------------------------------------------#
+#*******************************************************************************************************#
+@app.route('/')
+def index():
+
+    return render_template('rallye.html')
+
 
 # Pour optimisation
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
 
+if __name__ == '__main__':
+    socketio.run(app,host='0.0.0.0')
 run_RpiRoadbook(800, 480, TitleScene())
