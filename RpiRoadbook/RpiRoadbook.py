@@ -61,13 +61,13 @@ os.environ["SDL_MOUSEDRV"] = "TSLIB"
 os.environ["SDL_MOUSEDEV"] = "/dev/input/event0"
 
 # Pour l'ecran deporte via wifi
-from flask import Flask, url_for
-from flask import render_template
-from flask_socketio import SocketIO,send,emit
+#from flask import Flask, url_for
+#from flask import render_template
+#from flask_socketio import SocketIO,send,emit
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+#app = Flask(__name__)
+#app.config['SECRET_KEY'] = 'secret!'
+#socketio = SocketIO(app)
 
 fps = 5
 
@@ -84,6 +84,8 @@ vmax = 0.00
 vmoy = 0.0
 cmavant = 0
 cmavant2 = 0
+chrono_delay = 5 * aimants # 5 tours de roue avant de declencher le chrono
+chrono_delay = 0
 save_t_moy = time.time()
 save_t_odo = time.time()
 old_t = time.time()
@@ -135,14 +137,22 @@ gotoConfig = not GPIO.input(GPIO_OK)
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
-    global totalisateur,distance,distance2,temps1,temps2,old_t,developpe
+    global totalisateur,distance,distance2,temps1,temps2,old_t,developpe,chrono_delay, chrono_time, chronoconfig
     totalisateur += developpe
     distance += developpe
     distance2 += developpe
+    chrono_delay -= 1
+    if chrono_delay < 0 :
+        chrono_delay = 0
     t = time.time()
     if t - old_t < 5 :
-        temps1 += t-old_t
         temps2 += t-old_t
+    # Test si on doit demarrer le chrono
+    if chrono_delay == 1 :
+        chrono_time = t
+        chronoconfig['Chronometre']['chrono_delay'] = str(chrono_delay)
+        chronoconfig['Chronometre']['chrono_time'] = str(chrono_time)
+        save_chronoconfig()
     old_t = t
 
 def input_left_callback(channel):
@@ -369,7 +379,7 @@ def update_labels(screen):
             if (i in old_labels.keys()) and (len(old_labels[i][0]) > len (labels[i][0])) :
                  blit_text (screen,' '*len(old_labels[i][0]),old_labels[i][1],old_labels[i][2],old_labels[i][3])
             blit_text (screen,labels[i][0],labels[i][1],labels[i][2],labels[i][3])
-            emit('Rallye',{i : labels[i][0]})
+#            emit('Rallye',{i : labels[i][0]})
             old_labels [i] = labels[i]
 
 #--------------------------------------------------------------------------------- ----------#
@@ -398,6 +408,7 @@ setupconfig = configparser.ConfigParser()
 guiconfig = configparser.ConfigParser()
 rbconfig = configparser.ConfigParser()
 odoconfig = configparser.ConfigParser()
+chronoconfig = configparser.ConfigParser()
 
 def save_setupconfig():
     global setupconfig
@@ -441,8 +452,23 @@ def save_odoconfig():
     else :
         print('Write Error odo.cfg after 5 tries')
 
+def save_chronoconfig():
+    global chronoconfig
+    for attempt in range (5):
+        try:
+            with open('/mnt/piusb/.log/chrono.cfg','w') as configfile:
+                chronoconfig.write(configfile)
+        except:
+            subprocess.Popen('sudo mount -a',shell=True)
+            time.sleep(.2)
+        else :
+            break
+    else :
+        print('Write Error chrono.cfg after 5 tries')
+
 def check_configfile():
-    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,totalisateur,distance,distance2,temps1,temps2,developpe
+    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig
+    global totalisateur,distance,distance2,temps1,temps2,developpe,chrono_delay,chrono_time
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -468,6 +494,14 @@ def check_configfile():
     distance2 = float(odoconfig['Odometre']['Distance2'])
     temps1 = float(odoconfig['Odometre']['Temps1'])
     temps2 = float(odoconfig['Odometre']['Temps2'])
+
+    # On charge le chrono pour la vitesse moyenne
+    candidates = ['/home/rpi/RpiRoadbook/chrono.cfg','/mnt/piusb/.log/chrono.cfg']
+    chronoconfig.read(candidates)
+    save_chronoconfig()
+    chrono_delay = int (chronoconfig['Chronometre']['chrono_delay'])
+    chrono_time = float(chronoconfig['Chronometre']['chrono_time'])
+
 
 
 #*******************************************************************************************************#
@@ -1503,7 +1537,9 @@ class RoadbookScene(SceneBase):
         old_sprites = {}
         image_cache = {}
 
-        if temps1 > 0 :
+        temps1 = time.time()-chrono_time
+
+        if chrono_time == 0 :
             vmoy = distance/temps1*3.6/1000
         else:
             vmoy = 0
@@ -1563,7 +1599,7 @@ class RoadbookScene(SceneBase):
         save_t_odo = time.time()
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,temps1,cmavant,vmoy,vmax,save_t_moy,save_t_odo
+        global distance,temps1,cmavant,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -1609,13 +1645,19 @@ class RoadbookScene(SceneBase):
                     cmavant = distance
                     vmoy = 0
                     speed = 0
-                    vmax = 0;
+                    vmax = 0
+                    chrono_delay = 5 * aimants
+                    chrono_time = 0
                     odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
                     odoconfig['Odometre']['Distance1'] = str(distance)
                     odoconfig['Odometre']['Distance2'] = str(distance2)
                     odoconfig['Odometre']['Temps1'] = str(temps1)
                     odoconfig['Odometre']['Temps2'] = str(temps2)
+                    chronoconfig['Chronometre']['chrono_delay'] = str(chrono_delay)
+                    chronoconfig['Chronometre']['chrono_time'] = str(chrono_time)
+
                     save_odoconfig()
+                    save_chronoconfig()
                     save_t_moy = time.time()
                     save_t_odo = time.time()
                 #elif event.key == BOUTON_BACKSPACE:
@@ -1629,14 +1671,17 @@ class RoadbookScene(SceneBase):
 
     def Update(self):
         global distance,speed,vmax,cmavant,temps1,save_t_moy,save_t_odo,vmoy,temperature,cpu
-        global labels,old_labels,sprites,old_sprites,rbconfig
+        global labels,old_labels,sprites,old_sprites,rbconfig,chronoconfig
+        global chrono_delay,chrono_time
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
 
-        if distance < 20000 or temps1 < 2 :
-            vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 20 premiers metres ou les 2 premieres secondes
+        temps1 = time.time() - chrono_time
+
+        if chrono_delay > 0 :
+            vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 5 premiers tours de roues
         else:
             vmoy = distance/temps1*3.6/1000;
 
@@ -1657,6 +1702,9 @@ class RoadbookScene(SceneBase):
             odoconfig['Odometre']['Temps2'] = str(temps2)
             save_odoconfig()
             save_t_odo = time.time()
+            chronoconfig['Chronometre']['chrono_delay'] = str(chrono_delay)
+            chronoconfig['Chronometre']['chrono_time'] = str(chrono_time)
+            save_chronoconfig()
 
         labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
         labels['distance'] = ('{:6.2f} '.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3])
@@ -1901,16 +1949,16 @@ class RoadbookZoomScene(SceneBase):
 #*******************************************************************************************************#
 #------------------------- Definition des routes Flask   -----------------------------------------------#
 #*******************************************************************************************************#
-@app.route('/')
-def index():
+#@app.route('/')
+#def index():
 
-    return render_template('rallye.html')
+#    return render_template('rallye.html')
 
 
 # Pour optimisation
 #import cProfile
 #cProfile.run ('run_RpiRoadbook(800, 480, 60, TitleScene())')
 
-if __name__ == '__main__':
-    socketio.run(app,host='0.0.0.0')
+#if __name__ == '__main__':
+#    socketio.run(app,host='0.0.0.0')
 run_RpiRoadbook(800, 480, TitleScene())
