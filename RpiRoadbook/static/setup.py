@@ -3,6 +3,7 @@
 import cgi, os
 import cgitb; cgitb.enable()
 import configparser
+import time
 
 setupconfig = configparser.ConfigParser()
 
@@ -17,8 +18,9 @@ mode = setupconfig['Parametres']['mode']
 mode_jour = setupconfig['Parametres']['jour_nuit']
 luminosite = setupconfig['Parametres']['luminosite']
 
-st_date = '2019-01-01'
-st_time = '00:00'
+datetime_now = time.localtime ()
+st_date = '{}-{:02d}-{:02d}'.format(datetime_now.tm_year,datetime_now.tm_mon,datetime_now.tm_mday)
+st_time = '{:02d}:{:02d}'.format(datetime_now.tm_hour,datetime_now.tm_min)
 
 
 print('<html>')
@@ -98,5 +100,6 @@ print('  </div>')
 
 print('   <input type = "submit" value = "Valider" /></p>')
 print('   </form>')
+print('<a href="index.py"> <input type="button" value="Retour &agrave; l\'accueil"></a>')
 print('</body>')
 print('</html>')
