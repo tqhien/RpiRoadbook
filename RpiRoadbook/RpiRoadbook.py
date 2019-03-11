@@ -56,9 +56,15 @@ import RPi.GPIO as GPIO
 
 # Pour la gestion du touchscreen
 import sys
-os.environ["SDL_FBDEV"] = "/dev/fb0"
-os.environ["SDL_MOUSEDRV"] = "TSLIB"
-os.environ["SDL_MOUSEDEV"] = "/dev/input/event0"
+if os.path.isdir ("/dev/input/event0") :
+    os.environ["SDL_FBDEV"] = "/dev/fb0"
+    os.environ["SDL_MOUSEDRV"] = "TSLIB"
+    os.environ["SDL_MOUSEDEV"] = "/dev/input/event0"
+    is_tactile = True
+else:
+    is_tactile = False
+
+print (is_tactile)
 
 # Pour l'ecran deporte via wifi
 #from flask import Flask, url_for
@@ -687,7 +693,8 @@ class SelectionScene(SceneBase):
             self.menu_edit = pygame.image.load('./images/icone_edit.jpg')
             self.menu_edit_white = pygame.image.load('./images/icone_edit_selected.jpg')
             pygame.display.get_surface().fill(NOIR)
-        sprites['edit'] = (self.menu_edit,(int(guiconfig[self.orientation]['select_edit_x']),int(guiconfig[self.orientation]['select_edit_y'])))
+        if is_tactile :
+            sprites['edit'] = (self.menu_edit,(int(guiconfig[self.orientation]['select_edit_x']),int(guiconfig[self.orientation]['select_edit_y'])))
         pygame.display.update()
         self.j = time.time()
 
@@ -710,11 +717,13 @@ class SelectionScene(SceneBase):
                     if self.selection >= self.fenetre+10: self.fenetre+=1
                 elif event.key == BOUTON_LEFT :
                     self.iscountdown = False
-                    self.column -= 1
+                    if is_tactile:
+                        self.column -= 1
                     if self.column < 1 : self.column = 2
                 elif event.key == BOUTON_RIGHT :
                     self.iscountdown = False
-                    self.column += 1
+                    if is_tactile:
+                        self.column += 1
                     if self.column > 2 : self.column = 1
                 elif event.key == BOUTON_OK :
                         self.iscountdown = False ;
@@ -764,7 +773,8 @@ class SelectionScene(SceneBase):
 
             self.k = time.time()
             if self.next == self:
-                sprites['edit'] = (self.menu_edit_white,sprites['edit'][1]) if self.column == 2 else (self.menu_edit,sprites['edit'][1])
+                if is_tactile:
+                   sprites['edit'] = (self.menu_edit_white,sprites['edit'][1]) if self.column == 2 else (self.menu_edit,sprites['edit'][1])
             if self.iscountdown :
                 if self.k-self.j< self.countdown :
                     #print(labels['infos'])
@@ -1562,7 +1572,7 @@ class RoadbookScene(SceneBase):
         labels['t_vmoy'] = ('Vit. moy.',(int(guiconfig[self.orientation]['rb_t_vm_x']),int(guiconfig[self.orientation]['rb_t_vm_y'])),ROUGE25,angle)
         labels['vmoy'] = ('{:3.0f} '.format(0.0),(int(guiconfig[self.orientation]['rb_vm_x']),int(guiconfig[self.orientation]['rb_vm_y'])),GRIS75,angle)
         labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(guiconfig[self.orientation]['rb_temp_x']),int(guiconfig[self.orientation]['rb_temp_y'])),ROUGE25,angle)
-        labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(guiconfig[self.orientation]['rb_cpu_x']),int(guiconfig[self.orientation]['rb_cpu_y'])),ROUGE25,angle)
+        labels['cpu'] = ('{:4.1f}% '.format(0.0),(int(guiconfig[self.orientation]['rb_cpu_x']),int(guiconfig[self.orientation]['rb_cpu_y'])),ROUGE25,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.ncases = int(guiconfig[self.orientation]['ncases'])
@@ -1711,7 +1721,7 @@ class RoadbookScene(SceneBase):
         labels['vitesse'] = ('{:3.0f}  '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
         labels['vmoy'] = ('{:3.0f}  '.format(vmoy), labels['vmoy'][1],labels['vmoy'][2],labels['vmoy'][3])
         labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
-        labels['cpu'] = ('{:4.1f}%'.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
+        labels['cpu'] = ('{:4.1f}% '.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
 
         if self.oldcase != self.case :
             if angle == 0 :
