@@ -6,7 +6,7 @@ form = cgi.FieldStorage()
 
 if 'filename' in form:
   # On recupere le nom de fichier
-  filefield = form['filename'].value
+  fileitem = form['filename']
 
   print ('Content-Type: text/html\n')
   print ("<html>")

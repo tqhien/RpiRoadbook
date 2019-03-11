@@ -28,6 +28,6 @@ print ("""
 <p></p>
 <a href="upload.html"> <input type="button" value="Ajouter des roadbooks"></a>
 <a href="setup.py"> <input type="button" value="Configuration"></a>
-<a href="screen_setup.py"> <input type="button" value="Config. Affichages"></a>
+<!-- <a href="screen_setup.py"> <input type="button" value="Config. Affichages"></a> -->
 </body>
 </html>""")
