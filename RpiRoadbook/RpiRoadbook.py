@@ -64,34 +64,37 @@ if os.path.isdir ("/dev/input/event0") :
 else:
     is_tactile = False
 
-print (is_tactile)
-
-# Pour l'ecran deporte via wifi
-#from flask import Flask, url_for
-#from flask import render_template
-#from flask_socketio import SocketIO,send,emit
-
-#app = Flask(__name__)
-#app.config['SECRET_KEY'] = 'secret!'
-#socketio = SocketIO(app)
-
 fps = 5
 
-totalisateur = 0
 distance = 0
+totalisateur = 0
+speed = 0
+old_totalisateur = 0
+
+distance1 = 0
+vmoy1 = 0
+vmax1 = 0
+#chrono_delay1 = 5 * aimants # 5 tours de roue avant de declencher le chrono
+chrono_delay1 = 0
+chrono_time1 = 0
+old_distance1 = 0
+
 distance2 = 0
-temps1 = 0.0
-temps2 = 0.0
-speed = 0.00
+vmoy2 = 0
+vmax2 = 0
+#chrono_delay2 = 5 * aimants # 5 tours de roue avant de declencher le chrono
+chrono_delay2 = 0
+chrono_time2 = 0
+old_distance2 = 0
+
+decompte = 2
+start_decompte = False
+chrono_decompte = 0
+
 roue = 1864
 aimants = 1
 developpe = 1.0*roue / aimants
-vmax = 0.00
-vmoy = 0.0
-cmavant = 0
-cmavant2 = 0
-chrono_delay = 5 * aimants # 5 tours de roue avant de declencher le chrono
-chrono_delay = 0
+
 save_t_moy = time.time()
 save_t_odo = time.time()
 old_t = time.time()
@@ -143,23 +146,41 @@ gotoConfig = not GPIO.input(GPIO_OK)
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
-    global totalisateur,distance,distance2,temps1,temps2,old_t,developpe,chrono_delay, chrono_time, chronoconfig
+    global totalisateur,distance,developpe
+    global distance1,chrono_delay1,chrono_time1
+    global distance2,chrono_delay2,chrono_time2
+    global chronoconfig
+
     totalisateur += developpe
     distance += developpe
+    distance1 += developpe
     distance2 += developpe
-    chrono_delay -= 1
-    if chrono_delay < 0 :
-        chrono_delay = 0
-    t = time.time()
-    if t - old_t < 5 :
-        temps2 += t-old_t
-    # Test si on doit demarrer le chrono
-    if chrono_delay == 1 :
-        chrono_time = t
-        chronoconfig['Chronometre']['chrono_delay'] = str(chrono_delay)
-        chronoconfig['Chronometre']['chrono_time'] = str(chrono_time)
+
+    # gestion du demarrage du chrono1
+    # Valeur > 1 : on attend de faire suffisamment de tours de routes
+    # Valeur = 1 : on demarre le chrono1
+    # Valeur = 0 : le chrono1 est demarre
+    chrono_delay1 -= 1
+    if chrono_delay1 < 0 :
+        chrono_delay1 = 0
+    # Test si on doit demarrer le chrono1
+    if chrono_delay1 == 1 :
+        chrono_time1 = time.time()
+        chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
+        chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
         save_chronoconfig()
-    old_t = t
+
+    # Idem chrono2
+    chrono_delay2 -= 1
+    if chrono_delay2 < 0 :
+        chrono_delay2 = 0
+    # Test si on doit demarrer le chrono2
+    if chrono_delay2 == 1 :
+        chrono_time2 = time.time()
+        chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
+        chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+        save_chronoconfig()
+
 
 def input_left_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -307,8 +328,20 @@ ROUGE25     = 7
 ROUGE25inv  = 8
 VERT25      = 9
 GRIS75      =10
+BLANC80     =11
+BLANC20     =12
+ROUGE20     =13
+BLANC3      =14
+BLANC4      =15
+BLANC5      =16
+ROUGE3      =17
+ROUGE4      =18
+ROUGE5      =19
+VERT3       =20
+VERT4       =21
+VERT5       =22
 #Taille des polices pour chaque style
-SALPHA = {BLANC25:25,BLANC50:50,BLANC75:75,BLANC100:100,BLANC200:200,BLANC25inv:25,BLANC50inv:50,ROUGE25:25,ROUGE25inv:25,VERT25:25,GRIS75:75}
+SALPHA = {BLANC25:25,BLANC50:50,BLANC75:75,BLANC100:100,BLANC200:200,BLANC25inv:25,BLANC50inv:50,ROUGE25:25,ROUGE25inv:25,VERT25:25,GRIS75:75,BLANC80:80,BLANC20:20,ROUGE20:20,BLANC3:90,BLANC4:59,BLANC5:45,ROUGE3:90,ROUGE4:59,ROUGE5:45,VERT3:90,VERT4:59,VERT5:45}
 
 alphabet = {}
 alphabet_size_x = {}
@@ -333,31 +366,32 @@ def setup_alphabet(police=BLANC25):
     load_font(police)
     #printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ àâäçéèêëîïôöùûü'
     printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
-    fg_jour = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:ROUGE, ROUGE25inv:BLANC, VERT25:BLEU,  GRIS75:GRIS}
-    bg_jour = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:BLANC, ROUGE25inv:ROUGE, VERT25:BLANC, GRIS75:BLANC}
-    fg_nuit = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:ROUGE, ROUGE25inv:ROUGE,  VERT25:VERT,  GRIS75:GRIS}
-    bg_nuit = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:NOIR,  ROUGE25inv:BLANC, VERT25:NOIR,  GRIS75:NOIR}
+    fg_jour = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:ROUGE, ROUGE25inv:BLANC, VERT25:BLEU,  GRIS75:GRIS, BLANC80:NOIR, BLANC20:NOIR,ROUGE20:ROUGE,BLANC3:NOIR,BLANC4:NOIR,BLANC5:NOIR,ROUGE3:ROUGE,ROUGE4:ROUGE,ROUGE5:ROUGE,VERT3:VERT,VERT4:VERT,VERT5:VERT}
+    bg_jour = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:BLANC, ROUGE25inv:ROUGE, VERT25:BLANC, GRIS75:BLANC, BLANC80:BLANC, BLANC20:BLANC,ROUGE20:BLANC,BLANC3:BLANC,BLANC4:BLANC,BLANC5:BLANC,ROUGE3:BLANC,ROUGE4:BLANC,ROUGE5:BLANC,VERT3:BLANC,VERT4:BLANC,VERT5:BLANC}
+    fg_nuit = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:ROUGE, ROUGE25inv:ROUGE,  VERT25:VERT,  GRIS75:GRIS, BLANC80:BLANC, BLANC20:BLANC,ROUGE20:BLANC,BLANC3:BLANC,BLANC4:BLANC,BLANC5:BLANC,ROUGE3:ROUGE,ROUGE4:ROUGE,ROUGE5:ROUGE,VERT3:VERT,VERT4:VERT,VERT5:VERT}
+    bg_nuit = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:NOIR,  ROUGE25inv:BLANC, VERT25:NOIR,  GRIS75:NOIR, BLANC80:NOIR, BLANC20:NOIR,ROUGE20:NOIR,BLANC3:NOIR,BLANC4:NOIR,BLANC5:NOIR,ROUGE3:NOIR,ROUGE4:NOIR,ROUGE5:NOIR,VERT3:NOIR,VERT4:NOIR,VERT5:NOIR}
+
 
     if mode_jour :
         if angle == 90 :
             for i in printable :
-                alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,0,fg_jour[police],bg_jour[police]),90)
+                alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,1,fg_jour[police],bg_jour[police]),90)
                 alphabet_size_x[(i,police,angle)] = 0
                 alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]
         else :
             for i in printable :
-                alphabet[(i,police,angle)] = myfont[police].render(i,0,fg_jour[police],bg_jour[police])
+                alphabet[(i,police,angle)] = myfont[police].render(i,1,fg_jour[police],bg_jour[police])
                 alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
                 alphabet_size_y[(i,police,angle)] = 0
     else :
         if angle == 90 :
             for i in printable :
-                alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,0,fg_nuit[police],bg_nuit[police]),90)
+                alphabet[(i,police,angle)] = pygame.transform.rotate (myfont[police].render(i,1,fg_nuit[police],bg_nuit[police]),90)
                 alphabet_size_x[(i,police,angle)] = 0
                 alphabet_size_y[(i,police,angle)] = -alphabet[(i,police,angle)].get_size()[1]
         else :
             for i in printable :
-                alphabet[(i,police,angle)] = myfont[police].render(i,0,fg_nuit[police],bg_nuit[police])
+                alphabet[(i,police,angle)] = myfont[police].render(i,1,fg_nuit[police],bg_nuit[police])
                 alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
                 alphabet_size_y[(i,police,angle)] = 0
 
@@ -407,6 +441,626 @@ def update_sprites(screen):
             #emit(i,sprites[i][0])
             old_sprites [i] = sprites[i]
 
+#--------------------------------------------------------------------------------- ----------#
+#------------------------------ Organisation des widgets ------------------------------------#
+#---------------------------------------------------------------------------------- ---------#
+current_screen = 1
+current_widget = 0
+old_widget = 1
+widgets = {}
+
+#------------------------------ Definition des widgets ---------------------------------------------#
+widget_presets = {
+    'pajra1' : {'orientation':'Paysage','jour_nuit':'Jour','mode':'Rallye','layout':'1'},
+    'pajra2' : {'orientation':'Paysage','jour_nuit':'Jour','mode':'Rallye','layout':'2'},
+    'pajra3' : {'orientation':'Paysage','jour_nuit':'Jour','mode':'Rallye','layout':'3'},
+    'pajra4' : {'orientation':'Paysage','jour_nuit':'Jour','mode':'Rallye','layout':'4'},
+    'panra1' : {'orientation':'Paysage','jour_nuit':'Nuit','mode':'Rallye','layout':'1'},
+    'panra2' : {'orientation':'Paysage','jour_nuit':'Nuit','mode':'Rallye','layout':'2'},
+    'panra3' : {'orientation':'Paysage','jour_nuit':'Nuit','mode':'Rallye','layout':'3'},
+    'panra4' : {'orientation':'Paysage','jour_nuit':'Nuit','mode':'Rallye','layout':'4'},
+    'pojra1' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Rallye','layout':'5'},
+    'pojra2' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Rallye','layout':'6'},
+    'pojra3' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Rallye','layout':'7'},
+    'pojra4' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Rallye','layout':'8'},
+    'pojra5' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Rallye','layout':'9'},
+    'pojra6' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Rallye','layout':'10'},
+    'ponra1' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Rallye','layout':'5'},
+    'ponra2' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Rallye','layout':'6'},
+    'ponra3' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Rallye','layout':'7'},
+    'ponra4' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Rallye','layout':'8'},
+    'ponra5' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Rallye','layout':'9'},
+    'ponra6' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Rallye','layout':'10'},
+    'pajro1' : {'orientation':'Paysage','jour_nuit':'Jour','mode':'Route','layout':'11'},
+    'panro1' : {'orientation':'Paysage','jour_nuit':'Nuit','mode':'Route','layout':'11'},
+    'pojro1' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Route','layout':'12'},
+    'pojro1' : {'orientation':'Portrait','jour_nuit':'Nuit','mode':'Route','layout':'12'},
+    'pajzz' : {'orientation':'Paysage','jour_nuit':'Jour','mode':'Zoom','layout':'0'},
+    'pojzz' : {'orientation':'Portrait','jour_nuit':'Jour','mode':'Zoom','layout':'00'},
+}
+
+widget_sizes = {
+    # Nb de champs pour les formats rallye paysage
+    '1' : 3,
+    '2' : 4,
+    '3' : 5,
+    '4' : 6,
+    # Nb de champs pour les formats rallye portrait
+    '5' : 2,
+    '6' : 3,
+    '7' : 4,
+    '8' : 1,
+    '9' : 2,
+    '10': 3,
+    # Nb de chmamps pour les compteurs simples paysage et portrait
+    '11': 3,
+    '12': 3,
+    # Pour le zoom
+    '0' : 1,
+    '00': 1
+    }
+
+widget_layouts = {
+    '0' : [
+        {'x':500,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':0,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1}],
+    '00' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE20,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100}],
+    '1' : [
+        {'x':500,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1},
+        {'x':500,'y':30,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':5,'y1':115,'x2':25,'y2':1,'x3':240,'y3':115},
+        {'x':500,'y':180,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':5,'y1':115,'x2':25,'y2':1,'x3':240,'y3':115},
+        {'x':500,'y':330,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':5,'y1':115,'x2':25,'y2':1,'x3':240,'y3':115}],
+    '2' : [
+        {'x':500,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1},
+        {'x':500,'y':30,'w':300,'h':110,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':75,'x2':100,'y2':1,'x3':240,'y3':75},
+        {'x':500,'y':140,'w':300,'h':110,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':75,'x2':100,'y2':1,'x3':240,'y3':75},
+        {'x':500,'y':250,'w':300,'h':110,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':75,'x2':100,'y2':1,'x3':240,'y3':75},
+        {'x':500,'y':360,'w':300,'h':110,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':75,'x2':100,'y2':1,'x3':240,'y3':75}],
+    '3' : [
+        {'x':500,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1},
+        {'x':500,'y':30,'w':300,'h':90,'label_font':ROUGE25,'value_font':BLANC5,'unit_font':BLANC25,'over_font':ROUGE5,'inside_font':VERT5,'x1':150,'y1':1,'x2':5,'y2':20,'x3':150,'y3':40},
+        {'x':500,'y':120,'w':300,'h':90,'label_font':ROUGE25,'value_font':BLANC5,'unit_font':BLANC25,'over_font':ROUGE5,'inside_font':VERT5,'x1':150,'y1':1,'x2':5,'y2':20,'x3':150,'y3':40},
+        {'x':500,'y':210,'w':300,'h':90,'label_font':ROUGE25,'value_font':BLANC5,'unit_font':BLANC25,'over_font':ROUGE5,'inside_font':VERT5,'x1':150,'y1':1,'x2':5,'y2':20,'x3':150,'y3':40},
+        {'x':500,'y':300,'w':300,'h':90,'label_font':ROUGE25,'value_font':BLANC5,'unit_font':BLANC25,'over_font':ROUGE5,'inside_font':VERT5,'x1':150,'y1':1,'x2':5,'y2':20,'x3':150,'y3':40},
+        {'x':500,'y':390,'w':300,'h':90,'label_font':ROUGE25,'value_font':BLANC5,'unit_font':BLANC25,'over_font':ROUGE5,'inside_font':VERT5,'x1':150,'y1':1,'x2':5,'y2':20,'x3':150,'y3':40}],
+    '4' : [
+        {'x':500,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1},
+        {'x':500,'y':30,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25},
+        {'x':500,'y':105,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25},
+        {'x':500,'y':180,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25},
+        {'x':500,'y':255,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25},
+        {'x':500,'y':330,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25},
+        {'x':500,'y':405,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25}],
+    '5' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70},
+        {'x':180,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70}],
+    '6' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70},
+        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70}],
+    '7' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':0,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':30,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70}],
+    '8' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70}],
+    '9' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':30,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70}],
+    '10' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':30,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':240,'x2':30,'y2':200,'x3':30,'y3':70},
+        {'x':105,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'x1':1,'y1':240,'x2':30,'y2':200,'x3':30,'y3':70}],
+}
+
+
+class rb_widget():
+    def __init__(self,layout='1',widget=0):
+        global angle
+        self.widget_order = widget
+        angle = 0 if layout in ('0','1','2','3','4') else 90
+    def up(self):
+        pass
+    def down(self):
+        pass
+    def ok(self):
+        global current_widget,nb_champs
+        current_widget += 1
+        if current_widget > nb_champs :
+            current_widget = 0
+    def reset(self):
+        pass
+    def update(self):
+        pass
+    def render(self,scr):
+        pass
+    def toggle(self,scr):
+        r = pygame.draw.rect(scr,ROUGE,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+    def untoggle(self,scr):
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+
+def widget_dispatch(st,layout,widget):
+    if st == 'Totalisateur' :
+        return odo_widget(layout,widget)
+    elif st == 'Trip1' :
+        return trip1_widget(layout,widget)
+    elif st == 'Trip2' :
+        return trip2_widget(layout,widget)
+    elif st == 'Vitesse' :
+        return speed_widget(layout,widget)
+    elif st == 'Vmoy1' :
+        return vmoy1_widget(layout,widget)
+    elif st == 'Vmoy2' :
+        return vmoy2_widget(layout,widget)
+    elif st == 'Vmax1' :
+        return vmax1_widget(layout,widget)
+    elif st == 'Vmax2' :
+        return vmax2_widget(layout,widget)
+    elif st == 'Chrono1' :
+        return chrono1_widget(layout,widget)
+    elif st == 'Chrono2' :
+        return chrono2_widget(layout,widget)
+    elif st == 'Decompte' :
+        return countdown_widget(layout,widget)
+    else :
+        return rb_widget(layout,widget)
+
+#------------------ Affichage de l'heure, de la charge cpu et de la temperature du rpi ------------------------------#
+#------ Actions possibles : changement d'affichage personnalise sur appui long ok (reset)-----------------------------------#
+class status_widget (rb_widget):
+    def __init__(self,layout='0',widget=0):
+        global angle
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.temp_font = a['label_font']
+        self.heure_font = a['value_font']
+        self.cpu_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def reset(self):
+        global current_screen
+        current_screen += 1
+        if current_screen > 3 :
+            current_screen = 1
+        #
+        #
+        # TODO mettre ici la relecture de la config suivante
+        #
+        #
+    def update(self):
+        self.now = time.localtime()
+    def render(self,scr):
+        global angle,temperature,cpu
+        blit_text(scr,'{:3.0f}C'.format(temperature),(self.x+self.x1,self.y+self.y1), self.temp_font,angle)
+        blit_text(scr,'{:02d}:{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min,self.now.tm_sec),(self.x+self.x2,self.y+self.y2),self.heure_font, angle)
+        blit_text(scr,'{:02.0f}%'.format(cpu),(self.x+self.x3,self.y+self.y3),self.cpu_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage du totalisateur                                             ------------------------------#
+#------ Actions possibles : aucun                                                    -----------------------------------#
+class odo_widget (rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Totalisateur',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:05.0f}'.format(totalisateur),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage de la vitesse instantanee                                             ------------------------------#
+#------ Actions possibles : aucun                                                    -----------------------------------#
+class speed_widget (rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def update(self):
+        global totalisateur,speed,save_t_moy,old_totalisateur
+        k = time.time()
+        if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+            speed = (totalisateur*3.6-old_totalisateur*3.6);
+            speed = 1.0*speed/(k-save_t_moy)/1000;
+            save_t_moy = time.time()
+            old_totalisateur = totalisateur
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Vitesse',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:03.0f}'.format(speed),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage du trip1                                          ------------------------------#
+#------ Actions possibles : remise a zero , ajustement +/-100m                  -----------------------------------#
+class trip1_widget (rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def up(self):
+        global distance1,old_distance1
+        distance1+=10000
+        old_distance1=distance1
+        odoconfig['Odometre']['Distance1'] = str(distance1)
+        save_odoconfig()
+    def down(self):
+        global distance1,old_distance1
+        distance1+=10000
+        if distance1<0:
+            distance1 = 0
+        old_distance1=distance1
+        odoconfig['Odometre']['Distance1'] = str(distance1)
+        save_odoconfig()
+    def reset(self):
+        global distance1,chrono1,old_distance1
+        distance1 = 0
+        old_distance1 = distance1
+        vmoy1 = 0
+        speed = 0
+        vmax1 = 0
+        chrono_delay1 = 5 * aimants
+        chrono_time1 = 0
+        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+        odoconfig['Odometre']['Distance1'] = str(distance1)
+        odoconfig['Odometre']['Temps1'] = str(temps1)
+        chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
+        chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+        save_odoconfig()
+        save_chronoconfig()
+        save_t_moy = time.time()
+        save_t_odo = time.time()
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Trip1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:6.2f}'.format(distance1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage de la vitesse moyenne sur le trip1                                             ------------------------------#
+#------ Actions possibles : aucun (il faut faire un RAZ du Trip1 pour remettre a zero)                                                    -----------------------------------#
+class vmoy1_widget(rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def update(self):
+        global vmoy1,chrono_time1
+        temps = time.time() - chrono_time1
+        if temps <= 2 :
+            vmoy1 = 0
+        else :
+            vmoy1 = distance1 / temps * 3.6
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Vmoy1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:03.0f}'.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage de la vitesse moyenne1                                             ------------------------------#
+#------ Actions possibles : aucun                                                    -----------------------------------#
+class vmax1_widget(rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def update(self):
+        global speed,vmax1
+        temps = time.time() - chrono_time1
+        if temps <= 2 :
+            speed = 0
+        else :
+            speed = distance2 / temps * 3.6
+        if speed > vmax1 :
+            vmax1 = speed
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Vmax1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:03.0f}'.format(vmax1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage du chrono1                                            ------------------------------#
+#------ Actions possibles : aucun                                                    -----------------------------------#
+class chrono1_widget(rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def reset(self):
+        global distance1,chrono1
+        distance1 = 0
+        chrono1 = time.time()
+    def render(self,scr):
+        global angle
+        t = time.time() - chrono1
+        m,s = divmod (t,60)
+        ss = (s*100) % 100
+        blit_text(scr,' Chrono1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'.{:02.0f}'.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+
+class trip2_widget (rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def up(self):
+        global distance2,old_distance2
+        distance2+=10000
+        old_distance2=distance2
+        odoconfig['Odometre']['Distance2'] = str(distance2)
+        save_odoconfig()
+    def down(self):
+        global distance2,old_distance2
+        distance2+=10000
+        if distance2<0:
+            distance2 = 0
+        old_distance2=distance2
+        odoconfig['Odometre']['Distance2'] = str(distance2)
+        save_odoconfig()
+    def reset(self):
+        global distance2,chrono2,old_distance2
+        distance2 = 0
+        old_distance2 = distance2
+        vmoy2 = 0
+        vmax2 = 0
+        chrono_delay2 = 5 * aimants
+        chrono_time2 = 0
+        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+        odoconfig['Odometre']['Distance2'] = str(distance2)
+        chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
+        chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+        save_odoconfig()
+        save_chronoconfig()
+        save_t_moy = time.time()
+        save_t_odo = time.time()
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Trip2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:6.2f}'.format(distance2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+class vmoy2_widget(rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def update(self):
+        global vmoy2,chrono_time2
+        temps = time.time() - chrono_time2
+        if temps <= 2 :
+            vmoy2 = 0
+        else :
+            vmoy2 = distance2 / temps * 3.6
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Vmoy2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:03.0f}'.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+class vmax2_widget(rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def update(self):
+        global speed,vmax2
+        temps = time.time() - chrono_time2
+        if temps <= 2 :
+            speed = 0
+        else :
+            speed = distance2 / temps * 3.6
+        if speed > vmax2 :
+            vmax2 = speed
+    def render(self,scr):
+        global angle
+        blit_text(scr,' Vmax2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:03.0f}'.format(vmax2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+class chrono2_widget(rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def render(self,scr):
+        global angle
+        t = time.time() - chrono2
+        m,s = divmod (t,60)
+        ss = (s*100) % 100
+        blit_text(scr,' Chrono2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'.{:02.0f}'.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
+#------------------ Affichage du compte a rebours                                            ------------------------------#
+#------ Actions possibles : ajout de 30 secondes, RAZ, demarrage du compte a rebours                                                    -----------------------------------#
+class countdown_widget (rb_widget):
+    def __init__(self,layout='1',widget=0):
+        rb_widget.__init__(self,layout,widget)
+        a = widget_layouts[layout][widget]
+        setup_alphabet(a['label_font'])
+        setup_alphabet(a['value_font'])
+        setup_alphabet(a['unit_font'])
+        setup_alphabet(a['over_font'])
+        setup_alphabet(a['inside_font'])
+        self.label_font = a['label_font']
+        self.value_font = a['value_font']
+        self.unit_font = a['unit_font']
+        self.over_font = a['over_font']
+        self.inside_font = a['inside_font']
+        (self.x,self.y) = (a['x'],a['y'])
+        (self.w,self.h) = (a['w'],a['h'])
+        (self.x1,self.y1) = (a['x1'],a['y1'])
+        (self.x2,self.y2) = (a['x2'],a['y2'])
+        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def up(self):
+        global decompte
+        decompte += 30
+    def down(self):
+        global start_decompte
+        start_decompte = True
+        chrono_decompte = time.time() + decompte
+    def reset(self):
+        global decompte,start_decompte,chrono_decompte
+        decompte = 0
+        start_decompte = False
+        chrono_decompte = 0
+    def render(self,scr):
+        global angle
+        if start_decompte:
+            t = chrono_decompte - time.time()
+            if t <=30 and t >= 0 :
+                self.value_font = self.inside_font
+            if t < 0 :
+                self.value_font = self.over_font
+                self.unit_font = self.label_font
+                t = -t
+        else:
+            t = 0
+        m,s = divmod (t,60)
+        ss = (s*100) % 100
+        blit_text(scr,' Decompte',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'.{:02.0f}'.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
+        pygame.display.update(r)
+
 #----------------------------------------------------------------------------------------------#
 #-------------------------- Vérification configfiles ------------------------------------------#
 #----------------------------------------------------------------------------------------------#
@@ -415,6 +1069,7 @@ guiconfig = configparser.ConfigParser()
 rbconfig = configparser.ConfigParser()
 odoconfig = configparser.ConfigParser()
 chronoconfig = configparser.ConfigParser()
+screenconfig = configparser.ConfigParser()
 
 def save_setupconfig():
     global setupconfig
@@ -472,9 +1127,25 @@ def save_chronoconfig():
     else :
         print('Write Error chrono.cfg after 5 tries')
 
+def save_screenconfig():
+    global screenconfig
+    for attempt in range (5):
+        try:
+            with open('/mnt/piusb/.conf/screen.cfg','w') as configfile:
+                screenconfig.write(configfile)
+        except:
+            subprocess.Popen('sudo mount -a',shell=True)
+            time.sleep(.2)
+        else :
+            break
+    else :
+        print('Write Error screen.cfg after 5 tries')
+
+
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig
-    global totalisateur,distance,distance2,temps1,temps2,developpe,chrono_delay,chrono_time
+    global totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
+    global widgets
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -484,6 +1155,7 @@ def check_configfile():
     save_setupconfig()
 
     mode_jour = setupconfig['Parametres']['jour_nuit'] == 'Jour'
+    aimants = setupconfig['Parametres']['aimants']
     developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
 
     # On charge le roadbook en cours et sa case
@@ -496,17 +1168,29 @@ def check_configfile():
     odoconfig.read(candidates)
     save_odoconfig()
     totalisateur = float(odoconfig['Odometre']['Totalisateur'])
-    distance = float(odoconfig['Odometre']['Distance1'])
+    distance1 = float(odoconfig['Odometre']['Distance1'])
     distance2 = float(odoconfig['Odometre']['Distance2'])
-    temps1 = float(odoconfig['Odometre']['Temps1'])
-    temps2 = float(odoconfig['Odometre']['Temps2'])
 
     # On charge le chrono pour la vitesse moyenne
     candidates = ['/home/rpi/RpiRoadbook/chrono.cfg','/mnt/piusb/.log/chrono.cfg']
     chronoconfig.read(candidates)
     save_chronoconfig()
-    chrono_delay = int (chronoconfig['Chronometre']['chrono_delay'])
-    chrono_time = float(chronoconfig['Chronometre']['chrono_time'])
+    chrono_delay1 = int (chronoconfig['Chronometre1']['chrono_delay'])
+    chrono_time1 = float(chronoconfig['Chronometre1']['chrono_time'])
+    chrono_delay2 = int (chronoconfig['Chronometre2']['chrono_delay'])
+    chrono_time2 = float(chronoconfig['Chronometre2']['chrono_time'])
+
+    # On charge les configuration d'ecran
+    candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
+    screenconfig.read(candidates)
+    save_screenconfig()
+    form =  screenconfig['Affichage{}'.format(current_screen)]['format']
+    preset = widget_presets[form]
+    layout = preset['layout']
+    nb_champs = widget_sizes [layout]
+    widgets[(0)] = status_widget(layout,0)
+    for i in range(1,nb_champs+1) :
+        widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
 
 
 
@@ -1536,8 +2220,8 @@ class EditScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global developpe,roue,aimants, distance,cmavant,save_t_moy,save_t_odo,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
-        global temps1
+        global developpe,roue,aimants, distance1,old_distance1,save_t_moy,save_t_odo,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global widgets,current_widget,old_widget
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         check_configfile()
@@ -1546,33 +2230,19 @@ class RoadbookScene(SceneBase):
         sprites = {}
         old_sprites = {}
         image_cache = {}
+        #widgets = {}
 
-        temps1 = time.time()-chrono_time
+        temps1 = time.time()-chrono_time1
 
-        if chrono_time == 0 :
-            vmoy = distance/temps1*3.6/1000
-        else:
+        if chrono_time1 == 0 :
             vmoy = 0
+        else:
+            vmoy = distance/temps1*3.6/1000
         vmax = 0
         speed = 0
 
         self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
-
-        setup_alphabet(BLANC75)
-        setup_alphabet(BLANC100)
-        setup_alphabet(ROUGE25)
-        setup_alphabet(GRIS75)
-
-        # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
-        labels['heure'] = ('00:00:00',(int(guiconfig[self.orientation]['rb_tps_x']),int(guiconfig[self.orientation]['rb_tps_y'])),BLANC75,angle)
-        labels['distance'] = ('{:6.2f}'.format(0.0),(int(guiconfig[self.orientation]['rb_km_x']),int(guiconfig[self.orientation]['rb_km_y'])),BLANC100,angle)
-        labels['t_vitesse'] = ('Vitesse',(int(guiconfig[self.orientation]['rb_t_vi_x']),int(guiconfig[self.orientation]['rb_t_vi_y'])),ROUGE25,angle)
-        labels['vitesse'] = ('{:3.0f} '.format(0.0),(int(guiconfig[self.orientation]['rb_vi_x']),int(guiconfig[self.orientation]['rb_vi_y'])),BLANC75,angle)
-        labels['t_vmoy'] = ('Vit. moy.',(int(guiconfig[self.orientation]['rb_t_vm_x']),int(guiconfig[self.orientation]['rb_t_vm_y'])),ROUGE25,angle)
-        labels['vmoy'] = ('{:3.0f} '.format(0.0),(int(guiconfig[self.orientation]['rb_vm_x']),int(guiconfig[self.orientation]['rb_vm_y'])),GRIS75,angle)
-        labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(guiconfig[self.orientation]['rb_temp_x']),int(guiconfig[self.orientation]['rb_temp_y'])),ROUGE25,angle)
-        labels['cpu'] = ('{:4.1f}% '.format(0.0),(int(guiconfig[self.orientation]['rb_cpu_x']),int(guiconfig[self.orientation]['rb_cpu_y'])),ROUGE25,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.ncases = int(guiconfig[self.orientation]['ncases'])
@@ -1582,7 +2252,7 @@ class RoadbookScene(SceneBase):
         aimants = int(setupconfig['Parametres']['aimants'])
         developpe = 1.0*roue / aimants
 
-        cmavant = distance
+        old_distance1 = distance1
 
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
@@ -1594,8 +2264,8 @@ class RoadbookScene(SceneBase):
 
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
-        rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(600/w,180/h)
-        rb_ratio_annot = 480/w if self.orientation == 'Portrait' else 600/800
+        rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(500/w,160/h)
+        rb_ratio_annot = 480/w if self.orientation == 'Portrait' else 500/800
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
@@ -1607,38 +2277,32 @@ class RoadbookScene(SceneBase):
 
         save_t_moy = time.time()
         save_t_odo = time.time()
+        current_widget = 0
+        old_widget = 0
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,temps1,cmavant,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay
+        global distance1,old_distance1,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay1
+        global widgets,current_widget,nb_widgets
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
-                elif event.key == BOUTON_RIGHT:
-                    distance+=10000
-                    cmavant=distance
-                    odoconfig['Odometre']['Distance1'] = str(distance)
-                    save_odoconfig()
-                elif event.key == BOUTON_END:
-                    distance+=50000
-                    cmavant=distance
-                    odoconfig['Odometre']['Distance1'] = str(distance)
-                    save_odoconfig()
-                elif event.key == BOUTON_LEFT:
-                    distance-=10000
-                    if distance <= 0 : distance = 0
-                    cmavant = distance
-                    odoconfig['Odometre']['Distance1'] = str(distance)
-                    save_odoconfig()
-                elif event.key == BOUTON_HOME:
-                    distance-=50000
-                    if distance <= 0 : distance = 0
-                    cmavant = distance
-                    odoconfig['Odometre']['Distance1'] = str(distance)
-                    save_odoconfig()
 
+                # les actions sur le widget courant
+                elif event.key == BOUTON_RIGHT:
+                    widgets[(current_widget)].up()
+                elif event.key == BOUTON_LEFT:
+                    widgets[(current_widget)].down()
+                elif event.key == BOUTON_OK:
+                    current_widget += 1
+                    if current_widget > nb_widgets :
+                        current_widget = 0
+                elif event.key == BOUTON_BACKSPACE:
+                    widgets[(current_widget)].reset()
+
+                # les actions de deroulement du rb
                 elif event.key == BOUTON_UP:
                     self.oldcase = self.case
                     self.case -= 1
@@ -1649,29 +2313,6 @@ class RoadbookScene(SceneBase):
                     self.case += 1
                 elif event.key == BOUTON_PGDOWN:
                     self.case = self.nb_cases - self.ncases
-                elif event.key == BOUTON_BACKSPACE:
-                    distance = 0
-                    temps1 = 0.0
-                    cmavant = distance
-                    vmoy = 0
-                    speed = 0
-                    vmax = 0
-                    chrono_delay = 5 * aimants
-                    chrono_time = 0
-                    odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
-                    odoconfig['Odometre']['Distance1'] = str(distance)
-                    odoconfig['Odometre']['Distance2'] = str(distance2)
-                    odoconfig['Odometre']['Temps1'] = str(temps1)
-                    odoconfig['Odometre']['Temps2'] = str(temps2)
-                    chronoconfig['Chronometre']['chrono_delay'] = str(chrono_delay)
-                    chronoconfig['Chronometre']['chrono_time'] = str(chrono_time)
-
-                    save_odoconfig()
-                    save_chronoconfig()
-                    save_t_moy = time.time()
-                    save_t_odo = time.time()
-                #elif event.key == BOUTON_BACKSPACE:
-                    #self.SwitchToScene(TitleScene())
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - self.ncases :
@@ -1680,50 +2321,16 @@ class RoadbookScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global distance,speed,vmax,cmavant,temps1,save_t_moy,save_t_odo,vmoy,temperature,cpu
-        global labels,old_labels,sprites,old_sprites,rbconfig,chronoconfig
-        global chrono_delay,chrono_time
+        global save_t_odo,angle,totalisateur,distance1,distance2
+        global sprites,old_sprites,rbconfig,chronoconfig,odoconfig
+        global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
+        global widgets
+
+        # MAJ des cases du rb
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
-
-        temps1 = time.time() - chrono_time
-
-        if chrono_delay > 0 :
-            vmoy = 0 # On maintient la vitesse moyenne a 0 sur les 5 premiers tours de roues
-        else:
-            vmoy = distance/temps1*3.6/1000;
-
-        k = time.time()
-        if ( k-save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-            speed = (distance*3.6-cmavant*3.6);
-            speed = 1.0*speed/(k-save_t_moy)/1000;
-            save_t_moy = time.time()
-            cmavant = distance
-
-        if speed > vmax : vmax = speed
-
-        if k - save_t_odo >= 5 : # On sauvegarde l'odometre toutes les 5 secondes
-            odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
-            odoconfig['Odometre']['Distance1'] = str(distance)
-            odoconfig['Odometre']['Distance2'] = str(distance2)
-            odoconfig['Odometre']['Temps1'] = str(temps1)
-            odoconfig['Odometre']['Temps2'] = str(temps2)
-            save_odoconfig()
-            save_t_odo = time.time()
-            chronoconfig['Chronometre']['chrono_delay'] = str(chrono_delay)
-            chronoconfig['Chronometre']['chrono_time'] = str(chrono_time)
-            save_chronoconfig()
-
-        labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-        labels['distance'] = ('{:6.2f} '.format(distance/1000000), labels['distance'][1],labels['distance'][2],labels['distance'][3])
-        labels['vitesse'] = ('{:3.0f}  '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
-        labels['vmoy'] = ('{:3.0f}  '.format(vmoy), labels['vmoy'][1],labels['vmoy'][2],labels['vmoy'][3])
-        labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
-        labels['cpu'] = ('{:4.1f}% '.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
-
-        if self.oldcase != self.case :
             if angle == 0 :
                 for n in range(self.ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,480-(n+1)*self.nh))
@@ -1731,10 +2338,38 @@ class RoadbookScene(SceneBase):
                 for n in range(self.ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle),(800-(n+1)*self.nh,0))
 
+        # MAJ des infos des widgets
+        for j in list(widgets.keys()):
+            widgets[j].update()
+
+        # Sauvegarde de l'odometre, distances et temps de depart de chrono toutes les 5 secondes
+        k = time.time()
+        if k - save_t_odo >= 5 : # On sauvegarde l'odometre toutes les 5 secondes
+            odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+            odoconfig['Odometre']['Distance1'] = str(distance1)
+            odoconfig['Odometre']['Distance2'] = str(distance2)
+            save_odoconfig()
+            save_t_odo = time.time()
+            chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
+            chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+            chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
+            chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+            save_chronoconfig()
+
+
     def Render(self, screen):
+        global widgets,current_widget,old_widget
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
-        update_labels(screen)
         update_sprites(screen)
+        for j in list(widgets.keys()):
+            widgets[j].render(screen)
+        #update_labels(screen)
+        if old_widget != current_widget:
+            widgets[(old_widget)].untoggle()
+            widgets[(current_widget)].toggle()
+            old_widget = current_widget
+
+
 
 #*******************************************************************************************************#
 #---------------------------------------- Ecran Compteur de vitesse simple -----------------------------#
