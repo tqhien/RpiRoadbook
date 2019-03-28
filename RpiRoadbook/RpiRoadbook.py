@@ -121,10 +121,16 @@ BOUTON_PGDOWN  = pygame.K_PAGEDOWN # Bouton Down long
 
 GPIO_ROUE = 17
 GPIO_LEFT = 27
-GPIO_RIGHT = 22
-GPIO_OK = 23
+GPIO_OK   = 22
+GPIO_RIGHT = 23
 GPIO_UP = 24
 GPIO_DOWN = 25
+
+left_state = False
+ok_state = False
+right_state = False
+up_state = False
+down_state = False
 
 GPIO_DIM = 18
 
@@ -183,49 +189,63 @@ def input_roue_callback(channel):
 
 
 def input_left_callback(channel):
-    GPIO.remove_event_detect(channel)
+    global left_state
+    left_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
+    t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2)
-    bouton_time = time.time() - b4_time
-    if bouton_time >= 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
-    else:
+        if t >= .1 and t < 2:
+            if not left_state:
+                left_state = True
+        if t >=2 and t < 10:
+            if not left_long_state:
+                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
+                left_long_state = True
+        t = time.time() - b4_time
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=300)
+    left_state = False
+    left_long_state = False
 
 
 def input_right_callback(channel):
-    GPIO.remove_event_detect(channel)
+    global right_state
+    right_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
+    t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2)
-    bouton_time = time.time() - b4_time
-    if bouton_time >= 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
-    else:
+        if t >= .1 and t < 2:
+            if not right_state:
+                right_state = True
+        if t >=2 and t < 10:
+            if not right_long_state:
+                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
+                right_long_state = True
+        t = time.time() - b4_time
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=300)
+    right_state = False
+    right_long_state = False
 
 
 def input_ok_callback(channel):
-    GPIO.remove_event_detect(channel)
+    global ok_state
+    ok_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
+    t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2)
-    bouton_time = time.time() - b4_time
-    if bouton_time >= 2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
-    else:
+        if t >= .1 and t < 2:
+            if not ok_state:
+                ok_state = True
+        if t >=2 and t < 10:
+            if not ok_long_state:
+                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
+                ok_long_state = True
+        t = time.time() - b4_time
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
-    try :
-        GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
-    except :
-        pass
-
+    ok_state = False
+    ok_long_state = False
 
 def input_up_callback(channel):
     GPIO.remove_event_detect(channel)
@@ -234,7 +254,7 @@ def input_up_callback(channel):
     while not GPIO.input(channel) :# on attend le retour du bouton
         time.sleep(.2)
     bouton_time = time.time() - b4_time
-    if bouton_time >= 2 :
+    if bouton_time >=2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
@@ -246,9 +266,9 @@ def input_down_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2)
+        time.sleep(.2) 
     bouton_time = time.time() - b4_time
-    if bouton_time >= 2 :
+    if bouton_time >=2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
     else:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
@@ -257,9 +277,9 @@ def input_down_callback(channel):
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=50)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=50)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=50)
 GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
 GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
 
@@ -576,9 +596,7 @@ class rb_widget():
         setup_alphabet(a['value_font'])
         setup_alphabet(a['unit_font'])
         setup_alphabet(a['selected_font'])
-        setup_alphabet(a['over_font'])
-        setup_alphabet(a['inside_font'])
-
+        
         self.selected_font = a['selected_font']
         self.label_font = a['label_font']
         self.value_font = a['value_font']
@@ -592,9 +610,13 @@ class rb_widget():
         (self.x2,self.y2) = (a['x2'],a['y2'])
         (self.x3,self.y3) = (a['x3'],a['y3'])
         self.selected = False
+    def upup(self):
+        pass
     def up(self):
         pass
     def down(self):
+        pass
+    def downdown(self):
         pass
     def ok(self):
         global current_widget,nb_widgets
@@ -649,11 +671,9 @@ class status_widget (rb_widget):
     def __init__(self,layout='0',widget=0):
         global angle
         rb_widget.__init__(self,layout,widget)
-        a = widget_layouts[layout][widget]
-        self.temp_font = a['label_font']
-        self.heure_font = a['value_font']
-        self.cpu_font = a['unit_font']
-        self.selected_font = a['selected_font']
+        self.temp_font = self.label_font
+        self.heure_font = self.value_font
+        self.cpu_font = self.unit_font
     def reset(self):
         global current_screen
         current_screen += 1
@@ -722,6 +742,12 @@ class speed_widget (rb_widget):
 class trip1_widget (rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
+    def upup(self):
+        global distance1,old_distance1
+        distance1+=1000000
+        old_distance1=distance1
+        odoconfig['Odometre']['Distance1'] = str(distance1)
+        save_odoconfig()
     def up(self):
         global distance1,old_distance1
         distance1+=10000
@@ -731,6 +757,14 @@ class trip1_widget (rb_widget):
     def down(self):
         global distance1,old_distance1
         distance1-=10000
+        if distance1<0:
+            distance1 = 0
+        old_distance1=distance1
+        odoconfig['Odometre']['Distance1'] = str(distance1)
+        save_odoconfig()
+    def downdown(self):
+        global distance1,old_distance1
+        distance1-=1000000
         if distance1<0:
             distance1 = 0
         old_distance1=distance1
@@ -838,18 +872,12 @@ class chrono1_widget(rb_widget):
 class trip2_widget (rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-        a = widget_layouts[layout][widget]
-        setup_alphabet(a['label_font'])
-        setup_alphabet(a['value_font'])
-        setup_alphabet(a['unit_font'])
-        self.label_font = a['label_font']
-        self.value_font = a['value_font']
-        self.unit_font = a['unit_font']
-        (self.x,self.y) = (a['x'],a['y'])
-        (self.w,self.h) = (a['w'],a['h'])
-        (self.x1,self.y1) = (a['x1'],a['y1'])
-        (self.x2,self.y2) = (a['x2'],a['y2'])
-        (self.x3,self.y3) = (a['x3'],a['y3'])
+    def upup(self):
+        global distance2,old_distance2
+        distance2+=1000000
+        old_distance2=distance2
+        odoconfig['Odometre']['Distance2'] = str(distance2)
+        save_odoconfig()
     def up(self):
         global distance2,old_distance2
         distance2+=10000
@@ -859,6 +887,14 @@ class trip2_widget (rb_widget):
     def down(self):
         global distance2,old_distance2
         distance2-=10000
+        if distance2<0:
+            distance2 = 0
+        old_distance2=distance2
+        odoconfig['Odometre']['Distance2'] = str(distance2)
+        save_odoconfig()
+    def downdown(self):
+        global distance2,old_distance2
+        distance2-=1000000
         if distance2<0:
             distance2 = 0
         old_distance2=distance2
@@ -883,7 +919,10 @@ class trip2_widget (rb_widget):
     def render(self,scr):
         global angle
         blit_text(scr,' Trip2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
-        blit_text(scr,'{:6.2f}'.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        if self.selected:
+            blit_text(scr,'{:6.2f}'.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
+        else:
+            blit_text(scr,'{:6.2f}'.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
         pygame.display.update(r)
@@ -891,18 +930,6 @@ class trip2_widget (rb_widget):
 class vmoy2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-        a = widget_layouts[layout][widget]
-        setup_alphabet(a['label_font'])
-        setup_alphabet(a['value_font'])
-        setup_alphabet(a['unit_font'])
-        self.label_font = a['label_font']
-        self.value_font = a['value_font']
-        self.unit_font = a['unit_font']
-        (self.x,self.y) = (a['x'],a['y'])
-        (self.w,self.h) = (a['w'],a['h'])
-        (self.x1,self.y1) = (a['x1'],a['y1'])
-        (self.x2,self.y2) = (a['x2'],a['y2'])
-        (self.x3,self.y3) = (a['x3'],a['y3'])
     def update(self):
         global vmoy2,chrono_time2
         temps = time.time() - chrono_time2
@@ -913,7 +940,10 @@ class vmoy2_widget(rb_widget):
     def render(self,scr):
         global angle
         blit_text(scr,' Vmoy2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
-        blit_text(scr,'{:03.0f}'.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        if self.selected:
+            blit_text(scr,'{:03.0f}'.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+        else:
+            blit_text(scr,'{:03.0f}'.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
         pygame.display.update(r)
@@ -921,18 +951,6 @@ class vmoy2_widget(rb_widget):
 class vmax2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-        a = widget_layouts[layout][widget]
-        setup_alphabet(a['label_font'])
-        setup_alphabet(a['value_font'])
-        setup_alphabet(a['unit_font'])
-        self.label_font = a['label_font']
-        self.value_font = a['value_font']
-        self.unit_font = a['unit_font']
-        (self.x,self.y) = (a['x'],a['y'])
-        (self.w,self.h) = (a['w'],a['h'])
-        (self.x1,self.y1) = (a['x1'],a['y1'])
-        (self.x2,self.y2) = (a['x2'],a['y2'])
-        (self.x3,self.y3) = (a['x3'],a['y3'])
     def update(self):
         global speed,vmax2
         temps = time.time() - chrono_time2
@@ -945,7 +963,10 @@ class vmax2_widget(rb_widget):
     def render(self,scr):
         global angle
         blit_text(scr,' Vmax2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
-        blit_text(scr,'{:03.0f}'.format(vmax2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        if self.selected:
+            blit_text(scr,'{:03.0f}'.format(vmax2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+        else:
+            blit_text(scr,'{:03.0f}'.format(vmax2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
         pygame.display.update(r)
@@ -953,25 +974,16 @@ class vmax2_widget(rb_widget):
 class chrono2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-        a = widget_layouts[layout][widget]
-        setup_alphabet(a['label_font'])
-        setup_alphabet(a['value_font'])
-        setup_alphabet(a['unit_font'])
-        self.label_font = a['label_font']
-        self.value_font = a['value_font']
-        self.unit_font = a['unit_font']
-        (self.x,self.y) = (a['x'],a['y'])
-        (self.w,self.h) = (a['w'],a['h'])
-        (self.x1,self.y1) = (a['x1'],a['y1'])
-        (self.x2,self.y2) = (a['x2'],a['y2'])
-        (self.x3,self.y3) = (a['x3'],a['y3'])
     def render(self,scr):
         global angle
         t = time.time() - chrono2
         m,s = divmod (t,60)
         ss = (s*100) % 100
         blit_text(scr,' Chrono2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
-        blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        if self.selected:
+            blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+        else:
+            blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'.{:02.0f}'.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
         pygame.display.update(r)
@@ -982,6 +994,8 @@ class countdown_widget (rb_widget):
     def __init__(self,layout='1',widget=0):
         global decompte
         rb_widget.__init__(self,layout,widget)
+        setup_alphabet(self.over_font)
+        setup_alphabet(self.inside_font)
         decompte = 0
     def up(self):
         global decompte
@@ -1012,7 +1026,7 @@ class countdown_widget (rb_widget):
         blit_text(scr,' Decompte',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
-        else: 
+        else:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'.{:02.0f}'.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
@@ -2249,9 +2263,9 @@ class RoadbookScene(SceneBase):
 
                 # les actions sur le widget courant
                 elif event.key == BOUTON_RIGHT:
-                    widgets[(current_widget)].up()
-                elif event.key == BOUTON_LEFT:
                     widgets[(current_widget)].down()
+                elif event.key == BOUTON_LEFT:
+                    widgets[(current_widget)].up()
                 elif event.key == BOUTON_OK:
                     widgets[(current_widget)].deselect()
                     current_widget += 1
@@ -2260,7 +2274,10 @@ class RoadbookScene(SceneBase):
                     widgets[(current_widget)].select()
                 elif event.key == BOUTON_BACKSPACE:
                     widgets[(current_widget)].reset()
-
+                elif event.key == BOUTON_HOME:
+                    widgets[(current_widget)].upup()
+                elif event.key == BOUTON_END:
+                    widgets[(current_widget)].downdown()
                 # les actions de deroulement du rb
                 elif event.key == BOUTON_UP:
                     self.oldcase = self.case
