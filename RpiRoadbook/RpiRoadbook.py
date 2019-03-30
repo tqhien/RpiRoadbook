@@ -266,7 +266,7 @@ def input_down_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2) 
+        time.sleep(.2)
     bouton_time = time.time() - b4_time
     if bouton_time >=2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
@@ -297,6 +297,8 @@ def rpi_temp():
     except:
         temperature = -1
 
+rpi_temp()
+
 def cpu_load():
     global cpu
     try:
@@ -304,6 +306,8 @@ def cpu_load():
             cpu = int(float(f.readline().split(" ")[:3][0])*100)
     except:
         cpu = -1
+
+cpu_load()
 
 #-----------------------------------------------------------------------------------------------#
 #----------------------------- Gestion des images en cache -------------------------------------#
@@ -517,9 +521,9 @@ widget_sizes = {
     '8' : 1,
     '9' : 2,
     '10': 3,
-    # Nb de chmamps pour les compteurs simples paysage et portrait
-    '11': 3,
-    '12': 3,
+    # Nb de champs pour les compteurs simples paysage et portrait
+    '11': 5,
+    '12': 5,
     # Pour le zoom
     '0' : 1,
     '00': 1
@@ -583,6 +587,20 @@ widget_layouts = {
         {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
         {'x':30,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':240,'x2':30,'y2':200,'x3':30,'y3':70},
         {'x':105,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':240,'x2':30,'y2':200,'x3':30,'y3':70}],
+    '11' : [
+        {'x':0,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1},
+        {'x':0,'y':30,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':5,'y1':115,'x2':25,'y2':1,'x3':240,'y3':115},
+        {'x':0,'y':180,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':5,'y1':115,'x2':25,'y2':1,'x3':240,'y3':115},
+        {'x':0,'y':330,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':5,'y1':115,'x2':25,'y2':1,'x3':240,'y3':115},
+        {'x':300,'y':0,'w':500,'h':300,'label_font':ROUGE25,'value_font':BLANC200,'unit_font':BLANC25,'over_font':BLANC200,'inside_font':BLANC200,'selected_font':BLANC200,'x1':5,'y1':265,'x2':100,'y2':1,'x3':440,'y3':265},
+        {'x':300,'y':300,'w':500,'h':180,'label_font':ROUGE25,'value_font':BLANC100,'unit_font':BLANC25,'over_font':BLANC100,'inside_font':BLANC100,'selected_font':BLANC200,'x1':5,'y1':130,'x2':100,'y2':1,'x3':440,'y3':130}],
+    '12' : [
+        {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
+        {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70},
+        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':240,'x2':30,'y2':200,'x3':100,'y3':70},
+        {'x':330,'y':0,'w':300,'h':480,'label_font':ROUGE25,'value_font':BLANC200,'unit_font':BLANC25,'over_font':BLANC200,'inside_font':BLANC200,'selected_font':BLANC200,'x1':1,'y1':480,'x2':40,'y2':400,'x3':1,'y3':70},
+        {'x':630,'y':0,'w':170,'h':480,'label_font':ROUGE25,'value_font':BLANC100,'unit_font':BLANC25,'over_font':BLANC100,'inside_font':BLANC200,'selected_font':BLANC200,'x1':1,'y1':480,'x2':40,'y2':400,'x3':1,'y3':70}],
 }
 
 
@@ -590,13 +608,13 @@ class rb_widget():
     def __init__(self,layout='1',widget=0):
         global angle
         self.widget_order = widget
-        angle = 0 if layout in ('0','1','2','3','4') else 90
+        angle = 0 if layout in ('0','1','2','3','4','11') else 90
         a = widget_layouts[layout][widget]
         setup_alphabet(a['label_font'])
         setup_alphabet(a['value_font'])
         setup_alphabet(a['unit_font'])
         setup_alphabet(a['selected_font'])
-        
+
         self.selected_font = a['selected_font']
         self.label_font = a['label_font']
         self.value_font = a['value_font']
@@ -671,9 +689,6 @@ class status_widget (rb_widget):
     def __init__(self,layout='0',widget=0):
         global angle
         rb_widget.__init__(self,layout,widget)
-        self.temp_font = self.label_font
-        self.heure_font = self.value_font
-        self.cpu_font = self.unit_font
     def reset(self):
         global current_screen
         current_screen += 1
@@ -688,12 +703,12 @@ class status_widget (rb_widget):
         self.now = time.localtime()
     def render(self,scr):
         global angle,temperature,cpu
-        blit_text(scr,'{:3.0f}C'.format(temperature),(self.x+self.x1,self.y+self.y1), self.temp_font,angle)
+        blit_text(scr,'{:3.0f}C'.format(temperature),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02d}:{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min,self.now.tm_sec),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
-            blit_text(scr,'{:02d}:{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min,self.now.tm_sec),(self.x+self.x2,self.y+self.y2),self.heure_font, angle)
-        blit_text(scr,'{:02.0f}%'.format(cpu),(self.x+self.x3,self.y+self.y3),self.cpu_font,angle)
+            blit_text(scr,'{:02d}:{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min,self.now.tm_sec),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+        blit_text(scr,'{:02.0f}%'.format(cpu),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
@@ -852,12 +867,15 @@ class chrono1_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global distance1,chrono1
+        global distance1,chrono_time1
         distance1 = 0
-        chrono1 = time.time()
+        chrono_time1 = time.time()
     def render(self,scr):
-        global angle
-        t = time.time() - chrono1
+        global angle,chrono_time1
+        if chrono_time1 != 0:
+             t = time.time() - chrono_time1
+        else:
+             t = 0
         m,s = divmod (t,60)
         ss = (s*100) % 100
         blit_text(scr,' Chrono1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -975,8 +993,11 @@ class chrono2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def render(self,scr):
-        global angle
-        t = time.time() - chrono2
+        global angle,chrono_time2
+        if chrono_time2 != 0:
+             t = time.time() - chrono_time2
+        else:
+             t=0
         m,s = divmod (t,60)
         ss = (s*100) % 100
         blit_text(scr,' Chrono2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -2349,43 +2370,32 @@ class RoadbookScene(SceneBase):
 
 class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
-        global roue, aimants,developpe, distance,cmavant,distance2,cmavant2,totalisateur,speed,save_t_moy, save_t_odo,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global roue, aimants,developpe, distance1,distance2,old_distance1,old_distance2,totalisateur,speed,save_t_moy, save_t_odo,labels, old_labels,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global widgets, current_widget,old_widget
         SceneBase.__init__(self,fname)
+        widgets = {}
         check_configfile()
-        labels = {}
-        old_labels = {}
-        sprites = {}
-        old_sprites = {}
-        image_cache = {}
 
+        temps1 = time.time()-chrono_time1
+
+        if chrono_time1 == 0 :
+            vmoy = 0
+        else:
+            vmoy = distance/temps1*3.6/1000
+        vmax = 0
         speed = 0
 
         self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
 
-        setup_alphabet (BLANC75)
-        setup_alphabet(BLANC25)
-        setup_alphabet(BLANC100)
-        setup_alphabet(ROUGE25)
-        setup_alphabet(BLANC200)
-
         self.index = 0 # totalisateur par defaut
-
-        # Dans l'ordre : heure,odometre,texte_vitesse,vitesse,texte_vitessemoyenne,vitessemoyenne,
-        labels['heure'] = ('00:00:00',(int(guiconfig[self.orientation]['odo_tps_x']),int(guiconfig[self.orientation]['odo_tps_y'])),BLANC75,angle)
-        labels['t_totalisateur'] = ('Total : ',(int(guiconfig[self.orientation]['odo_t_km_x']),int(guiconfig[self.orientation]['odo_t_km_y'])),BLANC25,angle)
-        labels['totalisateur'] = ('{:6.2f} '.format(0.0),(int(guiconfig[self.orientation]['odo_km_x']),int(guiconfig[self.orientation]['odo_km_y'])),BLANC100,angle)
-        labels['t_vitesse'] = ('Vitesse',(int(guiconfig[self.orientation]['odo_t_vi_x']),int(guiconfig[self.orientation]['odo_t_vi_y'])),ROUGE25,angle)
-        labels['vitesse'] = ('{:3.0f} '.format(100.0),(int(guiconfig[self.orientation]['odo_vi_x']),int(guiconfig[self.orientation]['odo_vi_y'])),BLANC200,angle)
-        labels['temperature'] = ('{:4.1f}C'.format(0.0),(int(guiconfig[self.orientation]['odo_temp_x']),int(guiconfig[self.orientation]['odo_temp_y'])),ROUGE25,angle)
-        labels['cpu'] = ('{:4.1f}%'.format(0.0),(int(guiconfig[self.orientation]['odo_cpu_x']),int(guiconfig[self.orientation]['odo_cpu_y'])),ROUGE25,angle)
 
         roue = int(setupconfig['Parametres']['roue'])
         aimants = int(setupconfig['Parametres']['aimants'])
         developpe = 1.0*roue / aimants
 
-        cmavant = distance
-        cmavant2 = distance2
+        old_distance1 = distance1
+        old_distance2 = distance2
 
         if mode_jour:
             pygame.display.get_surface().fill(BLANC)
@@ -2395,91 +2405,57 @@ class OdometerScene(SceneBase):
 
         save_t_moy = time.time()
         save_t_odo = time.time()
+        current_widget = 0
+        old_widget = 0
 
     def ProcessInput(self, events, pressed_keys):
-        global distance,cmavant,distance2,cmavant2,speed,save_t_moy,save_t_odo,temps1,temps2
+        global distance1,old_distance1,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay1
+        global widgets,current_widget,nb_widgets
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
-            elif event.type == pygame.KEYDOWN :
-                # Seule action possible : reinitialisation du trip partiel
-                if event.key == BOUTON_BACKSPACE:
-                    if self.index == 1 :
-                        distance = 0
-                        temps1 = 0.0
-                        cmavant = distance
-                        speed = 0
-                        # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
-                        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
-                        odoconfig['Odometre']['Distance1'] = str(distance)
-                        odoconfig['Odometre']['Distance2'] = str(distance2)
-                        odoconfig['Odometre']['Temps1'] = str(temps1)
-                        odoconfig['Odometre']['Temps2'] = str(temps2)
-                        save_odoconfig()
-                        save_t_moy = time.time()
-                        save_t_odo = time.time()
-                    elif self.index == 2 :
-                        distance2 = 0
-                        temps2 = 0.0
-                        cmavant2 = distance2
-                        speed = 0
-                        # On force la sauvegarde du nouveau trip, notamment si on le fait a l'arret
-                        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
-                        odoconfig['Odometre']['Distance1'] = str(distance)
-                        odoconfig['Odometre']['Distance2'] = str(distance2)
-                        odoconfig['Odometre']['Temps1'] = str(temps1)
-                        odoconfig['Odometre']['Temps2'] = str(temps2)
-                        save_odoconfig()
-                        save_t_moy = time.time()
-                        save_t_odo = time.time()
-                elif event.key == BOUTON_DOWN or event.key == BOUTON_UP :
-                    self.index += 1
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.Terminate()
+                # les actions sur le widget courant
+                elif event.key == BOUTON_OK:
+                    widgets[(current_widget)].deselect()
+                    current_widget += 1
+                    if current_widget > 3 :
+                        current_widget = 0
+                    widgets[(current_widget)].select()
+                elif event.key == BOUTON_BACKSPACE:
+                    widgets[(current_widget)].reset()
 
     def Update(self):
-        global distance,speed,vmax,cmavant,vmoy,temperature,cpu,save_t_moy,save_t_odo
-        global labels,old_labels,sprites,old_sprites
+        global save_t_odo,angle,totalisateur,distance1,distance2
+        global chronoconfig,odoconfig
+        global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
+        global widgets
 
-        if self.index > 2 : self.index = 0
+        # MAJ des infos des widgets
+        for j in list(widgets.keys()):
+            widgets[j].update()
 
+        # Sauvegarde de l'odometre, distances et temps de depart de chrono toutes les 5 secondes
         k = time.time()
-        if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-            speed = (distance*3.6-cmavant*3.6);
-            speed = 1.0*speed/(k-save_t_moy)/1000;
-            save_t_moy = time.time()
-            cmavant = distance
-
-        if k - save_t_odo >= 5 : #On sauvegarde l'odometre toutes les 5 secondes
+        if k - save_t_odo >= 5 : # On sauvegarde l'odometre toutes les 5 secondes
             odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
-            odoconfig['Odometre']['Distance1'] = str(distance)
+            odoconfig['Odometre']['Distance1'] = str(distance1)
             odoconfig['Odometre']['Distance2'] = str(distance2)
-            odoconfig['Odometre']['Temps1'] = str(temps1)
-            odoconfig['Odometre']['Temps2'] = str(temps2)
             save_odoconfig()
             save_t_odo = time.time()
-
-
-        if self.next == self :
-            labels['heure'] = (time.strftime("%H:%M:%S", time.localtime()), labels['heure'][1],labels['heure'][2],labels['heure'][3])
-            d = totalisateur
-            if self.index == 0 :
-                d = totalisateur
-                t = 'Total :  '
-            elif self.index == 1 :
-                d = distance
-                t = 'Trip 1 : '
-            else :
-                d = distance2
-                t = 'Trip 2 : '
-            labels['totalisateur'] = ('{:6.2f} '.format(d/1000000), labels['totalisateur'][1],labels['totalisateur'][2],labels['totalisateur'][3])
-            labels['t_totalisateur'] = (t, labels['t_totalisateur'][1],labels['t_totalisateur'][2],labels['t_totalisateur'][3])
-            labels['vitesse'] = ('{:3.0f}    '.format(speed), labels['vitesse'][1],labels['vitesse'][2],labels['vitesse'][3])
-            labels['temperature'] = ('{:4.1f}C'.format(temperature),labels['temperature'][1],labels['temperature'][2],labels['temperature'][3])
-            labels['cpu'] = ('{:4.1f}% '.format(cpu),labels['cpu'][1],labels['cpu'][2],labels['cpu'][3])
+            chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
+            chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+            chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
+            chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+            save_chronoconfig()
 
     def Render(self, screen):
+        global widgets
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
-        update_labels(screen)
-        update_sprites(screen)
+        for j in list(widgets.keys()):
+            widgets[j].render(screen)
 
 #*******************************************************************************************************#
 #------------------------- La partie Derouleur Zoom   --------------------------------------------------#
