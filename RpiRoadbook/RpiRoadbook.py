@@ -94,6 +94,8 @@ chrono_decompte = 0
 roue = 1864
 aimants = 1
 developpe = 1.0*roue / aimants
+orientation = 'Paysage'
+ncases = 3
 
 save_t_moy = time.time()
 save_t_odo = time.time()
@@ -297,8 +299,6 @@ def rpi_temp():
     except:
         temperature = -1
 
-rpi_temp()
-
 def cpu_load():
     global cpu
     try:
@@ -306,8 +306,6 @@ def cpu_load():
             cpu = int(float(f.readline().split(" ")[:3][0])*100)
     except:
         cpu = -1
-
-cpu_load()
 
 #-----------------------------------------------------------------------------------------------#
 #----------------------------- Gestion des images en cache -------------------------------------#
@@ -1062,6 +1060,7 @@ rbconfig = configparser.ConfigParser()
 odoconfig = configparser.ConfigParser()
 chronoconfig = configparser.ConfigParser()
 screenconfig = configparser.ConfigParser()
+routecongig = configparser.ConfigParser()
 
 def save_setupconfig():
     global setupconfig
@@ -1119,11 +1118,12 @@ def save_chronoconfig():
     else :
         print('Write Error chrono.cfg after 5 tries')
 
-def save_screenconfig():
+def save_screenconfig(mode='Route'):
     global screenconfig
+    f = '/mnt/piusb/.conf/route.cfg' if mode == 'Route' else '/mnt/piusb/.conf/screen.cfg'
     for attempt in range (5):
         try:
-            with open('/mnt/piusb/.conf/screen.cfg','w') as configfile:
+            with open(f,'w') as configfile:
                 screenconfig.write(configfile)
         except:
             subprocess.Popen('sudo mount -a',shell=True)
@@ -1136,24 +1136,24 @@ def save_screenconfig():
 
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig
-    global totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
+    global totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
     global widgets,nb_widgets
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
-    # On charge les reglages : mode, orientation, etc
-    candidates = ['/home/rpi/RpiRoadbook/default.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+    # On charge les reglages : developpe, nb aimants, orientation
+    candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
     setupconfig.read(candidates)
     save_setupconfig()
-
-    mode_jour = setupconfig['Parametres']['jour_nuit'] == 'Jour'
     aimants = setupconfig['Parametres']['aimants']
     developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
+    orientation = setupconfig['Parametres']['orientation']
 
-    # On charge le roadbook en cours et sa case
+    # On charge le mode en cours, le roadbook en cours et sa case
     candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
     rbconfig.read(candidates)
     save_rbconfig()
+    rallye = rbconfig['Mode']['mode']
 
     # On charge le trip
     candidates = ['/home/rpi/RpiRoadbook/odo.cfg','/mnt/piusb/.log/odo.cfg']
@@ -1172,13 +1172,24 @@ def check_configfile():
     chrono_delay2 = int (chronoconfig['Chronometre2']['chrono_delay'])
     chrono_time2 = float(chronoconfig['Chronometre2']['chrono_time'])
 
-    # On charge les configuration d'ecran
-    candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
+    # On charge les configuration d'ecran selon le mode
+    if rallye == 'Route' :
+        candidates = ['/home/rpi/RpiRoadbook/route.cfg','/mnt/piusb/.conf/route.cfg']
+    else:
+        candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
     screenconfig.read(candidates)
-    save_screenconfig()
+    save_screenconfig(rallye)
+    mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
     form =  screenconfig['Affichage{}'.format(current_screen)]['format']
-    preset = widget_presets[form]
+    t = 'pa' if orientation == 'Paysage' else 'po'
+    t += 'j' if mode_jour else 'n'
+    t += form
+    preset = widget_presets[t]
     layout = preset['layout']
+    if layout in ('00','8','9','10'):
+        ncases = 4
+    else:
+        ncases = 3
     nb_widgets = widget_sizes [layout]
     widgets[(0)] = status_widget(layout,0)
     for i in range(1,nb_widgets+1) :
@@ -1228,6 +1239,8 @@ def run_RpiRoadbook(width, height,  starting_scene):
     active_scene = starting_scene
     check_configfile()
     t_sys = time.time()
+    rpi_temp()
+    cpu_load()
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
@@ -1284,12 +1297,11 @@ class TitleScene(SceneBase):
             gotoConfig = False
             self.SwitchToScene(ModeScene())
         else :
-            self.rallye = setupconfig['Parametres']['mode']
+            self.rallye = rbconfig['Mode']['mode']
             if self.rallye in ('Rallye','Zoom') :
                 self.SwitchToScene(SelectionScene())
             elif self.rallye == 'Route' :
                 self.SwitchToScene(OdometerScene())
-
 
     def Render(self, screen):
         if mode_jour :
@@ -1522,7 +1534,7 @@ class NoneScene(SceneBase):
 #*******************************************************************************************************#
 class ModeScene(SceneBase):
     def __init__(self, fname = ''):
-        global setupconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global setupconfig,rbconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour,myfont,alphabet,alphabet_size_x,alphabet_size_y
         SceneBase.__init__(self)
         self.next = self
         self.filename = fname
@@ -1556,8 +1568,8 @@ class ModeScene(SceneBase):
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.index = 0 # 0= mode, 1=nuit, 2=luminosite, 3=orientation, 4=suivant, 5 = ok
 
-        self.rallye = setupconfig['Parametres']['mode']
-        mode_jour = setupconfig['Parametres']['jour_nuit'] == 'Jour'
+        self.rallye = rbconfig['Mode']['mode']
+        mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
         self.dim = int(setupconfig['Parametres']['luminosite'])
         self.paysage = setupconfig['Parametres']['orientation'] == 'Paysage'
 
@@ -1581,7 +1593,7 @@ class ModeScene(SceneBase):
         pygame.display.update()
 
     def ProcessInput(self, events, pressed_keys):
-        global setupconfig,mode_jour,alphabet,alphabet_size_x,alphabet_size_y,old_labels, old_sprites
+        global setupconfig,rbconfig,mode_jour,alphabet,alphabet_size_x,alphabet_size_y,old_labels, old_sprites
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -1604,12 +1616,12 @@ class ModeScene(SceneBase):
                             self.rallye = 'Zoom'
                         elif self.rallye == 'Zoom' :
                             self.rallye = 'Rallye'
-                        setupconfig['Parametres']['mode'] = self.rallye
-                        save_setupconfig()
+                        rbconfig['Mode']['mode'] = self.rallye
+                        save_rbconfig()
 
                     elif self.index == 1 :
                         mode_jour = not mode_jour
-                        setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
+                        screenconfig['Affichage1']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
                         save_setupconfig()
 
                     elif self.index == 2 :
@@ -1942,7 +1954,7 @@ class ConversionScene(SceneBase):
         self.filename = fname
         self.gotoEdit = gotoE
         self.orientation = setupconfig['Parametres']['orientation']
-        self.rallye = setupconfig['Parametres']['mode']
+        self.rallye = rbconfig['Mode']['mode']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
@@ -2237,7 +2249,6 @@ class RoadbookScene(SceneBase):
         angle = 90 if self.orientation == 'Portrait' else 0
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.ncases = int(guiconfig[self.orientation]['ncases'])
         self.pages = {}
 
         roue = int(setupconfig['Parametres']['roue'])
@@ -2312,8 +2323,8 @@ class RoadbookScene(SceneBase):
                     self.case = self.nb_cases - self.ncases
 
         # Action sur le dérouleur
-        if self.case > self.nb_cases - self.ncases :
-            self.case = self.nb_cases -self.ncases
+        if self.case > self.nb_cases - ncases :
+            self.case = self.nb_cases - ncases
         if self.case < 0 :
             self.case = 0
 
@@ -2329,10 +2340,10 @@ class RoadbookScene(SceneBase):
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
             if angle == 0 :
-                for n in range(self.ncases):
+                for n in range(ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,480-(n+1)*self.nh))
             else :
-                for n in range(self.ncases):
+                for n in range(ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle),(800-(n+1)*self.nh,0))
 
         # MAJ des infos des widgets
