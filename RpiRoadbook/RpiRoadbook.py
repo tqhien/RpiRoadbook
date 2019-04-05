@@ -785,7 +785,9 @@ class trip1_widget (rb_widget):
         odoconfig['Odometre']['Distance1'] = str(distance1)
         save_odoconfig()
     def reset(self):
-        global distance1,chrono1,old_distance1
+        global distance1,old_distance1,vmoy1,speed,vmax1,chrono_delay1,chrono_time1
+        global odoconfig,chronoconfig
+        global save_t_moy,save_t_odo
         distance1 = 0
         old_distance1 = distance1
         vmoy1 = 0
@@ -926,7 +928,9 @@ class trip2_widget (rb_widget):
         odoconfig['Odometre']['Distance2'] = str(distance2)
         save_odoconfig()
     def reset(self):
-        global distance2,chrono2,old_distance2
+        global distance2,old_distance2,vmoy2,speed,vmax2,chrono_delay2,chrono_time2
+        global odoconfig,chronoconfig
+        global save_t_moy,save_t_odo
         distance2 = 0
         old_distance2 = distance2
         vmoy2 = 0
