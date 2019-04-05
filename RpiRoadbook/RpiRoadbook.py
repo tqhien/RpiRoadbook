@@ -690,15 +690,31 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global current_screen
+        global widgets,current_screen,screenconfig,nb_widgets,ncases
         current_screen += 1
         if current_screen > 3 :
             current_screen = 1
-        #
-        #
-        # TODO mettre ici la relecture de la config suivante
-        #
-        #
+        form =  screenconfig['Affichage{}'.format(current_screen)]['format']
+        t = 'pa' if orientation == 'Paysage' else 'po'
+        t += 'j' if mode_jour else 'n'
+        t += form
+        preset = widget_presets[t]
+        layout = preset['layout']
+        nb_widgets = widget_sizes [layout]
+        if layout in ('00','8','9','10'):
+            ncases = 4
+        else:
+            ncases = 3
+        widgets[(0)] = status_widget(layout,0)
+        for i in range(1,nb_widgets+1) :
+            widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
+        if mode_jour :
+            pygame.display.get_surface().fill(BLANC)
+        else :
+            pygame.display.get_surface().fill(NOIR)
+        pygame.display.update()
+        for j in list(widgets.keys()):
+            widgets[j].update()
     def update(self):
         self.now = time.localtime()
     def render(self,scr):
@@ -2456,27 +2472,7 @@ class OdometerScene(SceneBase):
                     self.Terminate()
                 # les actions sur le widget courant
                 elif event.key == BOUTON_OK:
-                    #widgets = {}
-                    current_screen += 1
-                    if current_screen > 3 :
-                        current_screen = 1
-                    form =  screenconfig['Affichage{}'.format(current_screen)]['format']
-                    t = 'pa' if orientation == 'Paysage' else 'po'
-                    t += 'j' if mode_jour else 'n'
-                    t += form
-                    preset = widget_presets[t]
-                    layout = preset['layout']
-                    nb_widgets = widget_sizes [layout]
-                    widgets[(0)] = status_widget(layout,0)
-                    for i in range(1,nb_widgets+1) :
-                        widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
-                    if mode_jour :
-                        pygame.display.get_surface().fill(BLANC)
-                    else :
-                        pygame.display.get_surface().fill(NOIR)
-                    pygame.display.update()
-                    for j in list(widgets.keys()):
-                        widgets[j].update()
+                    widgets[(0)].reset()
                 elif event.key == BOUTON_BACKSPACE:
                     widgets[(1)].reset()
 
