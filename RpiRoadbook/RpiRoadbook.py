@@ -726,7 +726,7 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites
         current_screen += 1
         if current_screen > 3 :
             current_screen = 1
@@ -741,6 +741,8 @@ class status_widget (rb_widget):
             ncases = 4
         else:
             ncases = 3
+        widgets = {}
+        old_sprites = {}        
         widgets[(0)] = status_widget(layout,0)
         for i in range(1,nb_widgets+1) :
             widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
