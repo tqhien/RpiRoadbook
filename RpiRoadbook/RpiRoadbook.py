@@ -1160,7 +1160,7 @@ def save_screenconfig(mode='Route'):
 
 
 def check_configfile():
-    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig
+    global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
     global widgets,nb_widgets
     # On charge les emplacements des elements d'affichage
@@ -2408,7 +2408,7 @@ class RoadbookScene(SceneBase):
 class OdometerScene(SceneBase):
     def __init__(self, fname = ''):
         global roue, aimants,developpe, distance1,distance2,old_distance1,old_distance2,totalisateur,speed,save_t_moy, save_t_odo,labels, old_labels,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
-        global widgets, current_widget,old_widget
+        global widgets, current_screen,old_screen
         SceneBase.__init__(self,fname)
         widgets = {}
         check_configfile()
@@ -2442,12 +2442,12 @@ class OdometerScene(SceneBase):
 
         save_t_moy = time.time()
         save_t_odo = time.time()
-        current_widget = 0
-        old_widget = 0
+        current_screen = 1
+        old_widget = 1
 
     def ProcessInput(self, events, pressed_keys):
         global distance1,old_distance1,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay1
-        global widgets,current_widget,nb_widgets
+        global widgets,current_screen,screenconfig,nb_widgets
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -2456,13 +2456,29 @@ class OdometerScene(SceneBase):
                     self.Terminate()
                 # les actions sur le widget courant
                 elif event.key == BOUTON_OK:
-                    widgets[(current_widget)].deselect()
-                    current_widget += 1
-                    if current_widget > 3 :
-                        current_widget = 0
-                    widgets[(current_widget)].select()
+                    #widgets = {}
+                    current_screen += 1
+                    if current_screen > 3 :
+                        current_screen = 1
+                    form =  screenconfig['Affichage{}'.format(current_screen)]['format']
+                    t = 'pa' if orientation == 'Paysage' else 'po'
+                    t += 'j' if mode_jour else 'n'
+                    t += form
+                    preset = widget_presets[t]
+                    layout = preset['layout']
+                    nb_widgets = widget_sizes [layout]
+                    widgets[(0)] = status_widget(layout,0)
+                    for i in range(1,nb_widgets+1) :
+                        widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
+                    if mode_jour :
+                        pygame.display.get_surface().fill(BLANC)
+                    else :
+                        pygame.display.get_surface().fill(NOIR)
+                    pygame.display.update()
+                    for j in list(widgets.keys()):
+                        widgets[j].update()
                 elif event.key == BOUTON_BACKSPACE:
-                    widgets[(current_widget)].reset()
+                    widgets[(1)].reset()
 
     def Update(self):
         global save_t_odo,angle,totalisateur,distance1,distance2
