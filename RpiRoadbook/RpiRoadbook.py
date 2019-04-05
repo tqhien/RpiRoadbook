@@ -823,7 +823,7 @@ class vmoy1_widget(rb_widget):
         if temps <= 2 :
             vmoy1 = 0
         else :
-            vmoy1 = distance1 / temps * 3.6
+            vmoy1 = distance1 * 3.6 / temps / 1000
     def render(self,scr):
         global angle
         blit_text(scr,' Vmoy1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -846,7 +846,7 @@ class vmax1_widget(rb_widget):
         if temps <= 2 :
             speed = 0
         else :
-            speed = distance1 / temps * 3.6
+            speed = distance1 * 3.6 / temps / 1000
         if speed > vmax1 :
             vmax1 = speed
     def render(self,scr):
@@ -961,7 +961,7 @@ class vmoy2_widget(rb_widget):
         if temps <= 2 :
             vmoy2 = 0
         else :
-            vmoy2 = distance2 / temps * 3.6
+            vmoy2 = distance2 * 3.6 / temps /1000
     def render(self,scr):
         global angle
         blit_text(scr,' Vmoy2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -982,7 +982,7 @@ class vmax2_widget(rb_widget):
         if temps <= 2 :
             speed = 0
         else :
-            speed = distance2 / temps * 3.6
+            speed = distance2 * 3.6 / temps / 1000
         if speed > vmax2 :
             vmax2 = speed
     def render(self,scr):
