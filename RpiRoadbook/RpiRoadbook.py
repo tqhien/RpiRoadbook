@@ -75,7 +75,7 @@ distance1 = 0
 vmoy1 = 0
 vmax1 = 0
 #chrono_delay1 = 5 * aimants # 5 tours de roue avant de declencher le chrono
-chrono_delay1 = 0
+chrono_delay1 = 5
 chrono_time1 = 0
 old_distance1 = 0
 
@@ -83,7 +83,7 @@ distance2 = 0
 vmoy2 = 0
 vmax2 = 0
 #chrono_delay2 = 5 * aimants # 5 tours de roue avant de declencher le chrono
-chrono_delay2 = 0
+chrono_delay2 = 5
 chrono_time2 = 0
 old_distance2 = 0
 
@@ -165,7 +165,7 @@ def input_roue_callback(channel):
     distance2 += developpe
 
     # gestion du demarrage du chrono1
-    # Valeur > 1 : on attend de faire suffisamment de tours de routes
+    # Valeur > 1 : on attend de faire suffisamment de tours de roue
     # Valeur = 1 : on demarre le chrono1
     # Valeur = 0 : le chrono1 est demarre
     chrono_delay1 -= 1
@@ -174,6 +174,7 @@ def input_roue_callback(channel):
     # Test si on doit demarrer le chrono1
     if chrono_delay1 == 1 :
         chrono_time1 = time.time()
+        chrono_delay1 = 0
         chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
         chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
         save_chronoconfig()
@@ -185,6 +186,7 @@ def input_roue_callback(channel):
     # Test si on doit demarrer le chrono2
     if chrono_delay2 == 1 :
         chrono_time2 = time.time()
+        chrono_delay2 = 0
         chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
         chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
         save_chronoconfig()
@@ -844,7 +846,7 @@ class vmax1_widget(rb_widget):
         if temps <= 2 :
             speed = 0
         else :
-            speed = distance2 / temps * 3.6
+            speed = distance1 / temps * 3.6
         if speed > vmax1 :
             vmax1 = speed
     def render(self,scr):
@@ -864,9 +866,17 @@ class chrono1_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global distance1,chrono_time1
+        global distance1,chrono_delay1,chrono_time1
+        global odoconfig,chronoconfig
         distance1 = 0
-        chrono_time1 = time.time()
+        chrono_delay1 = 5 * aimants
+        chrono_time1 = 0
+        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+        odoconfig['Odometre']['Distance1'] = str(distance1)
+        chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
+        chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+        save_odoconfig()
+        save_chronoconfig()
     def render(self,scr):
         global angle,chrono_time1
         if chrono_time1 != 0:
@@ -989,6 +999,18 @@ class vmax2_widget(rb_widget):
 class chrono2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
+    def reset(self):
+        global distance2,chrono_delay2,chrono_time2
+        global odoconfig,chronoconfig
+        distance2 = 0
+        chrono_delay2 = 5 * aimants
+        chrono_time2 = 0
+        odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+        odoconfig['Odometre']['Distance2'] = str(distance2)
+        chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
+        chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+        save_odoconfig()
+        save_chronoconfig()
     def render(self,scr):
         global angle,chrono_time2
         if chrono_time2 != 0:
