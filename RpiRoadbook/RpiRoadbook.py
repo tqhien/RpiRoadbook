@@ -201,10 +201,15 @@ def input_left_callback(channel):
         if t >= .1 and t < 2:
             if not left_state:
                 left_state = True
-        if t >=2 and t < 10:
+        if t >=2:
             if not left_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
                 left_long_state = True
+                old_t = time.time() - b4_time
+            else:
+                if t - old_t >= .5 :
+                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
+                    old_t = time.time() - b4_time
         t = time.time() - b4_time
     if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
@@ -221,10 +226,15 @@ def input_right_callback(channel):
         if t >= .1 and t < 2:
             if not right_state:
                 right_state = True
-        if t >=2 and t < 10:
+        if t >=2 :
             if not right_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
                 right_long_state = True
+                old_t = time.time() - b4_time
+            else:
+                if t - old_t >= .5 :
+                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
+                    old_t = time.time() - b4_time
         t = time.time() - b4_time
     if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
@@ -241,10 +251,15 @@ def input_ok_callback(channel):
         if t >= .1 and t < 2:
             if not ok_state:
                 ok_state = True
-        if t >=2 and t < 10:
+        if t >=2 :
             if not ok_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
                 ok_long_state = True
+                old_t = time.time() - b4_time
+            else:
+                if t - old_t >= .5 :
+                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
+                    old_t = time.time() - b4_time
         t = time.time() - b4_time
     if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
@@ -252,31 +267,52 @@ def input_ok_callback(channel):
     ok_long_state = False
 
 def input_up_callback(channel):
-    GPIO.remove_event_detect(channel)
+    global up_state
+    up_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
+    t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2)
-    bouton_time = time.time() - b4_time
-    if bouton_time >=2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
-    else:
+        if t >= .1 and t < 2:
+            if not up_state:
+                up_state = True
+        if t >=2 :
+            if not up_long_state:
+                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
+                up_long_state = True
+                old_t = time.time() - b4_time
+            else:
+                if t - old_t >= .5 :
+                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
+                    old_t = time.time() - b4_time
+        t = time.time() - b4_time
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=300)
-
+    up_state = False
+    up_long_state = False
 
 def input_down_callback(channel):
-    GPIO.remove_event_detect(channel)
+    global down_state
+    down_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
+    t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
-        time.sleep(.2)
-    bouton_time = time.time() - b4_time
-    if bouton_time >=2 :
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
-    else:
+        if t >= .1 and t < 2:
+            if not down_state:
+                down_state = True
+        if t >=2 :
+            if not down_long_state:
+                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
+                down_long_state = True
+                old_t = time.time() - b4_time
+            else:
+                if t - old_t >= .5 :
+                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
+                    old_t = time.time() - b4_time
+        t = time.time() - b4_time
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
+    down_state = False
+    down_long_state = False
 
 
 #On définit les interruptions sur les GPIO des commandes
