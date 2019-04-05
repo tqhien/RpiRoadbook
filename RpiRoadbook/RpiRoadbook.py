@@ -2398,7 +2398,7 @@ class RoadbookScene(SceneBase):
                     self.oldcase = self.case
                     self.case += 1
                 elif event.key == BOUTON_PGDOWN:
-                    self.case = self.nb_cases - self.ncases
+                    self.case = self.nb_cases - ncases
 
         # Action sur le dérouleur
         if self.case > self.nb_cases - ncases :
