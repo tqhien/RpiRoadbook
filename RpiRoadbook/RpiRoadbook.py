@@ -726,11 +726,15 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour
         current_screen += 1
         if current_screen > 3 :
             current_screen = 1
         form =  screenconfig['Affichage{}'.format(current_screen)]['format']
+        mode_j = screenconfig['Affichage{}'.format(current_screen)]['jour_nuit'] == 'Jour'
+        if mode_j != mode_jour :
+            mode_jour = mode_j
+            alphabet = {}
         t = 'pa' if orientation == 'Paysage' else 'po'
         t += 'j' if mode_jour else 'n'
         t += form
