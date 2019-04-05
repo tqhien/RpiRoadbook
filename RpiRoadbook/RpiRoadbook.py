@@ -735,9 +735,8 @@ class speed_widget (rb_widget):
         global totalisateur,speed,save_t_moy,old_totalisateur
         k = time.time()
         if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-            speed = (totalisateur*3.6-old_totalisateur*3.6);
-            speed = 1.0*speed/(k-save_t_moy)/1000;
-            save_t_moy = time.time()
+            speed = (totalisateur-old_totalisateur)*3.6/(k-save_t_moy)/1000;
+            save_t_moy = k
             old_totalisateur = totalisateur
     def render(self,scr):
         global angle
@@ -1136,7 +1135,7 @@ def save_screenconfig(mode='Route'):
 
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig
-    global totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
+    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
     global widgets,nb_widgets
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
@@ -1160,6 +1159,7 @@ def check_configfile():
     odoconfig.read(candidates)
     save_odoconfig()
     totalisateur = float(odoconfig['Odometre']['Totalisateur'])
+    old_totalisateur = totalisateur
     distance1 = float(odoconfig['Odometre']['Distance1'])
     distance2 = float(odoconfig['Odometre']['Distance2'])
 
