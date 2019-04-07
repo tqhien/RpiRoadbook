@@ -5,7 +5,7 @@ import cgitb; cgitb.enable()
 import re
 
 #files = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
-files = [f for f in os.listdir('/home/hien/Developpement/RpiRoadbook/piusb/') if re.search('.pdf$', f)]
+files = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
 files.sort()
 
 print ('Content-Type: text/html\n')

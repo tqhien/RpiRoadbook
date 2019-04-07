@@ -8,7 +8,7 @@ import time
 setupconfig = configparser.ConfigParser()
 
 # On charge les reglages : mode, orientation, etc
-candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
 roue = setupconfig['Parametres']['roue']
