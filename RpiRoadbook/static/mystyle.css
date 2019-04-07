@@ -16,6 +16,14 @@ td {
   border-bottom: 1px solid #ddd;
 }
 
+tr {
+  height:40px;
+}
+
+table {
+  width:100%;
+}
+
 tr:hover {background-color: #f0f0f0;}
 
 
@@ -24,7 +32,7 @@ input[type=checkbox],input[type=submit],input[type=button],input[type=date],inpu
   font-size:18px;
 }
 
-input[type=text] {
+input[type=text],input[type=number] {
   width:50px;
   height:40px;
   font-size:18px;
