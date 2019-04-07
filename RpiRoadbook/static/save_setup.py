@@ -10,7 +10,7 @@ form = cgi.FieldStorage()
 
 setupconfig = configparser.ConfigParser()
 # On charge les reglages : mode, orientation, etc
-candidates = ['/home/rpi/RpiRoadbook/default.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
 #roue = setupconfig['Parametres']['roue']
@@ -24,44 +24,28 @@ st_date = ''
 st_time = ''
 
 print ('Content-Type: text/html\n')
-print ("<html>")
-print ("<body>")
-print ("<h1>Configuration sauvegard&eacute;e :</h1>")
+print ("""<html>
+<head>
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+</head>
+<body>
+<div id="main">
+<h1>Configuration g&eacute;n&eacute;rale</h1>
+<hr>
+<h3>Configuration sauvegard&eacute;e :</h3>
+""")
 
-if 'user_mode' in form:
-  setupconfig['Parametres']['mode'] = form['user_mode'].value
-  print (setupconfig['Parametres']['mode'])  
-
-if 'user_jour' in form:
-  setupconfig['Parametres']['jour_nuit'] = form['user_jour'].value
-  print (setupconfig['Parametres']['jour_nuit'])
-  
-if 'user_luminosite' in form:
-  setupconfig['Parametres']['luminosite'] = form['user_luminosite'].value
-  print (setupconfig['Parametres']['luminosite'])
-  
-if 'user_orientation' in form:
-  setupconfig['Parametres']['orientation'] = form['user_orientation'].value
-  print (setupconfig['Parametres']['orientation'])
-  
 if 'user_roue' in form:
   setupconfig['Parametres']['roue'] = form['user_roue'].value
-  print (setupconfig['Parametres']['roue'])
-  
+  print ("Roue : {} mm\n".format(setupconfig['Parametres']['roue']))
+
 if 'user_aimant' in form:
   setupconfig['Parametres']['aimants'] = form['user_aimant'].value
-  print (setupconfig['Parametres']['aimants'])
+  print ("Nb aimants : {}\n".format(setupconfig['Parametres']['aimants']))
 
-if 'user_date' in form:
-  st_date = form['user_date'].value
-  print (st_date)
-  
-if 'user_time' in form:
-  st_time = form['user_time'].value
-  print (st_time)
-
-subprocess.Popen ('date "{} {}"'.format(st_date,st_time),shell=True)
-subprocess.Popen ('hwclock --set --date "{} {}" --noadjfile --utc'.format(st_date,st_time),shell=True)
+if 'user_orientation' in form:
+  setupconfig['Parametres']['orientation'] = form['user_orientation'].value
+  print ("Orientation : {}\n".format(setupconfig['Parametres']['orientation']))
 
 for attempt in range(5):
   try :
@@ -70,11 +54,15 @@ for attempt in range(5):
   except :
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
-  else : 
+  else :
     break
 else :
-  print('Write Error RpiRoadbook_setup.cfg after 5 tries')
+  print('Write Error RpiRoadbook_setup.cfg after 5 tries\n')
 
-print ("</body>")
-print ("</html>")
-  
+print ("""
+<hr>
+<a href="index.py"> <input type="button" value="Accueil"> </a>
+</div>
+</body>
+</html>
+""")

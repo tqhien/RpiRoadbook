@@ -6,7 +6,14 @@ import shutil
 
 print ("""Content-Type: text/html\n
 <html>
-<body>""")
+<head>
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+</head>
+<body>
+<div id="main">
+<h1>Suppression de roadbooks</h1>
+<hr>
+""")
 
 form = cgi.FieldStorage()
 
@@ -34,6 +41,8 @@ if 'choix' in form:
 else:
     print ("Pas de choix")
 print ("""
+<hr>
 <a href="index.py"> <input type="button" value="Retour &agrave; l'accueil"></a>
+</div>
 </body>
 </html>""")
