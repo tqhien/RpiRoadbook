@@ -255,11 +255,6 @@ def input_ok_callback(channel):
             if not ok_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
                 ok_long_state = True
-                old_t = time.time() - b4_time
-            else:
-                if t - old_t >= .5 :
-                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
-                    old_t = time.time() - b4_time
         t = time.time() - b4_time
     if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
@@ -746,7 +741,7 @@ class status_widget (rb_widget):
         else:
             ncases = 3
         widgets = {}
-        old_sprites = {}        
+        old_sprites = {}
         widgets[(0)] = status_widget(layout,0)
         for i in range(1,nb_widgets+1) :
             widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
