@@ -442,6 +442,7 @@ def setup_alphabet(police=BLANC25):
                 alphabet[(i,police,angle)] = myfont[police].render(i,1,fg_jour[police],bg_jour[police])
                 alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
                 alphabet_size_y[(i,police,angle)] = 0
+        alphabet[(' ',police,angle)].fill(bg_jour[police])
     else :
         if angle == 90 :
             for i in printable :
@@ -453,7 +454,7 @@ def setup_alphabet(police=BLANC25):
                 alphabet[(i,police,angle)] = myfont[police].render(i,1,fg_nuit[police],bg_nuit[police])
                 alphabet_size_x[(i,police,angle)] = alphabet[(i,police,angle)].get_size()[0]
                 alphabet_size_y[(i,police,angle)] = 0
-
+        alphabet[(' ',police,angle)].fill(bg_nuit[police])
 
 def blit_text (screen,st,coords, col=BLANC25,angle=0):
     if (not angle in (0,90)) : angle = 0
@@ -756,12 +757,12 @@ class status_widget (rb_widget):
         self.now = time.localtime()
     def render(self,scr):
         global angle,temperature,cpu
-        blit_text(scr,'{:3.0f}C'.format(temperature),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,'{:3.0f}C  '.format(temperature),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02d}:{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min,self.now.tm_sec),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
             blit_text(scr,'{:02d}:{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min,self.now.tm_sec),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
-        blit_text(scr,'{:02.0f}%'.format(cpu),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        blit_text(scr,'{:02.0f}%  '.format(cpu),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
@@ -797,9 +798,9 @@ class speed_widget (rb_widget):
         global angle
         blit_text(scr,' Vitesse',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:03.0f}'.format(speed),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+            blit_text(scr,'{:3.0f} '.format(speed),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
-            blit_text(scr,'{:03.0f}'.format(speed),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:3.0f} '.format(speed),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
@@ -883,9 +884,9 @@ class vmoy1_widget(rb_widget):
         global angle
         blit_text(scr,' Vmoy1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:03.0f}'.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+            blit_text(scr,'{:3.0f} '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
-            blit_text(scr,'{:03.0f}'.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:3.0f} '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
@@ -939,6 +940,8 @@ class chrono1_widget(rb_widget):
         else:
              t = 0
         m,s = divmod (t,60)
+        if m >= 100 :
+            h,m = divmod (m,100)
         ss = (s*100) % 100
         blit_text(scr,' Chrono1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
