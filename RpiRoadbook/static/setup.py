@@ -59,7 +59,7 @@ print("""
    </form>
 <hr>
 <div>
-<a href="screen_setup.py"> <input type="button" value="Configurer les affichages"></a>
+<a href="screen_setup.py"> <input type="button" value="Personnaliser les affichages"></a>
 <a href="clock_setup.py"> <input type="button" value="Ajuster l'horloge"></a>
 </div>
 <hr>

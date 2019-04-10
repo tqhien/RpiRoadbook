@@ -6,6 +6,8 @@ form = cgi.FieldStorage()
 
 import configparser
 
+nb_screens = 4
+
 screenconfig = configparser.ConfigParser()
 
 # On charge les reglages :
@@ -24,7 +26,7 @@ print("""
 <hr>
 """)
 
-for k in range (1,4) :
+for k in range (1,nb_screens+1) :
     jour_nuit = 'jour_nuit{}'.format(k)
     if jour_nuit in form:
         screenconfig['Affichage{}'.format(k)]['jour_nuit'] = form[jour_nuit].value

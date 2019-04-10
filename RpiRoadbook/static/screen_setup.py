@@ -5,6 +5,8 @@ import cgitb; cgitb.enable()
 import configparser
 import time
 
+nb_screens = 4
+
 screenconfig = configparser.ConfigParser()
 setupconfig = configparser.ConfigParser()
 
@@ -32,7 +34,7 @@ print("""
         {
         var st = ['','','','']; """)
 print('var nb_lignes = {};'.format(nb_lignes))
-print('for (k=1;k<4;k++) {')
+print('for (k=1;k<{};k++) {'.format(nb_screens+1))
 print("            st[k]='{}' ;".format(st))
 print("""            var b = document.getElementById("jour_nuit"+k)[document.getElementById("jour_nuit"+k).selectedIndex].value
             switch (b)
@@ -81,7 +83,7 @@ print("""            var b = document.getElementById("jour_nuit"+k)[document.get
         <tr><th></th><th>Ecran 1</th><th>Ecran 2</th><th>Ecran 3</th></tr>
 """)
 print('<tr><td>Preview</td>')
-for j in range (1,4):
+for j in range (1,nb_screens+1):
     # Affichage des previews
     print('<td>')
     print('<img src="images/pajra1.png" id="preview_img{}">'.format(j))
@@ -90,7 +92,7 @@ print('</tr><tr></tr>')
 
 # Affichage des listes de choix jour_nuit
 print('<tr><td>Mode</td>')
-for j in range (1,4):
+for j in range (1,nb_screens+1):
     print('<td>')
     print('<select name="jour_nuit" id="jour_nuit{}" onchange="update_preview()" style="width:110px;">'.format(j))
     print('<option value="Jour" selected="Jour">Jour</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Jour' else '<option value="Jour">Jour</option>')
@@ -101,7 +103,7 @@ print('</tr>')
 
 # Affichage des choix de luminosite
 print('<tr><td>Luminosit&eacute;</td>')
-for j in range (1,4):
+for j in range (1,nb_screens+1):
     print('<td>')
     print('<input type="number" id="luminosite{}" name="luminosite" value="{}" style="width:110px;"> %'.format(j,screenconfig['Affichage{}'.format(j)]['luminosite']))
     print('</td>')
@@ -109,7 +111,7 @@ print('</tr>')
 
 # Affichage des listes de layout
 print('<tr><td>Disposition</td>')
-for j in range (1,4):
+for j in range (1,nb_screens+1):
 
     print('<td>')
     print('<select name="layout" id="layout{}" onchange="update_preview()" style="width:110px;">'.format(j))
@@ -132,7 +134,7 @@ print('</tr><tr></tr>')
 for i in range (1,7) :
     print('<tr>')
     print('<td>Widget {} : </td>'.format(i))
-    for j in range (1,4) :
+    for j in range (1,nb_screens+1) :
         print('<td>')
         print('<select id="champ{}{}" name="champ{}{}" style="width:110px;">'.format(j,i,j,i))
         print('<option selected="" value=""></option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == '' else '<option value=""></option>')
