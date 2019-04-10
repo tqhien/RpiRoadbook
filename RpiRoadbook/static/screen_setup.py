@@ -34,7 +34,7 @@ print("""
         {
         var st = ['','','','']; """)
 print('var nb_lignes = {};'.format(nb_lignes))
-print('for (k=1;k<{};k++) {'.format(nb_screens+1))
+print('for (k=1;k<{};k++)'.format(nb_screens+1),' {')
 print("            st[k]='{}' ;".format(st))
 print("""            var b = document.getElementById("jour_nuit"+k)[document.getElementById("jour_nuit"+k).selectedIndex].value
             switch (b)
@@ -80,7 +80,7 @@ print("""            var b = document.getElementById("jour_nuit"+k)[document.get
     <hr>
     <form action="save_screen.py" method="post">
         <table>
-        <tr><th></th><th>Ecran 1</th><th>Ecran 2</th><th>Ecran 3</th></tr>
+        <tr><th></th><th>Ecran 1</th><th>Ecran 2</th><th>Ecran 3</th>th>Ecran 4</th></tr>
 """)
 print('<tr><td>Preview</td>')
 for j in range (1,nb_screens+1):
