@@ -28,11 +28,12 @@ for fileitem in files:
 
 print ("""
 </table>
-<a href="upload.py"> <input type="button" value="Ajouter des roadbooks"></a>
+<a href="upload.py"> <input type="button" value="Ajouter un roadbook"></a>
 <a href="rm_rb.py" onclick="return confirm('Etes-vous s&ucirc;r de vouloir supprimer ?');"><input type="submit" value="Supprimer les roadbooks s&eacute;lectionn&eacute;s"></a>
 </form>
 
 <hr>
+<a href="screen_setup.py"> <input type="button" value="Personnaliser les &eacute;crans"></a>
 <a href="setup.py"> <input type="button" value="Configuration"></a>
 </div>
 </body>
