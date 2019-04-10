@@ -38,6 +38,7 @@ else :
   print('Write Error RpiRoadbook.cfg after 5 tries')
 
 print("""
+Attendez 5 secondes et red&eacute;marrer le RpiRoadbook
 <hr>
 <a href="index.py"> <input type="button" value="Retour &agrave; l\'accueil"></a>
 </div>
