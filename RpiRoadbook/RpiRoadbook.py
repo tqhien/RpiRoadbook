@@ -103,6 +103,8 @@ old_t = time.time()
 temperature = -1
 cpu = -1
 
+nb_screens = 4
+
 filedir = ''
 fichiers = []
 
@@ -557,8 +559,8 @@ widget_sizes = {
     '11': 5,
     '12': 5,
     # Pour le zoom
-    '0' : 1,
-    '00': 1
+    '0' : 0,
+    '00': 0
     }
 
 widget_layouts = {
@@ -723,17 +725,29 @@ class status_widget (rb_widget):
         rb_widget.__init__(self,layout,widget)
     def reset(self):
         global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour
+
+        # On charge le mode en cours, le roadbook en cours et sa case
+        candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
+        rbconfig.read(candidates)
+        rallye = rbconfig['Mode']['mode']
+
         current_screen += 1
-        if current_screen > 3 :
+        if current_screen > nb_screens :
             current_screen = 1
-        form =  screenconfig['Affichage{}'.format(current_screen)]['format']
+        form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
         mode_j = screenconfig['Affichage{}'.format(current_screen)]['jour_nuit'] == 'Jour'
         if mode_j != mode_jour :
             mode_jour = mode_j
             alphabet = {}
         t = 'pa' if orientation == 'Paysage' else 'po'
         t += 'j' if mode_jour else 'n'
-        t += form
+        if rallye == 'Rallye' :
+            t += 'ra'
+            t += form
+        elif rallye == 'Zoom':
+            t += 'zz'
+        else:
+            t += 'ro1'
         preset = widget_presets[t]
         layout = preset['layout']
         nb_widgets = widget_sizes [layout]
@@ -1262,10 +1276,16 @@ def check_configfile():
     screenconfig.read(candidates)
     save_screenconfig(rallye)
     mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
-    form =  screenconfig['Affichage{}'.format(current_screen)]['format']
+    form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
     t = 'pa' if orientation == 'Paysage' else 'po'
     t += 'j' if mode_jour else 'n'
-    t += form
+    if rallye == 'Rallye' :
+        t += 'ra'
+        t += form
+    elif rallye == 'Zoom':
+        t += 'zz'
+    else:
+        t += 'ro1'
     preset = widget_presets[t]
     layout = preset['layout']
     if layout in ('00','8','9','10'):
