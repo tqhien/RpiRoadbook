@@ -13,10 +13,10 @@ print("""
 <h1>Ajout d'un roadbook</h1>
 <hr>
    <form enctype = "multipart/form-data"
-                     action = "save_file.py" method = "post">
+                     action = "preview_file.py" method = "post">
    <h3>S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : </h3>
    <input type = "file" name = "filename" />
-   <br><input type = "submit" value = "Upload" />
+   <br><input type = "submit" value = "Ajouter et Pr&eacute;visualiser..." />
    </form>
    <hr>
    <a href="index.py"> <input type="button" value="Retour &agrave; l\'accueil"></a>
