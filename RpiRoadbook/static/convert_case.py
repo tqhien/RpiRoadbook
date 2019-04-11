@@ -19,15 +19,27 @@ if 'fn' in form:
    filedir = os.path.splitext(filename)[0]
    #print(filename)
 
-if 'page' in form:
-    i = int(form['page'].value)
+if 'nb_pages' in form:
+    nb_pages = int(form['nb_pages'].value)
     #print(i)
 
-if 'x' in form:
-    x = int(form['x'].value)
+if 'nb_colonnes' in form:
+    nb_colonnes = int(form['nb_colonnes'].value)
 
-if 'y' in form:
-    y = int(form['y'].value)
+if 'nb_lignes' in form:
+    nb_lignes = int(form['nb_lignes'].value)
+
+if 'largeur' in form:
+    largeur = float(form['largeur'].value)
+
+if 'lecture' in form:
+    lecture = form['lecture'].value == 'true'
+
+if 'marge_up' in form:
+    marge_up = float(form['marge_up'].value)
+
+if 'hauteur' in form:
+    hauteur = float(form['hauteur'].value)
 
 if 'w' in form:
     w = int(form['w'].value)
@@ -35,15 +47,22 @@ if 'w' in form:
 if 'h' in form:
     h = int(form['h'].value)
 
-if 'num' in form:
-    num =int(form['num'].value)
-
-
 if 'total' in form:
     total = int(form['total'].value)
 
-pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
+nb_cases = nb_lignes * nb_colonnes
 
-print('Case {} / {}'.format(num+1,total))
+for i in range (nb_pages) :
+    for k in range(nb_colonnes):
+        for j in range (nb_lignes) :
+            x = round(largeur*k)
+            if lecture :
+                y = round(marge_up+(nb_lignes-j-1)*hauteur)
+            else :
+                y = round(marge_up+j*hauteur)
+            num = i*nb_cases+k*nb_lignes+j
+            pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
+
+            print('Case {} / {}<br>'.format(num+1,total))
 
 print ('</html>')

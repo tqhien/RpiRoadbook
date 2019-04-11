@@ -21,7 +21,8 @@ print ("""<html>
 <h1>Conversion</h1>
 <hr>
 <h3>Traitement en cours. Veuillez patienter</h3>
-<div id="result"></div>
+
+La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (environ 1 seconde/case)
 <script>
 """)
 
@@ -64,6 +65,7 @@ w = round(largeur)
 h = round(hauteur)
 
 # on injecte dans la page html
+print('var filename = "{}"'.format(filename))
 print('var nb_colonnes = {};'.format(nb_colonnes))
 print('var nb_lignes = {} ;'.format(nb_lignes))
 print('var marge_up = {};'.format(marge_up))
@@ -81,47 +83,37 @@ print('var total = {} ;'.format(total))
 print('var w = {};'.format(w))
 print('var h = {};'.format(h))
 
+#num:i*nb_cases+k*nb_lignes+j,
+#total:total
 
 print ("""
 
-var i,j,k;
-
-for (i=0;i<nb_pages;i++) {
-    for (k=0;k<nb_colonnes;k++) {
-        for (j=0;j<nb_lignes;j++) {
-            x = Math.round(largeur*k)
-            if (lecture) {
-                y = Math.round(marge_up+(nb_lignes-j-1)*hauteur) }
-            else {
-                y = Math.round(marge_up+j*hauteur) }
-
-            $.ajax({
-              url: "convert_case.py",
-                data: {
-                  fn: 'test.pdf',
-                  page:i,
-                  x : x,
-                  y:y,
-                  w:w,
-                  h:h,
-                  num:i*nb_cases+k*nb_lignes+j,
-                  total:total
-                },
-              success: function( result ) {
-                  $( "#pdf_result" ).append( "Conversion <strong>" + result + "</strong> fait<br>" );
-                }
-            });
-        }
+$.ajax({
+  url: "convert_case.py",
+    data: {
+      fn: filename,
+      nb_pages:nb_pages,
+      nb_colonnes:nb_colonnes,
+      nb_lignes:nb_lignes,
+      largeur:largeur,
+      lecture:lecture,
+      marge_up:marge_up,
+      hauteur:hauteur,
+      w:w,
+      h:h,
+      total:total
+    },
+  success: function( result ) {
+      $( "#pdf_result" ).append( result + "<br>" );
     }
-}
-$( "#result" ).html( "<a href='index.py'> <input type='button' value='Accueil'> </a>" );
+});
 
     </script>
-<div id="pdf_result">
-  </div>
-
 <hr>
 <a href="index.py"> <input type="button" value="Accueil"> </a>
+<hr>
+<div id="pdf_result">
+  </div>
 </div>
 </body>
 </html>
