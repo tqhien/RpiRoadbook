@@ -137,6 +137,7 @@ up_state = False
 down_state = False
 
 GPIO_DIM = 18
+luminosite = 100.0
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
@@ -146,8 +147,8 @@ GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DIM, GPIO.OUT)
-pulse = GPIO.PWM(GPIO_DIM,5000) # fréquence de 800Hz
-pulse.start(100.0)
+pulse = GPIO.PWM(GPIO_DIM,100) # fréquence de 7.5kHz
+pulse.start(luminosite)
 
 # Test bouton au démarrage pour menu de configuration
 gotoConfig = not GPIO.input(GPIO_OK)
@@ -341,6 +342,12 @@ def cpu_load():
             cpu = int(float(f.readline().split(" ")[:3][0])*100)
     except:
         cpu = -1
+
+def dim_light():
+    global pulse,luminosite
+    #pulse = GPIO.PWM(GPIO_DIM,7500) # fréquence de 7.5kHz
+    #pulse.ChangeDutyCycle(luminosite)
+    pulse.ChangeDutyCycle(100.0)
 
 #-----------------------------------------------------------------------------------------------#
 #----------------------------- Gestion des images en cache -------------------------------------#
@@ -724,7 +731,7 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour,luminosite
 
         # On charge le mode en cours, le roadbook en cours et sa case
         candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -736,6 +743,7 @@ class status_widget (rb_widget):
             current_screen = 1
         form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
         mode_j = screenconfig['Affichage{}'.format(current_screen)]['jour_nuit'] == 'Jour'
+        luminosite = float(screenconfig['Affichage{}'.format(current_screen)]['luminosite'])
         if mode_j != mode_jour :
             mode_jour = mode_j
             alphabet = {}
@@ -1235,6 +1243,7 @@ def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
     global widgets,nb_widgets
+    global luminosite
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -1278,6 +1287,7 @@ def check_configfile():
     screenconfig.read(candidates)
     save_screenconfig(rallye)
     mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
+    luminosite = float(screenconfig['Affichage1']['luminosite'])
     form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
     t = 'pa' if orientation == 'Paysage' else 'po'
     t += 'j' if mode_jour else 'n'
@@ -1345,6 +1355,7 @@ def run_RpiRoadbook(width, height,  starting_scene):
     t_sys = time.time()
     rpi_temp()
     cpu_load()
+    dim_light()
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
@@ -1352,6 +1363,7 @@ def run_RpiRoadbook(width, height,  starting_scene):
         if time.time() - 5 > t_sys :
             rpi_temp()
             cpu_load()
+            dim_light()
             t_sys = time.time()
 
         # Event filtering
