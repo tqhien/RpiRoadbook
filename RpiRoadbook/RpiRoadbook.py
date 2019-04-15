@@ -146,9 +146,9 @@ GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(GPIO_DIM, GPIO.OUT)
-pulse = GPIO.PWM(GPIO_DIM,100) # fréquence de 7.5kHz
-pulse.start(luminosite)
+#GPIO.setup(GPIO_DIM, GPIO.OUT)
+#pulse = GPIO.PWM(GPIO_DIM,8000) # fréquence de 7.5kHz
+#pulse.start(luminosite)
 
 # Test bouton au démarrage pour menu de configuration
 gotoConfig = not GPIO.input(GPIO_OK)
@@ -347,7 +347,8 @@ def dim_light():
     global pulse,luminosite
     #pulse = GPIO.PWM(GPIO_DIM,7500) # fréquence de 7.5kHz
     #pulse.ChangeDutyCycle(luminosite)
-    pulse.ChangeDutyCycle(100.0)
+    #pulse.ChangeDutyCycle(50.0)
+    pass
 
 #-----------------------------------------------------------------------------------------------#
 #----------------------------- Gestion des images en cache -------------------------------------#
