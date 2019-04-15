@@ -10,7 +10,7 @@ form = cgi.FieldStorage()
 
 setupconfig = configparser.ConfigParser()
 # On charge les reglages : mode, orientation, etc
-candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
 #roue = setupconfig['Parametres']['roue']
@@ -60,6 +60,12 @@ else :
   print('Write Error RpiRoadbook_setup.cfg after 5 tries\n')
 
 print ("""
+<hr>
+<div>
+<a href="screen_setup.py"> <input type="button" value="Personnaliser les affichages"></a>
+<a href="clock_setup.py"> <input type="button" value="Ajuster l'horloge"></a>
+<a href="raz.py"> <input type="button" value="Config. Usine"></a>
+</div>
 <hr>
 <a href="index.py"> <input type="button" value="Accueil"> </a>
 </div>
