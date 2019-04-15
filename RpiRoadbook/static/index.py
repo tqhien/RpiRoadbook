@@ -38,7 +38,7 @@ print("""
 """)
 
 for fileitem in files:
-  print ('<tr><td><input type="checkbox" name="choix" value="{}"></td><td><a href="rb_edit.py?rb={}"> {} </a></td>'.format(fileitem,fileitem,fileitem))
+  print ('<tr><td><input type="checkbox" name="choix" value="{}"></td><td><a href="annotation.py?fn={}"> {} </a></td>'.format(fileitem,fileitem,fileitem))
 
 print ("""
 </table>

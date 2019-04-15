@@ -3,12 +3,14 @@
 import cgi, os
 import cgitb; cgitb.enable()
 import base64
+import re
 
 form = cgi.FieldStorage()
 #print(form)
 
 if 'fn' in form:
     filename = form['fn'].value
+    filename = re.sub(r"[\s-]","-",filename)
     filedir = os.path.splitext(filename)[0]
 
 if 'num' in form:
@@ -16,8 +18,9 @@ if 'num' in form:
 else:
     num = 0
 
-if 'nmax' in form:
-    nmax = int(form['nmax'].value)
+
+DIR = '/mnt/piusb/Conversions/{}'.format(filedir)
+nmax = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
 
 print ('Content-Type: text/html\n')
 print ("""<html>
@@ -62,8 +65,11 @@ print("""
          var annot = new Image();
          var sigCanvas = document.getElementById("canvasSignature");
          var context = sigCanvas.getContext("2d");
+         w = sigCanvas.width;
+         h = sigCanvas.height;
+         context.clearRect(0,0,w,h) ;
 """)
-if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,num)) :
+if os.path.isfile(os.path.join('/mnt/piusb/Annotations/{}'.format(filedir),'annotation_{:03d}.png'.format(num))) :
     print('annot.src="/Annotations/{}/annotation_{:03d}.png";'.format(filedir,num)) ;
     print('context.drawImage(annot,0,0,650,200);')
 print("""
@@ -225,16 +231,13 @@ print("""
     <hr>
     <div>
 """)
-print('      <a href="annotation.py?fn={}&num=0&nmax={}"> <input type="button" value="|<"></a>'.format(filename,nmax))
-if num-10 >=0 :
-    print('      <a href="annotation.py?fn={}&num={}&nmax={}"> <input type="button" value="-10"></a>'.format(filename,num-10,nmax))
-if num-1 >= 0 :
-    print('      <a href="annotation.py?fn={}&num={}&nmax={}"> <input type="button" value="-1"></a>'.format(filename,num-1,nmax))
-if nmax > num+1:
-    print('      <a href="annotation.py?fn={}&num={}&nmax={}"> <input type="button" value="+1>"></a>'.format(filename,num+1,nmax))
-if nmax > num+10 :
-    print('      <a href="annotation.py?fn={}&num={}&nmax={}"> <input type="button" value="+10>"></a>'.format(filename,num+10,nmax))
-print('      <a href="annotation.py?fn={}&num={}&nmax={}"> <input type="button" value=">|"></a>'.format(filename,nmax-1,nmax))
+print('<a href="annotation.py?fn={}&num=0"> <input type="button" value="|<"></a>'.format(filename) if num > 0 else '<a href="annotation.py?fn={}&num=0"> <input type="button" value="|<" disabled></a>'.format(filename))
+print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="-10"></a>'.format(filename,num-10) if num-10>=0 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="-10" disabled></a>'.format(filename,num-10))
+print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="-1"></a>'.format(filename,num-1) if num-1 >= 0 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="-1" disabled></a>'.format(filename,num-1))
+print('<input type="text" value="{}/{}">'.format(num+1,nmax))
+print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="+1"></a>'.format(filename,num+1) if nmax > num+1 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="+1" disabled></a>'.format(filename,num+1))
+print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="+10>"></a>'.format(filename,num+10) if nmax > num+10 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="+10" disabled></a>'.format(filename,num+10))
+print('<a href="annotation.py?fn={}&num={}"> <input type="button" value=">|"></a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value=">|" disabled></a>'.format(filename,nmax-1))
 print("""
       <input type="button" id="save_canvas" name="save_canvas" value="Sauvegarder" >
       <input type="button" id="raz_canvas" name="raz_canvas" value="RAZ Annot." onclick="erase()">

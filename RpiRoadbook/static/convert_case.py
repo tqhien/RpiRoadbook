@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import cgi, os
 import cgitb; cgitb.enable()
+import re
 
 form = cgi.FieldStorage()
 
@@ -16,6 +17,7 @@ print('<html>')
 
 if 'fn' in form:
    filename = form['fn'].value
+   filename = re.sub(r"[\s-]","-",filename)
    filedir = os.path.splitext(filename)[0]
    #print(filename)
 

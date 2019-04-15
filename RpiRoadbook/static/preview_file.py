@@ -4,6 +4,8 @@ import cgi, os
 import cgitb; cgitb.enable()
 form = cgi.FieldStorage()
 
+import re
+
 # Pour la lecture des fichiers pdf et conversion en image
 from pdf2image import page_count,convert_from_path,page_size
 import subprocess
@@ -26,6 +28,7 @@ if 'filename' in form:
     # On ne garde que le nom du fichier
     # pour eviter des attaques par navigation dans l'arborescence
     fn = os.path.basename(fileitem.filename)
+    fn = re.sub(r"[\s-]","_",fn)
     filedir = os.path.splitext(fn)[0]
     open('/mnt/piusb/' + fn, 'wb').write(fileitem.file.read())
     message = 'Le fichier "' + fn + '" a &eacute;t&eacute; t&eacutel&eacute;charg&eacute;'

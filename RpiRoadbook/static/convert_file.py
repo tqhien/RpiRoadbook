@@ -2,6 +2,7 @@
 # -*- coding: latin-1 -*-
 import cgi, os
 import cgitb; cgitb.enable()
+import re
 
 form = cgi.FieldStorage()
 
@@ -28,6 +29,7 @@ La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (envi
 
 if 'fn' in form:
   filename = form['fn'].value
+  filename = re.sub(r"[\s-]","-",filename)
 
 if 'nb_colonnes' in form:
   nb_colonnes = int(form['nb_colonnes'].value)
