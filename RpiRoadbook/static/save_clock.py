@@ -33,7 +33,8 @@ if 'user_time' in form:
   print ('{}\n'.format(st_time))
 
 subprocess.Popen ('date "{} {}"'.format(st_date,st_time),shell=True)
-subprocess.Popen ('hwclock --set --date "{} {}" --noadjfile'.format(st_date,st_time),shell=True)
+subprocess.Popen ('hwclock --set --date "{} {}" --utc --noadjfile'.format(st_date,st_time),shell=True)
+subprocess.Popen ('hwclock -w',shell=True)
 
 print("""
 <hr>
