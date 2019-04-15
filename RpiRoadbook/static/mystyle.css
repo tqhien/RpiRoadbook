@@ -39,6 +39,24 @@ input[type=text],input[type=number] {
   text-align: right;
 }
 
+#mybg_case {
+  position : relative;
+  top : 0px;
+  left:0px;
+  z-index:0;
+  width : 650px;
+  height : 200px;
+}
+
+#annotations {
+ position : relative;
+ top : 0px;
+ left:0px;
+ z-index:1;
+ width : 650px;
+ height : 200px;
+}
+
 #main {
   max-width: 600px;
   margin: 0 auto;
