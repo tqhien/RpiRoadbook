@@ -354,10 +354,10 @@ def dim_light():
 #----------------------------- Gestion des images en cache -------------------------------------#
 #-----------------------------------------------------------------------------------------------#
 image_cache = {}
-def get_image(key,angle=0):
+def get_image(key,angle=0,mode_jour=True):
     global filedir,fichiers,image_cache
     # Chargement des images uniquement si pas encore en cache
-    if not (key,angle) in image_cache:
+    if not (key,angle,mode_jour) in image_cache:
         img = pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[key]))
         if mode_jour:
             s = img
@@ -368,7 +368,7 @@ def get_image(key,angle=0):
         if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) :
             annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
             annot = pygame.transform.rotozoom(annot,0,rb_ratio_annot)
-            annot.set_colorkey(BLANC)
+            annot.set_colorkey(NOIR)
             s.blit(annot,(0,0))
         image_cache[(key,angle)] = pygame.transform.rotozoom (s,angle,rb_ratio)
     return image_cache[(key,angle)]
@@ -772,6 +772,7 @@ class status_widget (rb_widget):
         else:
             ncases = 3
         widgets = {}
+        sprites = {}
         old_sprites = {}
         widgets[(0)] = status_widget(layout,0)
         for i in range(1,nb_widgets+1) :
@@ -2465,10 +2466,10 @@ class RoadbookScene(SceneBase):
             save_rbconfig()
             if angle == 0 :
                 for n in range(ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,480-(n+1)*self.nh))
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh))
             else :
                 for n in range(ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(800-(n+1)*self.nh,0))
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh,0))
 
         # MAJ des infos des widgets
         for j in list(widgets.keys()):
@@ -2661,10 +2662,10 @@ class RoadbookZoomScene(SceneBase):
             save_rbconfig()
             if angle == 0 :
                 for n in range(self.ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(0,480-(n+1)*self.nh))
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh))
             else :
                 for n in range(self.ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle),(800-(n+1)*self.nh,0))
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh,0))
 
     def Render(self, screen):
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
