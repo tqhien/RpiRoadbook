@@ -29,14 +29,6 @@ for k in range (1,nb_screens+1) :
     jour_nuit = 'jour_nuit{}'.format(k)
     if jour_nuit in form:
         screenconfig['Affichage{}'.format(k)]['jour_nuit'] = form[jour_nuit].value
-    luminosite = 'luminosite{}'.format(k)
-    if luminosite in form:
-        v = int(form[luminosite].value)
-        if v > 100 :
-            v = 100
-        if v < 5 :
-            v = 5
-        screenconfig['Affichage{}'.format(k)]['luminosite'] = '{}'.format(v)
     layout = 'layout{}'.format(k)
     if layout in form:
         screenconfig['Affichage{}'.format(k)]['layout'] = form[layout].value

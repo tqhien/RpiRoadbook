@@ -135,9 +135,6 @@ right_state = False
 up_state = False
 down_state = False
 
-GPIO_DIM = 18
-luminosite = 100.0
-
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
 GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -145,9 +142,6 @@ GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-#GPIO.setup(GPIO_DIM, GPIO.OUT)
-#pulse = GPIO.PWM(GPIO_DIM,8000) # fréquence de 7.5kHz
-#pulse.start(luminosite)
 
 # Test bouton au démarrage pour menu de configuration
 gotoConfig = not GPIO.input(GPIO_OK)
@@ -341,13 +335,6 @@ def cpu_load():
             cpu = int(float(f.readline().split(" ")[:3][0])*100)
     except:
         cpu = -1
-
-def dim_light():
-    global pulse,luminosite
-    #pulse = GPIO.PWM(GPIO_DIM,7500) # fréquence de 7.5kHz
-    #pulse.ChangeDutyCycle(luminosite)
-    #pulse.ChangeDutyCycle(50.0)
-    pass
 
 #-----------------------------------------------------------------------------------------------#
 #----------------------------- Gestion des images en cache -------------------------------------#
@@ -737,7 +724,7 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour,luminosite
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour
 
         # On charge le mode en cours, le roadbook en cours et sa case
         candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -749,7 +736,6 @@ class status_widget (rb_widget):
             current_screen = 1
         form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
         mode_j = screenconfig['Affichage{}'.format(current_screen)]['jour_nuit'] == 'Jour'
-        luminosite = float(screenconfig['Affichage{}'.format(current_screen)]['luminosite'])
         if mode_j != mode_jour :
             mode_jour = mode_j
             alphabet = {}
@@ -1250,7 +1236,6 @@ def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
     global widgets,nb_widgets
-    global luminosite
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -1294,7 +1279,6 @@ def check_configfile():
     screenconfig.read(candidates)
     save_screenconfig(rallye)
     mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
-    luminosite = float(screenconfig['Affichage1']['luminosite'])
     form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
     t = 'pa' if orientation == 'Paysage' else 'po'
     t += 'j' if mode_jour else 'n'
@@ -1362,7 +1346,6 @@ def run_RpiRoadbook(width, height,  starting_scene):
     t_sys = time.time()
     rpi_temp()
     cpu_load()
-    dim_light()
 
     while active_scene != None:
         pressed_keys = pygame.key.get_pressed()
@@ -1370,7 +1353,6 @@ def run_RpiRoadbook(width, height,  starting_scene):
         if time.time() - 5 > t_sys :
             rpi_temp()
             cpu_load()
-            dim_light()
             t_sys = time.time()
 
         # Event filtering
@@ -1681,19 +1663,16 @@ class ModeScene(SceneBase):
         labels ['mode'] = ('Rallye',(int(guiconfig[self.orientation]['mode_mode_x']),int(guiconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
         labels ['t_nuit'] = ('Jour/Nuit :',(int(guiconfig[self.orientation]['mode_l_jour_nuit_x']),int(guiconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
         labels ['jour_nuit'] = ('Rallye',(int(guiconfig[self.orientation]['mode_jour_nuit_x']),int(guiconfig[self.orientation]['mode_jour_nuit_y'])),BLANC50,angle)
-        labels ['t_dim'] = ('Luminosite :',(int(guiconfig[self.orientation]['mode_l_dim_x']),int(guiconfig[self.orientation]['mode_l_dim_y'])),BLANC50,angle)
-        labels ['dim'] = ('100',(int(guiconfig[self.orientation]['mode_dim_x']),int(guiconfig[self.orientation]['mode_dim_y'])),BLANC50,angle)
         labels ['t_orientation'] = ('Orientation :',(int(guiconfig[self.orientation]['mode_l_orientation_x']),int(guiconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
         labels ['orientation'] = ('Portrait ',(int(guiconfig[self.orientation]['mode_orientation_x']),int(guiconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
 
         labels ['suivant'] = ('->',(int(guiconfig[self.orientation]['mode_suiv_x']),int(guiconfig[self.orientation]['mode_suiv_y'])),BLANC50,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.index = 0 # 0= mode, 1=nuit, 2=luminosite, 3=orientation, 4=suivant, 5 = ok
+        self.index = 0 # 0= mode, 1=nuit, 2=orientation, 3=suivant, 4 = ok
 
         self.rallye = rbconfig['Mode']['mode']
         mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
-        self.dim = int(setupconfig['Parametres']['luminosite'])
         self.paysage = setupconfig['Parametres']['orientation'] == 'Paysage'
 
         if mode_jour :
@@ -1748,13 +1727,6 @@ class ModeScene(SceneBase):
                         save_setupconfig()
 
                     elif self.index == 2 :
-                        self.dim -= 5
-                        if self.dim < 5 : self.dim = 5
-                        pulse.ChangeDutyCycle(self.dim)
-                        setupconfig['Parametres']['luminosite'] = str(self.dim)
-                        save_setupconfig()
-
-                    elif self.index == 3 :
                         self.paysage = not self.paysage
                         setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         if self.paysage :
@@ -1784,10 +1756,6 @@ class ModeScene(SceneBase):
                         save_setupconfig
 
                     elif self.index == 2 :
-                        self.dim += 5
-                        if self.dim > 100 : self.dim = 100
-                        pulse.ChangeDutyCycle(self.dim)
-                    elif self.index == 3 :
                         self.paysage = not self.paysage
                         setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         if self.paysage :
@@ -1808,10 +1776,7 @@ class ModeScene(SceneBase):
                     elif self.index == 1:
                         setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
                         save_setupconfig()
-                    elif self.index == 2 :
-                        setupconfig['Parametres']['luminosite'] = str(self.dim)
-                        save_setupconfig()
-                    elif self.index == 3:
+                    elif self.index == 2:
                         setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
                         if self.paysage :
                             subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
@@ -1822,9 +1787,9 @@ class ModeScene(SceneBase):
                             subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
                             subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
                         save_setupconfig()
-                    elif self.index == 4 :
+                    elif self.index == 3 :
                         self.SwitchToScene(ConfigScene())
-                    elif self.index == 5 :
+                    elif self.index == 4 :
                         alphabet = {}
                         alphabet_size_x = {}
                         alphabet_size_y = {}
@@ -1832,7 +1797,7 @@ class ModeScene(SceneBase):
                         self.SwitchToScene(TitleScene())
                     # on passe au réglage suivant
                     self.index +=1
-                    if self.index > 3:
+                    if self.index > 2:
                         self.index = 0
 
     def Update(self):
@@ -1845,15 +1810,13 @@ class ModeScene(SceneBase):
             else :
                 labels['jour_nuit'] = ('Nuit   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Nuit   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
 
-            labels['dim'] = ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50inv,labels['dim'][3]) if self.index == 2 else ('{:3d}%'.format(self.dim),labels['dim'][1],BLANC50,labels['dim'][3])
-
             if self.paysage :
-                labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+                labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
             else :
-                labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 3 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+                labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
 
-            labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 4 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
-            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 5 else (self.bouton_ok,sprites['ok'][1])
+            labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 3 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
+            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 4 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
         update_labels(screen)

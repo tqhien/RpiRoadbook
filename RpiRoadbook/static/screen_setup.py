@@ -101,14 +101,6 @@ for j in range (1,nb_screens+1):
     print('</td>')
 print('</tr>')
 
-# Affichage des choix de luminosite
-print('<tr><td>Luminosit&eacute;</td>')
-for j in range (1,nb_screens+1):
-    print('<td>')
-    print('<input type="number" id="luminosite{}" name="luminosite{}" value="{}" style="width:110px;"> %'.format(j,j,screenconfig['Affichage{}'.format(j)]['luminosite']))
-    print('</td>')
-print('</tr>')
-
 # Affichage des listes de layout
 print('<tr><td>Disposition</td>')
 for j in range (1,nb_screens+1):
