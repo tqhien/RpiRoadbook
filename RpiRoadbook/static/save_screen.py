@@ -11,7 +11,7 @@ nb_screens = 4
 screenconfig = configparser.ConfigParser()
 
 # On charge les reglages :
-candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/RpiRoadbook_screen.cfg']
+candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
 screenconfig.read(candidates)
 
 print("Content-Type: text/html")
@@ -47,7 +47,7 @@ for k in range (1,nb_screens+1) :
 
 for attempt in range(5):
   try :
-    with open('/mnt/piusb/.conf/RpiRoadbook_screen.cfg', 'w') as configfile:
+    with open('/mnt/piusb/.conf/screen.cfg', 'w') as configfile:
       screenconfig.write(configfile)
   except :
     subprocess.Popen('sudo mount -a',shell=True)
@@ -56,7 +56,7 @@ for attempt in range(5):
     print('<h3>Configuration sauvegard&eacute; !</h3>')
     break
 else :
-  print('<h3>Write Error RpiRoadbook_screen.cfg after 5 tries</h3>')
+  print('<h3>Write Error screen.cfg after 5 tries</h3>')
 
 print ("""
 <hr>
