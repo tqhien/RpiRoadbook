@@ -4,6 +4,7 @@ import cgi, os
 import cgitb; cgitb.enable()
 import base64
 import re
+from PIL import Image
 
 form = cgi.FieldStorage()
 #print(form)
@@ -21,6 +22,9 @@ else:
 
 DIR = '/mnt/piusb/Conversions/{}'.format(filedir)
 nmax = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
+img_name = os.path.join(DIR,'{}_{:03d}.jpg'.format(filedir,num))
+img = Image.open(img_name)
+w,h = img.size
 
 print ('Content-Type: text/html\n')
 print ("""<html>
@@ -60,8 +64,9 @@ print('base.src="/Conversions/{}/{}_{:03d}.jpg";'.format(filedir,filedir,num))
 print("""
          layer1 = document.getElementById("ma_case");
          ctx1 = layer1.getContext("2d");
-         ctx1.drawImage(base, 0, 0, 650,200);
-
+""")
+print('         ctx1.drawImage(base, 0, 0, {},{});'.format(w,h))
+print("""
          var annot = new Image();
          var sigCanvas = document.getElementById("canvasSignature");
          var context = sigCanvas.getContext("2d");
@@ -71,7 +76,7 @@ print("""
 """)
 if os.path.isfile(os.path.join('/mnt/piusb/Annotations/{}'.format(filedir),'annotation_{:03d}.png'.format(num))) :
     print('annot.src="/Annotations/{}/annotation_{:03d}.png";'.format(filedir,num)) ;
-    print('context.drawImage(annot,0,0,650,200);')
+    print('context.drawImage(annot,0,0, {},{});'.format(w,h))
 print("""
          context.strokeStyle = 'Red';
          context.lineWidth = 5 ;
@@ -249,9 +254,10 @@ print("""
     <hr>
    <div id="canvasDiv" style="position:relative;height:250px;">
       <!-- It's bad practice (to me) to put your CSS here.  I'd recommend the use of a CSS file! -->
-      <canvas id="ma_case"width="650px" height="200px" style="position:absolute;top:0px;border:2px solid #000000;z-index=0"></canvas>
-      <canvas id="canvasSignature" width="650px" height="200px" style="position:absolute;top:0px;border:2px solid #000000;z-index=1"></canvas>
-
+""")
+print('      <canvas id="ma_case" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;z-index=0"></canvas>'.format(w,h))
+print('      <canvas id="canvasSignature" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;z-index=1"></canvas>'.format(w,h))
+print("""
    </div>
 <div id="canvas_result" style="position:relative"></div>
 </div>
