@@ -359,12 +359,18 @@ def get_image(key,angle=0):
     # Chargement des images uniquement si pas encore en cache
     if not (key,angle) in image_cache:
         img = pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[key]))
+        if mode_jour:
+            s = img
+        else :
+            s = pygame.Surface(img.get_rect().size, pygame.SRCALPHA)
+            s.fill((255,255,0,200))
+            s.blit(img, (0,0), None, BLEND_RGB_SUB)
         if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) :
             annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
             annot = pygame.transform.rotozoom(annot,0,rb_ratio_annot)
             annot.set_colorkey(BLANC)
-            img.blit(annot,(0,0))
-        image_cache[(key,angle)] = pygame.transform.rotozoom (img,angle,rb_ratio)
+            s.blit(annot,(0,0))
+        image_cache[(key,angle)] = pygame.transform.rotozoom (s,angle,rb_ratio)
     return image_cache[(key,angle)]
 
 
@@ -380,6 +386,7 @@ ROUGE = (255,0,0)
 VERT = (0,255,0)
 BLEU = (0,0,255)
 GRIS = (125,125,125)
+JAUNE = (200,200,50,100)
 
 #Styles utilises :
 BLANC25     = 0
@@ -437,7 +444,7 @@ def setup_alphabet(police=BLANC25):
     printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
     fg_jour = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:ROUGE, ROUGE25inv:BLANC, VERT25:BLEU,  GRIS75:GRIS, BLANC80:NOIR, BLANC20:NOIR,ROUGE20:ROUGE,BLANC3:NOIR,BLANC4:NOIR,BLANC5:NOIR,ROUGE3:ROUGE,ROUGE4:ROUGE,ROUGE5:ROUGE,VERT3:VERT,VERT4:VERT,VERT5:VERT,BLANC20inv:BLANC,BLANC3inv:BLANC,BLANC4inv:BLANC,BLANC5inv:BLANC}
     bg_jour = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:BLANC, ROUGE25inv:ROUGE, VERT25:BLANC, GRIS75:BLANC, BLANC80:BLANC, BLANC20:BLANC,ROUGE20:BLANC,BLANC3:BLANC,BLANC4:BLANC,BLANC5:BLANC,ROUGE3:BLANC,ROUGE4:BLANC,ROUGE5:BLANC,VERT3:BLANC,VERT4:BLANC,VERT5:BLANC,BLANC20inv:NOIR,BLANC3inv:NOIR,BLANC4inv:NOIR,BLANC5inv:NOIR}
-    fg_nuit = { BLANC25:BLANC, BLANC50:BLANC, BLANC75:BLANC, BLANC100:BLANC, BLANC200:BLANC, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:ROUGE, ROUGE25inv:ROUGE,  VERT25:VERT,  GRIS75:GRIS, BLANC80:BLANC, BLANC20:BLANC,ROUGE20:BLANC,BLANC3:BLANC,BLANC4:BLANC,BLANC5:BLANC,ROUGE3:ROUGE,ROUGE4:ROUGE,ROUGE5:ROUGE,VERT3:VERT,VERT4:VERT,VERT5:VERT,BLANC20inv:NOIR,BLANC3inv:NOIR,BLANC4inv:NOIR,BLANC5inv:NOIR}
+    fg_nuit = { BLANC25:JAUNE, BLANC50:JAUNE, BLANC75:JAUNE, BLANC100:JAUNE, BLANC200:JAUNE, BLANC25inv:NOIR,  BLANC50inv:NOIR,  ROUGE25:ROUGE, ROUGE25inv:ROUGE,  VERT25:VERT,  GRIS75:GRIS, BLANC80:JAUNE, BLANC20:JAUNE,ROUGE20:JAUNE,BLANC3:JAUNE,BLANC4:JAUNE,BLANC5:JAUNE,ROUGE3:ROUGE,ROUGE4:ROUGE,ROUGE5:ROUGE,VERT3:VERT,VERT4:VERT,VERT5:VERT,BLANC20inv:NOIR,BLANC3inv:NOIR,BLANC4inv:NOIR,BLANC5inv:NOIR}
     bg_nuit = { BLANC25:NOIR,  BLANC50:NOIR,  BLANC75:NOIR,  BLANC100:NOIR,  BLANC200:NOIR,  BLANC25inv:BLANC, BLANC50inv:BLANC, ROUGE25:NOIR,  ROUGE25inv:BLANC, VERT25:NOIR,  GRIS75:NOIR, BLANC80:NOIR, BLANC20:NOIR,ROUGE20:NOIR,BLANC3:NOIR,BLANC4:NOIR,BLANC5:NOIR,ROUGE3:NOIR,ROUGE4:NOIR,ROUGE5:NOIR,VERT3:NOIR,VERT4:NOIR,VERT5:NOIR,BLANC20inv:BLANC,BLANC3inv:BLANC,BLANC4inv:BLANC,BLANC5inv:BLANC}
 
 
