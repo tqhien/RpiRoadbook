@@ -109,7 +109,6 @@ filedir = ''
 fichiers = []
 
 rb_ratio = 1
-rb_ration_annot = 1
 
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
@@ -367,7 +366,6 @@ def get_image(key,angle=0,mode_jour=True):
             s.blit(img, (0,0), None, BLEND_RGB_SUB)
         if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) :
             annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
-            annot = pygame.transform.rotozoom(annot,0,rb_ratio_annot)
             annot.set_colorkey(NOIR)
             s.blit(annot,(0,0))
         image_cache[(key,angle)] = pygame.transform.rotozoom (s,angle,rb_ratio)
@@ -2349,7 +2347,7 @@ class EditScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
-        global developpe,roue,aimants, distance1,old_distance1,save_t_moy,save_t_odo,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global developpe,roue,aimants, distance1,old_distance1,save_t_moy,save_t_odo,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
         global widgets,current_widget,old_widget
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
@@ -2393,7 +2391,6 @@ class RoadbookScene(SceneBase):
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
         rb_ratio = min(480/w,150/h) if self.orientation == 'Portrait' else min(500/w,160/h)
-        rb_ratio_annot = 480/w if self.orientation == 'Portrait' else 500/800
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
@@ -2594,7 +2591,7 @@ class OdometerScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookZoomScene(SceneBase):
     def __init__(self, fname = ''):
-        global image_cache,filedir,fichiers,rb_ratio,rb_ratio_annot,sprites, old_sprites,angle
+        global image_cache,filedir,fichiers,rb_ratio,sprites, old_sprites,angle
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         check_configfile()
@@ -2620,7 +2617,6 @@ class RoadbookZoomScene(SceneBase):
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
         rb_ratio = 480/w if self.orientation == 'Portrait' else 800/w
-        rb_ratio_annot = 480/w if self.orientation == 'Portrait' else 600/800
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
