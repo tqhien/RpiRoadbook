@@ -11,7 +11,7 @@ nb_screens = 4
 screenconfig = configparser.ConfigParser()
 
 # On charge les reglages :
-candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/screen.cfg','/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/RpiRoadbook_screen.cfg']
+candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/RpiRoadbook_screen.cfg']
 screenconfig.read(candidates)
 
 print("Content-Type: text/html")
@@ -25,7 +25,6 @@ print("""
 <h1>Configuration des &eacutecrans</h1>
 <hr>
 """)
-
 for k in range (1,nb_screens+1) :
     jour_nuit = 'jour_nuit{}'.format(k)
     if jour_nuit in form:
@@ -37,7 +36,7 @@ for k in range (1,nb_screens+1) :
             v = 100
         if v < 5 :
             v = 5
-        screenconfig['Affichage{}'.format(k)]['luminosite'] = v
+        screenconfig['Affichage{}'.format(k)]['luminosite'] = '{}'.format(v)
     layout = 'layout{}'.format(k)
     if layout in form:
         screenconfig['Affichage{}'.format(k)]['layout'] = form[layout].value
@@ -54,12 +53,12 @@ for attempt in range(5):
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
   else :
+    print('<h3>Configuration sauvegard&eacute; !</h3>')
     break
 else :
-  print('Write Error RpiRoadbook_screen.cfg after 5 tries')
+  print('<h3>Write Error RpiRoadbook_screen.cfg after 5 tries</h3>')
 
 print ("""
-<h3>Configuration sauvegard&eacute; !</h3>
 <hr>
 <a href="index.py"> <input type="button" value="Accueil"> </a>
 </div></body></html>""")

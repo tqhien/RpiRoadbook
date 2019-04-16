@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 import cgi, os
 import cgitb; cgitb.enable()
 import configparser
@@ -11,10 +11,10 @@ screenconfig = configparser.ConfigParser()
 setupconfig = configparser.ConfigParser()
 
 # On charge les reglages : mode, orientation, etc
-candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
-candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/screen.cfg','/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/RpiRoadbook_screen.cfg']
+candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/RpiRoadbook_screen.cfg']
 screenconfig.read(candidates)
 
 orientation = setupconfig['Parametres']['orientation']
@@ -94,7 +94,7 @@ print('</tr><tr></tr>')
 print('<tr><td>Mode</td>')
 for j in range (1,nb_screens+1):
     print('<td>')
-    print('<select name="jour_nuit" id="jour_nuit{}" onchange="update_preview()" style="width:110px;">'.format(j))
+    print('<select name="jour_nuit{}" id="jour_nuit{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
     print('<option value="Jour" selected="Jour">Jour</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Jour' else '<option value="Jour">Jour</option>')
     print('<option value="Nuit" selected="Nuit">Nuit</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Nuit' else '<option value="Nuit">Nuit</option>')
     print('</select>')
@@ -105,7 +105,7 @@ print('</tr>')
 print('<tr><td>Luminosit&eacute;</td>')
 for j in range (1,nb_screens+1):
     print('<td>')
-    print('<input type="number" id="luminosite{}" name="luminosite" value="{}" style="width:110px;"> %'.format(j,screenconfig['Affichage{}'.format(j)]['luminosite']))
+    print('<input type="number" id="luminosite{}" name="luminosite{}" value="{}" style="width:110px;"> %'.format(j,j,screenconfig['Affichage{}'.format(j)]['luminosite']))
     print('</td>')
 print('</tr>')
 
@@ -114,7 +114,7 @@ print('<tr><td>Disposition</td>')
 for j in range (1,nb_screens+1):
 
     print('<td>')
-    print('<select name="layout" id="layout{}" onchange="update_preview()" style="width:110px;">'.format(j))
+    print('<select name="layout{}" id="layout{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
     if orientation == 'Paysage' :
         print('<option selected="1" value="1">3 Champs</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '1' else '<option value="1">3 Champs</option>')
         print('<option selected="2" value="2">4 Champs</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '2' else '<option value="2">4 Champs</option>')
