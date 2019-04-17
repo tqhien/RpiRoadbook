@@ -596,8 +596,8 @@ widget_layouts = {
         {'x':500,'y':405,'w':300,'h':75,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':25,'x2':155,'y2':25,'x3':240,'y3':25}],
     '5' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
-        {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70},
-        {'x':180,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70}],
+        {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':480,'x2':20,'y2':380,'x3':1,'y3':70},
+        {'x':180,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':480,'x2':20,'y2':380,'x3':1,'y3':70}],
     '6' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
         {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':480,'x2':1,'y2':320,'x3':1,'y3':70},
