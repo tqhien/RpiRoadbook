@@ -2426,10 +2426,11 @@ class RoadbookScene(SceneBase):
             save_rbconfig()
             if angle == 0 :
                 for n in range(ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh))
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh-n))
             else :
                 for n in range(ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh,0))
+                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh-n,0))
+            self.oldcase=self.case
 
         # MAJ des infos des widgets
         for j in list(widgets.keys()):
@@ -2614,7 +2615,7 @@ class RoadbookZoomScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global sprites,old_sprites,rbconfig
+        global sprites,old_sprites,rbconfig,mode_jour
         if self.case != self.oldcase :
             # On sauvegarde la nouvelle position
             rbconfig['Roadbooks']['case'] = str(self.case)
@@ -2625,6 +2626,7 @@ class RoadbookZoomScene(SceneBase):
             else :
                 for n in range(self.ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh,0))
+            self.oldcase = self.case
 
     def Render(self, screen):
         # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
