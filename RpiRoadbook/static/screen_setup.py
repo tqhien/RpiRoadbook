@@ -11,10 +11,10 @@ screenconfig = configparser.ConfigParser()
 setupconfig = configparser.ConfigParser()
 
 # On charge les reglages : mode, orientation, etc
-candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
-candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/screen.cfg','/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
 screenconfig.read(candidates)
 
 orientation = setupconfig['Parametres']['orientation']
@@ -28,7 +28,10 @@ else:
 print("""
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="mystyle.css">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="w3.css">
+  	<link rel="stylesheet" href="font-awesome.min.css">
+  	<link rel="stylesheet" href="material-icons.css">
     <script type="text/javascript">
      function update_preview()
         {
@@ -75,36 +78,51 @@ print("""            var b = document.getElementById("jour_nuit"+k)[document.get
 
 </script> </head>
   <body onload=update_preview()>
-  <div id="main">
-    <h1>Configuration des &eacutecrans</h1>
-    <hr>
+  <!-- Entete -->
+  <div class="w3-container w3-center w3-section">
+  <h1>Personnalisation des &eacute;crans Rallye</h1>
+  </div>
+  <hr>
+<div class="w3-container">
+<h3>Choisissez un &eacute;cran &agrave; personnaliser</h3>
     <form action="save_screen.py" method="post">
-        <table>
-        <tr><th></th><th>Ecran 1</th><th>Ecran 2</th><th>Ecran 3</th><th>Ecran 4</th></tr>
+        <div class="w3-row w3-black">
+        <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran1');">
+          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 1</div>
+        </a>
+        <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran2');">
+          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 2</div>
+        </a>
+        <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran3');">
+          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 3</div>
+        </a>
+        <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran4');">
+          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 4</div>
+        </a>
+        </div>
 """)
-print('<tr><td>Preview</td>')
+
 for j in range (1,nb_screens+1):
+    print('<div id="Ecran{}" class="w3-container screen" style="display:none">'.format(j))
+    print('<table>')
     # Affichage des previews
+    print('<tr><td>Preview</td>')
     print('<td>')
     print('<img src="images/pajra1.png" id="preview_img{}">'.format(j))
     print('</td>')
-print('</tr><tr></tr>')
+    print('</tr><tr><td>Jour/Nuit</td>')
 
-# Affichage des listes de choix jour_nuit
-print('<tr><td>Mode</td>')
-for j in range (1,nb_screens+1):
+    # Affichage des listes de choix jour_nuit
     print('<td>')
     print('<select name="jour_nuit{}" id="jour_nuit{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
     print('<option value="Jour" selected="Jour">Jour</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Jour' else '<option value="Jour">Jour</option>')
     print('<option value="Nuit" selected="Nuit">Nuit</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Nuit' else '<option value="Nuit">Nuit</option>')
     print('</select>')
     print('</td>')
-print('</tr>')
+    print('</tr>')
 
 # Affichage des listes de layout
-print('<tr><td>Disposition</td>')
-for j in range (1,nb_screens+1):
-
+    print('<tr><td>Disposition</td>')
     print('<td>')
     print('<select name="layout{}" id="layout{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
     if orientation == 'Paysage' :
@@ -122,11 +140,10 @@ for j in range (1,nb_screens+1):
 
     print('</select>')
     print('</td>')
-print('</tr><tr></tr>')
-for i in range (1,7) :
-    print('<tr>')
-    print('<td>Widget {} : </td>'.format(i))
-    for j in range (1,nb_screens+1) :
+    print('</tr><tr></tr>')
+    for i in range (1,7) :
+        print('<tr>')
+        print('<td>Widget {} : </td>'.format(i))
         print('<td>')
         print('<select id="champ{}{}" name="champ{}{}" style="width:110px;">'.format(j,i,j,i))
         print('<option selected="" value=""></option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == '' else '<option value=""></option>')
@@ -141,16 +158,45 @@ for i in range (1,7) :
         print('<option selected="Decompte" value="Decompte">Decompte</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Decompte' else '<option value="Decompte">Decompte</option>')
         print('<option selected="Vmax1" value="Vmax1">Vmax1</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmax1' else '<option value="Vmax1">Vmax1</option>')
         print('<option selected="Vmax2" value="Vmax2">Vmax2</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmax2' else '<option value="Vmax2">Vmax2</option>')
+        print('<option selected="Heure" value="Heure">Heure</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Heure' else '<option value="Heure">Heure</option>')
         print('</select>')
         print('</td>')
-    print('</tr>')
+        print('</tr>')
+    print('</table>')
+    print('</div>')
+
 print("""
-        </table>
-        <hr> <input value="Valider" type="submit">
+
+        <div class="w3-bar">
+                <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">Valider</button>
+        </div>
     </form>
-    <hr>
-    <a href="index.py"> <input type="button" value="Retour &agrave; l\'accueil"></a>
     </div>
+    <hr>
+    <!-- Pied de page -->
+    <div class="w3-bar w3-black">
+      <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+      <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configuration</a>
+      <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
+      <a href="raz.py" class="w3-bar-item w3-button w3-right w3-hover-red">Config. Usine</a>
+      <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
+    </div>
+
+    <script>
+function openScreen(evt, screenName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("screen");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(screenName).style.display = "block";
+  evt.currentTarget.firstElementChild.className += " w3-red";
+}
+</script>
   </body>
 </html>
 """)

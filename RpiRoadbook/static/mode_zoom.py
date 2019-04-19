@@ -13,13 +13,20 @@ setupconfig.read(candidates)
 print ('Content-Type: text/html\n')
 print ("""<html>
 <head>
-<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="stylesheet" type="text/css" href="mystyle.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="w3.css">
+	<link rel="stylesheet" href="font-awesome.min.css">
+	<link rel="stylesheet" href="material-icons.css">
+    <link rel="stylesheet" type="text/css" href="mystyle.css">
 </head>
 <body>
-<div id="main">
+<!-- Entete -->
+<div class="w3-container w3-center w3-section">
 <h1>Changement de mode</h1>
+</div>
 <hr>
+<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
+<h3>Nouveau mode :</h3>
 """)
 
 setupconfig['Mode']['mode'] = 'Zoom'
@@ -32,15 +39,24 @@ for attempt in range(5):
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
   else :
-    print ('Nouveau mode : Zoom')
+    print ('<h3>Zoom</h3>')
     break
 else :
   print('Write Error RpiRoadbook.cfg after 5 tries')
 
 print("""
-Attendez 5 secondes et red&eacute;marrer le RpiRoadbook
+Attendez 5 secondes et red&eacute;marrez le RpiRoadbook
+</div>
 <hr>
-<a href="index.py"> <input type="button" value="Retour &agrave; l\'accueil"></a>
+<hr>
+
+<!-- Pied de page -->
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configurer</a>
+  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnaliser les affichages</a>
+  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
+  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
 </div>
 </body>
 </html>""")

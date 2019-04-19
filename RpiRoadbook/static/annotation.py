@@ -29,9 +29,10 @@ w,h = img.size
 print ('Content-Type: text/html\n')
 print ("""<html>
 <head>
-   <meta charset="utf-8" />
-   <title>Annotations</title>
-<link rel="stylesheet" href="/mystyle.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="w3.css">
+  <link rel="stylesheet" href="font-awesome.min.css">
+  <link rel="stylesheet" href="material-icons.css">
    <script type="text/javascript" src="jquery-3.3.0.min.js"></script>
 
    <script type="text/javascript">
@@ -231,27 +232,18 @@ print("""
 </head>
 
 <body onload="initialize()">
-  <div id="main">
+ <!-- Entete -->
+ <div class="w3-container w3-center w3-section">
     <h1>Annotations</h1>
-    <hr>
-    <div>
-""")
-print('<a href="annotation.py?fn={}&num=0"> <input type="button" value="|<"></a>'.format(filename) if num > 0 else '<a href="annotation.py?fn={}&num=0"> <input type="button" value="|<" disabled></a>'.format(filename))
-print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="-10"></a>'.format(filename,num-10) if num-10>=0 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="-10" disabled></a>'.format(filename,num-10))
-print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="-1"></a>'.format(filename,num-1) if num-1 >= 0 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="-1" disabled></a>'.format(filename,num-1))
-print('<input type="text" value="{}/{}">'.format(num+1,nmax))
-print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="+1"></a>'.format(filename,num+1) if nmax > num+1 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="+1" disabled></a>'.format(filename,num+1))
-print('<a href="annotation.py?fn={}&num={}"> <input type="button" value="+10>"></a>'.format(filename,num+10) if nmax > num+10 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value="+10" disabled></a>'.format(filename,num+10))
-print('<a href="annotation.py?fn={}&num={}"> <input type="button" value=">|"></a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="annotation.py?fn={}&num={}"> <input type="button" value=">|" disabled></a>'.format(filename,nmax-1))
-print("""
-      <input type="button" id="save_canvas" name="save_canvas" value="Sauvegarder" >
-      <input type="button" id="raz_canvas" name="raz_canvas" value="RAZ Annot." onclick="erase()">
-    </div>
+</div>
+
+
+<div class="w3-bar w3-grey w3-center">
+      <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
+      <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
+</div>
     <hr>
 
-  <a href="index.py"> <input type="button" value="Retour &agrave; l'accueil"></a>
-
-    <hr>
    <div id="canvasDiv" style="position:relative;height:250px;">
       <!-- It's bad practice (to me) to put your CSS here.  I'd recommend the use of a CSS file! -->
 """)
@@ -260,6 +252,22 @@ print('      <canvas id="canvasSignature" width="{}px" height="{}px" style="posi
 print("""
    </div>
 <div id="canvas_result" style="position:relative"></div>
+
+<div class="w3-bar">
+""")
+print('<a href="annotation.py?fn={}&num=0" class="w3-button"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename) if num > 0 else '<a href="annotation.py?fn={}&num=0" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename))
+print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10) if num-10>=0 else '<a href="annotation.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10))
+print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1) if num-1 >= 0 else '<a href="annotation.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1))
+print('<input type="text" value="{}/{}">'.format(num+1,nmax))
+print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1) if nmax > num+1 else '<a href="annotation.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1))
+print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10) if nmax > num+10 else '<a href="annotation.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10))
+print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="annotation.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1))
+print("""
+</div>
+
+<!-- Pied de page -->
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
 </div>
 
 </body>

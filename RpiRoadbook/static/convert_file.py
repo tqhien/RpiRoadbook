@@ -12,18 +12,29 @@ import subprocess
 
 print ('Content-Type: text/html\n')
 print ("""<html>
-<head>
-<link rel="stylesheet" type="text/css" href="mystyle.css">
-</head>
+ <head>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="w3.css">
+   <link rel="stylesheet" href="font-awesome.min.css">
+   <link rel="stylesheet" href="material-icons.css">
+ </head>
 <body>
   <script src="jquery-3.3.0.min.js"></script>
 
-<div id="main">
+<!-- Entete -->
+<div class="w3-container w3-center w3-section">
 <h1>Conversion</h1>
+</div>
 <hr>
-<h3>Traitement en cours. Veuillez patienter</h3>
+<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
+<div class="w3-row">
+  <div class="w3-col w3-light-grey s12 w3-center">
+<p><h3>Traitement en cours. Veuillez patienter</h3></p>
 
 La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (environ 1 seconde/case)
+</div>
+</div>
+</div>
 <script>
 """)
 
@@ -112,11 +123,13 @@ $.ajax({
 
     </script>
 <hr>
-<a href="index.py"> <input type="button" value="Accueil"> </a>
-<hr>
-<div id="pdf_result">
-  </div>
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
 </div>
+<hr>
+<div class="w3-container w3-center" id="pdf_result">
+  </div>
+
 </body>
 </html>
 """)

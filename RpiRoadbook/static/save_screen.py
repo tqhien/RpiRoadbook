@@ -11,18 +11,23 @@ nb_screens = 4
 screenconfig = configparser.ConfigParser()
 
 # On charge les reglages :
-candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/screen.cfg','/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
 screenconfig.read(candidates)
 
 print("Content-Type: text/html")
 print("""
 <html>
 <head>
-  <link rel="stylesheet" type="text/css" href="mystyle.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="w3.css">
+	<link rel="stylesheet" href="font-awesome.min.css">
+	<link rel="stylesheet" href="material-icons.css">
 </head>
 <body>
-<div id="main">
-<h1>Configuration des &eacutecrans</h1>
+<!-- Entete -->
+<div class="w3-container w3-center w3-section">
+  <h1>Configuration des écran</h1>
+</div>
 <hr>
 """)
 for k in range (1,nb_screens+1) :
@@ -52,5 +57,13 @@ else :
 
 print ("""
 <hr>
-<a href="index.py"> <input type="button" value="Accueil"> </a>
-</div></body></html>""")
+<!-- Pied de page -->
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configuration</a>
+  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
+  <a href="raz.py" class="w3-bar-item w3-button w3-right w3-hover-red">Config. Usine</a>
+  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
+</div>
+</body>
+</html>""")

@@ -26,26 +26,33 @@ st_time = ''
 print ('Content-Type: text/html\n')
 print ("""<html>
 <head>
-<link rel="stylesheet" type="text/css" href="mystyle.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="w3.css">
+	<link rel="stylesheet" href="font-awesome.min.css">
+	<link rel="stylesheet" href="material-icons.css">
 </head>
 <body>
-<div id="main">
+<!-- Entete -->
+<div class="w3-container w3-center w3-section">
 <h1>Configuration g&eacute;n&eacute;rale</h1>
+</div>
 <hr>
+
+<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>Configuration sauvegard&eacute;e :</h3>
 """)
 
 if 'user_roue' in form:
   setupconfig['Parametres']['roue'] = form['user_roue'].value
-  print ("Roue : {} mm\n".format(setupconfig['Parametres']['roue']))
+  print ("Roue : {} mm<br>".format(setupconfig['Parametres']['roue']))
 
 if 'user_aimant' in form:
   setupconfig['Parametres']['aimants'] = form['user_aimant'].value
-  print ("Nb aimants : {}\n".format(setupconfig['Parametres']['aimants']))
+  print ("Nb aimants : {}<br>".format(setupconfig['Parametres']['aimants']))
 
 if 'user_orientation' in form:
   setupconfig['Parametres']['orientation'] = form['user_orientation'].value
-  print ("Orientation : {}\n".format(setupconfig['Parametres']['orientation']))
+  print ("Orientation : {}<br>".format(setupconfig['Parametres']['orientation']))
 
 for attempt in range(5):
   try :
@@ -59,15 +66,27 @@ for attempt in range(5):
 else :
   print('Write Error RpiRoadbook_setup.cfg after 5 tries\n')
 
+if setupconfig['Parametres']['orientation'] == 'Paysage' :
+    subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+    subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
+    subprocess.Popen('sudo mount /dev/root / -o ro,remount', shell=True)
+else :
+    subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
+    subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
+    subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
+
 print ("""
-<hr>
-<div>
-<a href="screen_setup.py"> <input type="button" value="Personnaliser les affichages"></a>
-<a href="clock_setup.py"> <input type="button" value="Ajuster l'horloge"></a>
-<a href="raz.py"> <input type="button" value="Config. Usine"></a>
+<br>
 </div>
 <hr>
-<a href="index.py"> <input type="button" value="Accueil"> </a>
+<!-- Pied de page -->
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnaliser les affichages</a>
+  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
+  <a href="raz.py" class="w3-bar-item w3-button w3-right w3-hover-red">Config. Usine</a>
+  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
+
 </div>
 </body>
 </html>
