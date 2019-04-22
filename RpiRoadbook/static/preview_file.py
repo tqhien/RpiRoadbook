@@ -79,7 +79,9 @@ if 'filename' in form:
 
 <div class="w3-bar w3-grey">
     <button class="w3-submit w3-btn w3-red w3-hover-teal" type="submit">Valider</button>
-    <a href="cancel_file.py" class="w3-bar-item w3-button w3-hover-blue"> Annuler</a>
+    """)
+  print('<a href="cancel_file.py?fn={}" class="w3-bar-item w3-button w3-hover-blue"> Annuler</a>'.format(fn))
+  print("""
 </div>
 </form>
 

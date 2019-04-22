@@ -17,7 +17,6 @@ print ("""<html>
 	<link rel="stylesheet" href="w3.css">
 	<link rel="stylesheet" href="font-awesome.min.css">
 	<link rel="stylesheet" href="material-icons.css">
-    <link rel="stylesheet" type="text/css" href="mystyle.css">
 </head>
 <body>
 <!-- Entete -->
@@ -54,9 +53,6 @@ Attendez 5 secondes et red&eacute;marrez le RpiRoadbook
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configurer</a>
-  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnaliser les affichages</a>
-  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
-  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
 </div>
 </body>
 </html>""")

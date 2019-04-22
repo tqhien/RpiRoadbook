@@ -26,7 +26,7 @@ print("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-  <h1>Configuration des écran</h1>
+  <h1>Configuration des &eacute;crans</h1>
 </div>
 <hr>
 """)
@@ -50,7 +50,7 @@ for attempt in range(5):
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
   else :
-    print('<h3>Configuration sauvegard&eacute; !</h3>')
+    print('<h3>Configuration sauvegard&eacute;e !</h3>')
     break
 else :
   print('<h3>Write Error screen.cfg after 5 tries</h3>')
@@ -61,9 +61,7 @@ print ("""
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configuration</a>
-  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
-  <a href="raz.py" class="w3-bar-item w3-button w3-right w3-hover-red">Config. Usine</a>
-  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
+  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnalisation des &eacute;crans</a>
 </div>
 </body>
 </html>""")

@@ -4,7 +4,8 @@ import cgi, os
 import cgitb; cgitb.enable()
 import shutil
 
-print ("""Content-Type: text/html\n
+print ('Content-Type: text/html')
+print("""
 <html>
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,30 +16,38 @@ print ("""Content-Type: text/html\n
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>Retour &agrave la configuration d'usine</h1>
+<h1>Annulation</h1>
 </div>
 <hr>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
-<h3>Fichiers supprim&eacute;s :</h3>
+<h3>Annulation du t&eacute;l&eacute;chargement :</h3>
 """)
 
-filelist = [
-    '.conf/RpiRoadbook.cfg',
-    '.conf/RpiRoadbook_setup.cfg',
-    '.conf/RpiRoadbook_screen.cfg',
-    '.conf/route.cfg',
-    '.conf/screen.cfg',
-    '.log/chrono.cfg',
-    '.log/odo.cfg',
-]
+form = cgi.FieldStorage()
 
-for fileitem in filelist:
+if 'fn' in form:
+  # On recupere les noms de fichiers
+  filefield = form['fn']
+  if not isinstance(filefield, list):
+    filefield = [filefield]
+  for fileitem in filefield:
+    filedir = os.path.splitext(fileitem.value)[0]
     try:
-        os.remove("/mnt/piusb/{}".format(fileitem))
+        os.remove("/mnt/piusb/{}".format(fileitem.value))
     except :
         pass
-    else:
-        print('{}<br>'.format(fileitem))
+
+    try:
+        shutil.rmtree("/mnt/piusb/Conversions/{}".format(filedir))
+    except:
+        pass
+    try:
+      shutil.rmtree("/mnt/piusb/Annotations/{}".format(filedir))
+    except:
+        pass
+    print("{}<br>".format(fileitem.value))
+else:
+    print ("Pas de choix")
 print ("""
 </div>
 <hr>
@@ -46,7 +55,6 @@ print ("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configurer</a>
 </div>
 </body>
 </html>""")
