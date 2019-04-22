@@ -80,37 +80,45 @@ print("""            var b = document.getElementById("jour_nuit"+k)[document.get
   <body onload=update_preview()>
   <!-- Entete -->
   <div class="w3-container w3-center w3-section">
-  <h1>Personnalisation des &eacute;crans Rallye</h1>
+  <h1>Personnalisation des &eacute;crans</h1>
   </div>
-  <hr>
 <div class="w3-container">
 <h3>Choisissez un &eacute;cran &agrave; personnaliser</h3>
     <form action="save_screen.py" method="post">
         <div class="w3-row w3-black">
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran1');">
-          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 1</div>
+          <div class="w3-quarter tablink w3-hover-grey w3-padding w3-grey">Ecran 1</div>
         </a>
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran2');">
-          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 2</div>
+          <div class="w3-quarter tablink w3-hover-light-blue w3-padding">Ecran 2</div>
         </a>
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran3');">
-          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 3</div>
+          <div class="w3-quarter tablink w3-hover-light-green w3-padding">Ecran 3</div>
         </a>
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran4');">
-          <div class="w3-quarter tablink w3-hover-light-grey w3-padding">Ecran 4</div>
+          <div class="w3-quarter tablink w3-hover-yellow w3-padding">Ecran 4</div>
         </a>
         </div>
 """)
 
 for j in range (1,nb_screens+1):
-    print('<div id="Ecran{}" class="w3-container screen" style="display:none">'.format(j))
-    print('<table>')
+    if j == 1 :
+        print('<div id="Ecran{}" class="w3-row-padding screen w3-grey" style="display:block">'.format(j))
+        print('<div class="w3-col m3">')
+    elif j == 2 :
+        print('<div id="Ecran{}" class="w3-row-padding screen w3-light-blue" style="display:none">'.format(j))
+        print('<div class="w3-col m3"><br></div><div class="w3-col m3">')
+    elif j == 3 :
+        print('<div id="Ecran{}" class="w3-row-padding screen w3-light-green" style="display:none">'.format(j))
+        print('<div class="w3-col m6"><br></div><div class="w3-col m3">')
+    else :
+        print('<div id="Ecran{}" class="w3-row-padding screen w3-yellow " style="display:none">'.format(j))
+        print('<div class="w3-col m9"><br></div><div class="w3-col m3">')
     # Affichage des previews
-    print('<tr><td>Preview</td>')
-    print('<td>')
     print('<img src="images/pajra1.png" id="preview_img{}">'.format(j))
-    print('</td>')
-    print('</tr><tr><td>Jour/Nuit</td>')
+    print('<table>')
+
+    print('<tr><td>Jour/Nuit</td>')
 
     # Affichage des listes de choix jour_nuit
     print('<td>')
@@ -162,7 +170,7 @@ for j in range (1,nb_screens+1):
         print('</select>')
         print('</td>')
         print('</tr>')
-    print('</table>')
+    print('</table></div>')
     print('</div>')
 
 print("""
@@ -172,12 +180,11 @@ print("""
         </div>
     </form>
     </div>
-    <hr>
+
     <!-- Pied de page -->
     <div class="w3-bar w3-black">
       <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-      <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configuration</a>
-      <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
+      <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
     </div>
 
     <script>
@@ -189,10 +196,18 @@ function openScreen(evt, screenName) {
   }
   tablinks = document.getElementsByClassName("tablink");
   for (i = 0; i < x.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+    tablinks[i].className = tablinks[i].className.replace(" w3-grey", "");
+    tablinks[i].className = tablinks[i].className.replace(" w3-light-blue", "");
+    tablinks[i].className = tablinks[i].className.replace(" w3-light-green", "");
+    tablinks[i].className = tablinks[i].className.replace(" w3-yellow", "");
   }
   document.getElementById(screenName).style.display = "block";
-  evt.currentTarget.firstElementChild.className += " w3-red";
+  switch (screenName) {
+    case 'Ecran1' :  evt.currentTarget.firstElementChild.className += " w3-grey"; break ;
+    case 'Ecran2' :  evt.currentTarget.firstElementChild.className += " w3-light-blue"; break ;
+    case 'Ecran3' :  evt.currentTarget.firstElementChild.className += " w3-light-green"; break ;
+    case 'Ecran4' :  evt.currentTarget.firstElementChild.className += " w3-yellow"; break ;
+  }
 }
 </script>
   </body>

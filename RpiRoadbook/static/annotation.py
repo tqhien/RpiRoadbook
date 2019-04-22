@@ -242,7 +242,6 @@ print("""
       <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
       <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
 </div>
-    <hr>
 
    <div id="canvasDiv" style="position:relative;height:250px;">
       <!-- It's bad practice (to me) to put your CSS here.  I'd recommend the use of a CSS file! -->

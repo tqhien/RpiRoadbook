@@ -17,7 +17,6 @@ print ("""Content-Type: text/html\n
 <div class="w3-container w3-center w3-section">
 <h1>Retour &agrave la configuration d'usine</h1>
 </div>
-<hr>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>Fichiers supprim&eacute;s :</h3>
 """)
@@ -41,12 +40,11 @@ for fileitem in filelist:
         print('{}<br>'.format(fileitem))
 print ("""
 </div>
-<hr>
 
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configurer</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configurer</a>
 </div>
 </body>
 </html>""")

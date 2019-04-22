@@ -28,7 +28,6 @@ print("""
 <div class="w3-container w3-center w3-section">
   <h1>Configuration des &eacute;crans</h1>
 </div>
-<hr>
 """)
 for k in range (1,nb_screens+1) :
     jour_nuit = 'jour_nuit{}'.format(k)
@@ -56,11 +55,10 @@ else :
   print('<h3>Write Error screen.cfg after 5 tries</h3>')
 
 print ("""
-<hr>
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configuration</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
   <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnalisation des &eacute;crans</a>
 </div>
 </body>

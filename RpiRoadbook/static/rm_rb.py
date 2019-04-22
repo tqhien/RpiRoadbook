@@ -18,7 +18,6 @@ print ("""Content-Type: text/html\n
 <div class="w3-container w3-center w3-section">
 <h1>Suppression de roadbooks</h1>
 </div>
-<hr>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>Fichiers supprim&eacute;s :</h3>
 """)
@@ -50,7 +49,6 @@ else:
     print ("Pas de choix")
 print ("""
 </div>
-<hr>
 
 <!-- Pied de page -->
 <div class="w3-bar w3-black">

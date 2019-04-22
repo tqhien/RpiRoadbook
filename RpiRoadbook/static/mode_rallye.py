@@ -23,7 +23,6 @@ print ("""<html>
 <div class="w3-container w3-center w3-section">
 <h1>Changement de mode</h1>
 </div>
-<hr>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>Nouveau mode :</h3>
 """)
@@ -46,13 +45,11 @@ else :
 print("""
 Attendez 5 secondes et red&eacute;marrez le RpiRoadbook
 </div>
-<hr>
-<hr>
 
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configurer</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configurer</a>
   <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnaliser les affichages</a>
 </div>
 </body>

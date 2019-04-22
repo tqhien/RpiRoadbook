@@ -16,7 +16,6 @@ print("""
 <div class="w3-container w3-center w3-section">
   <h1>Ajout d'un Roadbook</h1>
 </div>
-<hr>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue">
    <form enctype="multipart/form-data" action="preview_file.py" method = "post">
    <h3>S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : </h3>

@@ -25,7 +25,6 @@ print ("""
 <div class="w3-container w3-center w3-section">
 <h1>R&eacute;glage de l'horloge</h1>
 </div>
-<hr>
 <h3>R&eacute;glage sauvegard&eacute; :</h3>
 """)
 
@@ -42,11 +41,10 @@ subprocess.Popen ('hwclock --set --date "{} {}" --utc --noadjfile'.format(st_dat
 subprocess.Popen ('hwclock -w',shell=True)
 
 print("""
-<hr>
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue">Configuration</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
 </div>
 </body>
 </html>

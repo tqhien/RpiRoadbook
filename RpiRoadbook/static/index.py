@@ -28,10 +28,9 @@ print ("""<html>
 <div class="w3-container w3-center w3-section">
   <h1>Gestionnaire du RpiRoadbook</h1>
 </div>
-<hr>
 
 <!-- Choix mode -->
-<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
+<div class="w3-container w3-section w3-topbar w3-bottombar w3-leftbar w3-rightbar w3-border-red">
 <div class="w3-row">
 	<div class="w3-col w3-light-grey s12 w3-center"><p><h3>Changement de mode</h3></p></div>
 </div>
@@ -47,9 +46,9 @@ print('<a class="w3-button w3-block" href="mode_zoom.py"><i class="w3-xlarge fa 
 print("""
 </div>
 </div>
-<hr>
+
 <!-- Table des rb presents -->
-<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey">
+<div class="w3-container w3-section w3-topbar w3-bottombar w3-leftbar w3-rightbar w3-border-blue">
 <form action="rm_rb.py" method="post">
 <table class="w3-table-all">
 <tr>
@@ -71,11 +70,11 @@ print ("""
 </div>
 </form>
 </div>
-<hr>
+
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="screen_setup.py"> Personnaliser les &eacute;crans</a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i> Configuration</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"> Configuration</a>
 </div>
 
 </body>
