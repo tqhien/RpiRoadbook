@@ -96,6 +96,7 @@ aimants = 1
 developpe = 1.0*roue / aimants
 orientation = 'Paysage'
 ncases = 3
+force_refresh = False
 
 save_t_moy = time.time()
 save_t_odo = time.time()
@@ -496,12 +497,13 @@ def blit_sprite (screen,sprite,coords):
     pygame.display.update(r)
 
 def update_sprites(screen):
-    global sprites,old_sprites
+    global sprites,old_sprites,force_refresh
     for i in list(sprites.keys()) :
-        if (i not in old_sprites.keys()) or (old_sprites [i] != sprites[i]) :
+        if (i not in old_sprites.keys()) or (old_sprites [i] != sprites[i]) or force_refresh :
             blit_sprite (screen,sprites[i][0],sprites[i][1])
             #emit(i,sprites[i][0])
             old_sprites [i] = sprites[i]
+            force_refresh = False
 
 #--------------------------------------------------------------------------------- ----------#
 #------------------------------ Organisation des widgets ------------------------------------#
@@ -726,7 +728,7 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases,old_sprites,mode_jour
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,sprites,old_sprites,mode_jour,force_refresh
 
         # On charge le mode en cours, le roadbook en cours et sa case
         candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -759,7 +761,9 @@ class status_widget (rb_widget):
             ncases = 3
         widgets = {}
         sprites = {}
-        old_sprites = {}
+        force_refresh = True
+        #old_sprites = {}
+        
         widgets[(0)] = status_widget(layout,0)
         for i in range(1,nb_widgets+1) :
             widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
@@ -2435,10 +2439,10 @@ class RoadbookScene(SceneBase):
         global save_t_odo,angle,totalisateur,distance1,distance2
         global sprites,old_sprites,rbconfig,chronoconfig,odoconfig
         global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
-        global widgets
+        global widgets,force_refresh
 
         # MAJ des cases du rb
-        if self.case != self.oldcase :
+        if (self.case != self.oldcase) or force_refresh :
             # On sauvegarde la nouvelle position
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
