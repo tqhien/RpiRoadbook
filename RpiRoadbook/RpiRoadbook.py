@@ -1030,7 +1030,7 @@ class trip2_widget (rb_widget):
         else:
             blit_text(scr,'{:6.2f}'.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
-        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
 class vmoy2_widget(rb_widget):
@@ -1051,7 +1051,7 @@ class vmoy2_widget(rb_widget):
         else:
             blit_text(scr,'{:03.0f} '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
-        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
 class vmax2_widget(rb_widget):
@@ -1074,7 +1074,7 @@ class vmax2_widget(rb_widget):
         else:
             blit_text(scr,'{:03.0f} '.format(vmax2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
-        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
 class chrono2_widget(rb_widget):
@@ -1108,7 +1108,7 @@ class chrono2_widget(rb_widget):
         else:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'.{:02.0f} '.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
-        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
 #------------------ Affichage du compte a rebours                                            ------------------------------#
@@ -1152,7 +1152,7 @@ class countdown_widget (rb_widget):
         else:
             blit_text(scr,'{:02.0f}:{:02.0f} '.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'.{:02.0f} '.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
-        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
 class heure_widget(rb_widget):
@@ -1168,7 +1168,7 @@ class heure_widget(rb_widget):
         else:
             blit_text(scr,'{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'{:02.0f} '.format(self.now.tm_sec),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
-        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),3)
+        r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
 #----------------------------------------------------------------------------------------------#
