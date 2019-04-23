@@ -74,7 +74,7 @@ print ("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="screen_setup.py"> Personnaliser les &eacute;crans</a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"> Configuration</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i> Configuration</a>
 </div>
 
 </body>
