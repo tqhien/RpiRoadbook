@@ -191,8 +191,10 @@ def input_roue_callback(channel):
 
 def input_left_callback(channel):
     global left_state
+    GPIO.remove_event_detect(channel)
     left_long_state = False
     b4_time = time.time()
+    time.sleep(.2)
     t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
         if t >= .05 and t < 2:
@@ -207,17 +209,21 @@ def input_left_callback(channel):
                 if t - old_t >= .5 :
                     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
                     old_t = time.time() - b4_time
+        time.sleep(.2)
         t = time.time() - b4_time
     if t >= .05 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
     left_state = False
     left_long_state = False
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=50)
 
 
 def input_right_callback(channel):
     global right_state
+    GPIO.remove_event_detect(channel)
     right_long_state = False
     b4_time = time.time()
+    time.sleep(.2)
     t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
         if t >= .05 and t < 2:
@@ -232,36 +238,44 @@ def input_right_callback(channel):
                 if t - old_t >= .5 :
                     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
                     old_t = time.time() - b4_time
+        time.sleep(.2)
         t = time.time() - b4_time
     if t >= .05 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
     right_state = False
     right_long_state = False
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=50)
 
 
 def input_ok_callback(channel):
     global ok_state
+    GPIO.remove_event_detect(channel)
     ok_long_state = False
     b4_time = time.time()
+    time.sleep(.2)
     t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
-        if t >= .05 and t < 2:
+        if t >= .5 and t < 2:
             if not ok_state:
                 ok_state = True
         if t >=2 :
             if not ok_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
                 ok_long_state = True
+        time.sleep(.2)
         t = time.time() - b4_time
-    if t >= .05 and t < 2:
+    if t >= .5 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
     ok_state = False
     ok_long_state = False
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
 
 def input_up_callback(channel):
     global up_state
+    GPIO.remove_event_detect(channel)
     up_long_state = False
     b4_time = time.time()
+    time.sleep(.2)
     t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
         if t >= .05 and t < 2:
@@ -271,21 +285,20 @@ def input_up_callback(channel):
             if not up_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
                 up_long_state = True
-                old_t = time.time() - b4_time
-            else:
-                if t - old_t >= .5 :
-                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
-                    old_t = time.time() - b4_time
+        time.sleep(.2)
         t = time.time() - b4_time
-    if t >= .05 and t < 2:
+    if t >= .05 and t < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
     up_state = False
     up_long_state = False
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=300)
 
 def input_down_callback(channel):
     global down_state
+    GPIO.remove_event_detect(channel)
     down_long_state = False
     b4_time = time.time()
+    time.sleep(.2)
     t = time.time() - b4_time
     while not GPIO.input(channel) :# on attend le retour du bouton
         if t >= .05 and t < 2:
@@ -295,25 +308,23 @@ def input_down_callback(channel):
             if not down_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
                 down_long_state = True
-                old_t = time.time() - b4_time
-            else:
-                if t - old_t >= .5 :
-                    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
-                    old_t = time.time() - b4_time
+        time.sleep(.2)
         t = time.time() - b4_time
-    if t >= .05 and t < 2:
+    if t >= .05 and t < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
     down_state = False
     down_long_state = False
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
 
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
 GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=50)
 GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=50)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=50)
+GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
 GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
 GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+
 
 #*******************************************************************************************************#
 #------------------------- Le callbacks des suivis systeme : temp et cpu -------------------------------#
@@ -763,7 +774,7 @@ class status_widget (rb_widget):
         sprites = {}
         force_refresh = True
         #old_sprites = {}
-        
+
         widgets[(0)] = status_widget(layout,0)
         for i in range(1,nb_widgets+1) :
             widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
