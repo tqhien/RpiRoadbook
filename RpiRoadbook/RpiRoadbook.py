@@ -614,26 +614,26 @@ widget_layouts = {
     '6' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
         {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':475,'x2':1,'y2':320,'x3':1,'y3':70},
-        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
-        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70}],
+        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70},
+        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70}],
     '7' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
-        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
-        {'x':30,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
-        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
-        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70}],
+        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70},
+        {'x':30,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70},
+        {'x':180,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70},
+        {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70}],
     '8' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
         {'x':30,'y':0,'w':150,'h':480,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':1,'y1':475,'x2':30,'y2':320,'x3':1,'y3':70}],
     '9' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
-        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
-        {'x':30,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70}],
+        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70},
+        {'x':30,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70}],
     '10' : [
         {'x':0,'y':0,'w':30,'h':480,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':400,'x2':1,'y2':280,'x3':1,'y3':100},
-        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
-        {'x':30,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':30,'y3':70},
-        {'x':105,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':30,'y3':70}],
+        {'x':30,'y':240,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':110,'y3':70},
+        {'x':30,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':35,'y3':70},
+        {'x':105,'y':0,'w':75,'h':240,'label_font':ROUGE25,'value_font':BLANC25,'unit_font':BLANC25,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC25inv,'x1':1,'y1':235,'x2':35,'y2':200,'x3':35,'y3':70}],
     '11' : [
         {'x':0,'y':0,'w':300,'h':30,'label_font':ROUGE20,'value_font':BLANC20,'unit_font':ROUGE20,'over_font':ROUGE25,'inside_font':VERT25,'selected_font':BLANC20inv,'x1':1,'y1':1,'x2':120,'y2':1,'x3':240,'y3':1},
         {'x':0,'y':30,'w':300,'h':150,'label_font':ROUGE25,'value_font':BLANC3,'unit_font':BLANC25,'over_font':ROUGE3,'inside_font':VERT3,'selected_font':BLANC3inv,'x1':5,'y1':115,'x2':15,'y2':1,'x3':240,'y3':115},
@@ -807,9 +807,9 @@ class odo_widget (rb_widget):
         global angle
         blit_text(scr,' Totalisateur',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:05.0f}'.format(totalisateur/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+            blit_text(scr,'{:05.0f} '.format(totalisateur/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
-            blit_text(scr,'{:05.0f}'.format(totalisateur/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:05.0f} '.format(totalisateur/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
@@ -893,9 +893,9 @@ class trip1_widget (rb_widget):
         global angle
         blit_text(scr,' Trip1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:6.2f}'.format(distance1/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
+            blit_text(scr,'{:6.2f} '.format(distance1/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
-            blit_text(scr,'{:6.2f}'.format(distance1/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:6.2f} '.format(distance1/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
@@ -1037,9 +1037,9 @@ class trip2_widget (rb_widget):
         global angle
         blit_text(scr,' Trip2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:6.2f}'.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
+            blit_text(scr,'{:6.2f} '.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
-            blit_text(scr,'{:6.2f}'.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:6.2f} '.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
