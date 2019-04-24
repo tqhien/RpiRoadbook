@@ -215,7 +215,7 @@ def input_left_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
     left_state = False
     left_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=50)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=300)
 
 
 def input_right_callback(channel):
@@ -244,7 +244,7 @@ def input_right_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
     right_state = False
     right_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=50)
+    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=300)
 
 
 def input_ok_callback(channel):
@@ -319,8 +319,8 @@ def input_down_callback(channel):
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=50)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=50)
+GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
 GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
 GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
 GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
@@ -524,6 +524,8 @@ current_widget = 0
 old_widget = 1
 widgets = {}
 nb_widgets = 1
+widget_isselected = False
+widget_select_t = 0
 
 #------------------------------ Definition des widgets ---------------------------------------------#
 widget_presets = {
@@ -2403,7 +2405,7 @@ class RoadbookScene(SceneBase):
 
     def ProcessInput(self, events, pressed_keys):
         global distance1,old_distance1,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay1
-        global widgets,current_widget,nb_widgets
+        global widgets,current_widget,nb_widgets,widget_select_t,widget_isselected
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
@@ -2413,8 +2415,14 @@ class RoadbookScene(SceneBase):
 
                 # les actions sur le widget courant
                 elif event.key == BOUTON_RIGHT:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
                     widgets[(current_widget)].down()
                 elif event.key == BOUTON_LEFT:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
                     widgets[(current_widget)].up()
                 elif event.key == BOUTON_OK:
                     widgets[(current_widget)].deselect()
@@ -2422,11 +2430,22 @@ class RoadbookScene(SceneBase):
                     if current_widget > nb_widgets :
                         current_widget = 0
                     widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
                 elif event.key == BOUTON_BACKSPACE:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
                     widgets[(current_widget)].reset()
                 elif event.key == BOUTON_HOME:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
                     widgets[(current_widget)].upup()
                 elif event.key == BOUTON_END:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
                     widgets[(current_widget)].downdown()
                 # les actions de deroulement du rb
                 elif event.key == BOUTON_UP:
@@ -2450,7 +2469,7 @@ class RoadbookScene(SceneBase):
         global save_t_odo,angle,totalisateur,distance1,distance2
         global sprites,old_sprites,rbconfig,chronoconfig,odoconfig
         global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
-        global widgets,force_refresh
+        global widgets,force_refresh,widget_select_t,current_widget,widget_isselected
 
         # MAJ des cases du rb
         if (self.case != self.oldcase) or force_refresh :
@@ -2464,6 +2483,12 @@ class RoadbookScene(SceneBase):
                 for n in range(ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh-n,0))
             self.oldcase=self.case
+
+        # Deselectionne le widget au bout de 10 secondes
+        if widget_isselected :
+            if time.time() - widget_select_t > 10 :
+                widgets[(current_widget)].deselect()
+                widget_isselected = False
 
         # MAJ des infos des widgets
         for j in list(widgets.keys()):
