@@ -73,8 +73,9 @@ print("""
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnaliser les affichages</a>
   <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
+  <a href="wifi_setup.py" class="w3-bar-item w3-button w3-hover-blue">Wifi</a>
   <a href="raz.py" class="w3-bar-item w3-button w3-right w3-hover-red" onclick="return confirm('Etes-vous s&ucirc;r de vouloir supprimer ?');">Config. Usine</a>
-  <!-- <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a> --!>
+  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
 </div>
 
 </body>
