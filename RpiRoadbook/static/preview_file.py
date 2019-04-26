@@ -1,4 +1,4 @@
-#!/usr/bin/pytho
+#!/usr/bin/python
 # -*- coding: latin-1 -*
 import cgi, os
 import cgitb; cgitb.enable()
