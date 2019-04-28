@@ -9,15 +9,19 @@ import subprocess
 form = cgi.FieldStorage()
 
 wificonfig = configparser.ConfigParser()
-# On charge les reglages : mode, orientation, etc
+
+# On charge les reglages wifi
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/hostapd.conf','/home/rpi/RpiRoadbook/hostapd.conf','/mnt/piusb/.conf/hostapd.conf']
-wificonfig.read(candidates)
+for i in candidates :
+    try:
+        with open(i, 'r') as f:
+            config_string = '[dummy_section]\n' + f.read()
+        wificonfig.read_string(config_string)
+    except:
+        pass
 
-#roue = setupconfig['Parametres']['roue']
-#aimants = setupconfig['Parametres']['aimants']
-
-st_date = ''
-st_time = ''
+ssid = wificonfig['dummy_section']['ssid']
+wpa_passphrase = wificonfig['dummy_section']['wpa_passphrase']
 
 print ('Content-Type: text/html\n')
 print ("""<html>
@@ -37,24 +41,25 @@ print ("""<html>
 """)
 
 if 'user_ssid' in form:
-  wificonfig['ssid'] = form['user_ssid'].value
-  print ("SSID : {} <br>".format(wificonfig['ssid']))
+  wificonfig['dummy_section']['ssid'] = form['user_ssid'].value
+  print ("SSID : {} <br>".format(wificonfig['dummy_section']['ssid']))
 
 if 'user_passphrase' in form:
-  wificonfig['wpa_passphrase'] = form['user_passphrase'].value
-  print ("Mot de passe : {}<br>".format(wificonfig['wpa_passphrase']))
+  wificonfig['dummy_section']['wpa_passphrase'] = form['user_passphrase'].value
+  print ("Mot de passe : {}<br>".format(wificonfig['dummy_section']['wpa_passphrase']))
 
 for attempt in range(5):
   try :
-    with open('/mnt/piusb/.conf/hostapd2.conf', 'w') as configfile:
-      wificonfig.write(configfile)
+    with open('/mnt/piusb/.conf/hostapd.conf', 'w') as configfile:
+      for i in wificonfig.options('dummy_section') :
+          configfile.write('{} = {}\n'.format(i,wificonfig['dummy_section'][i]))
   except :
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
   else :
     break
 else :
-  print('Write Error hostapd2.conf after 5 tries\n')
+  print('Write Error hostapd.conf after 5 tries\n')
 
 print ("""
 <br>

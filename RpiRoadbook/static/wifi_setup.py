@@ -7,12 +7,18 @@ import time
 
 wificonfig = configparser.ConfigParser()
 
-# On charge les reglages : mode, orientation, etc
+# On charge les reglages wifi
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/hostapd.conf','/home/rpi/RpiRoadbook/hostapd.conf','/mnt/piusb/.conf/hostapd.conf']
-wificonfig.read(candidates)
+for i in candidates :
+    try:
+        with open(i, 'r') as f:
+            config_string = '[dummy_section]\n' + f.read()
+        wificonfig.read_string(config_string)
+    except:
+        pass
 
-ssid = wificonfig['ssid']
-wpa_passphrase = wificonfig['wpa_passphrase']
+ssid = wificonfig['dummy_section']['ssid']
+wpa_passphrase = wificonfig['dummy_section']['wpa_passphrase']
 
 print("""<html>
 <head>
