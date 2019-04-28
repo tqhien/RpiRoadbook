@@ -27,6 +27,7 @@ filelist = [
     '.conf/RpiRoadbook_screen.cfg',
     '.conf/route.cfg',
     '.conf/screen.cfg',
+    '.conf/hostapd.conf',
     '.log/chrono.cfg',
     '.log/odo.cfg',
 ]
