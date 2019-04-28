@@ -6,6 +6,8 @@ form = cgi.FieldStorage()
 
 import re
 
+import time
+
 import subprocess
 
 print ('Content-Type: text/html\n')
@@ -34,8 +36,10 @@ if 'filename' in form:
   # Test si le fichier a bien ete telecharge
   if fileitem.filename:
     open('/mnt/piusb/ota/ota.tar.gz', 'wb').write(fileitem.file.read())
+    # On attend au moins 5 secondes, le temps que le cache btrfs soit mis sur disque
+    time.sleep (6.0)
     print('<h3>Firmware t&eacute;l&eacute;charg&eacute;.</h3><br>')
-    print('<h3>Attendez 5 secondes et red&eacute;marrez le RpiRoadbook</h3><br>')
+    print('<h3>Red&eacute;marrez le RpiRoadbook</h3><br>')
     print('<h3>pour appliquer la mise &agrave; jour.</h3><br>')
 print("""
 </div>

@@ -16,12 +16,13 @@ print("""
 <div class="w3-container w3-center w3-section">
   <h1>Mise &agrave; jour Firmware</h1>
 </div>
-<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue">
-   <form enctype="multipart/form-data" action="save_ota.py" method = "post">
-   <h3>S&eacute;lectionnez le firmware &agrave; t&eacute;l&eacute;charger : </h3>
-   <input class="w3-input w3-button " type="file" name="filename" />
-   <input class="w3-input w3-teal w3-button w3-hover-blue w3-left-align w3-margin" type="submit" value="T&eacute;l&eacute;charger le firmware..." />
-   </form>
+<div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue w3-center">
+   <h3>Attention : une mauvaise mise &agrave; jour peut rendre votre RpiRoadbook non fonctionnel</h3>
+   <h3>Etes-vous s&ucirc;r de vouloir continuer ?</h3>
+    <div class="w3-bar w3-margin">
+      <a class="w3-bar-item w3-button w3-black w3-hover-blue w3-margin-right" href="index.py">Annuler et revenir &agrave; l'accueil</a>
+      <a class="w3-bar-item w3-button w3-red w3-hover-orange w3-margin-left" href="ota.py">Continuer</a>
+    </div>
 </div>
 <!-- Pied de page -->
 <div class="w3-bar w3-black w3-margin">
