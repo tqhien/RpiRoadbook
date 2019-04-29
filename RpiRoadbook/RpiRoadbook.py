@@ -1457,6 +1457,7 @@ class TitleScene(SceneBase):
 class SelectionScene(SceneBase):
     def __init__(self):
         global angle,labels,old_labels,sprites,old_sprites,myfont,alphabet,alphabet_size_x,alphabet_size_y
+        global setupconfig,rbconfig
         SceneBase.__init__(self)
 
         self.runonce=True
@@ -1466,6 +1467,7 @@ class SelectionScene(SceneBase):
 
 
         self.orientation = setupconfig['Parametres']['orientation']
+        self.rallye = rbconfig['Mode']['mode']
 
         angle = 90 if self.orientation == 'Portrait' else 0
 
@@ -1562,7 +1564,10 @@ class SelectionScene(SceneBase):
                                 rbconfig['Roadbooks']['case'] = '0'
                                 save_rbconfig()
                             self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
-                            self.SwitchToScene(ConversionScene(self.filename))
+                            if self.rallye == 'Zoom' :
+                                self.SwitchToScene(RoadbookZoomScene(self.filename))
+                            else :
+                                self.SwitchToScene(RoadbookScene(self.filename))
                         else :
                             self.filename = self.filenames[self.selection]
                             self.gotoEdit = True
@@ -1617,9 +1622,13 @@ class SelectionScene(SceneBase):
             if self.iscountdown:
                 self.k = time.time();
                 if (self.k-self.j>=self.countdown) :
+                    self.filename = self.filenames[self.selection]                    
                     rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
                     save_rbconfig()
-                    self.SwitchToScene(ConversionScene(self.filename))
+                    if self.rallye == 'Zoom' :
+                        self.SwitchToScene(RoadbookZoomScene(self.filename))
+                    else :
+                        self.SwitchToScene(RoadbookScene(self.filename))
 
 
     def Render(self, screen):
@@ -2349,6 +2358,7 @@ class RoadbookScene(SceneBase):
         global widgets,current_widget,old_widget
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
+
         check_configfile()
         labels = {}
         old_labels = {}
