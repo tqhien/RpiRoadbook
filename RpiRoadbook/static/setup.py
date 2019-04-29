@@ -74,7 +74,7 @@ print("""
   <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> Personnaliser les affichages</a>
   <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-clock-o"></i> Ajuster l'horloge</a>
   <a href="wifi_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-wifi"></i> Wifi</a>
-  <a href="raz.py" class="w3-bar-item w3-button w3-right w3-hover-red" onclick="return confirm('Etes-vous s&ucirc;r ?');"><i class="w3-xlarge fa fa-undo"></i> Config. Usine</a>
+  <a href="warning_raz.py" class="w3-bar-item w3-button w3-right w3-hover-red" ><i class="w3-xlarge fa fa-undo"></i> Config. Usine</a>
   <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge material-icons">system_update</i> MAJ Firmware</a>
 </div>
 

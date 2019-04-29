@@ -59,7 +59,7 @@ print ("""
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
-  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnalisation des &eacute;crans</a>
+  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> Personnalisation des &eacute;crans</a>
 </div>
 </body>
 </html>""")
