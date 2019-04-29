@@ -52,7 +52,7 @@ for attempt in range(5):
   try :
     with open('/mnt/piusb/.conf/hostapd.conf', 'w') as configfile:
       for i in wificonfig.options('dummy_section') :
-          configfile.write('{} = {}\n'.format(i,wificonfig['dummy_section'][i]))
+          configfile.write('{}={}\n'.format(i,wificonfig['dummy_section'][i]))
   except :
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
