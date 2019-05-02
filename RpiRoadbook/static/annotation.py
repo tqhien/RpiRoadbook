@@ -33,6 +33,8 @@ print ("""<html>
   <link rel="stylesheet" href="w3.css">
   <link rel="stylesheet" href="font-awesome.min.css">
   <link rel="stylesheet" href="material-icons.css">
+
+
    <script type="text/javascript" src="jquery-3.3.0.min.js"></script>
 
    <script type="text/javascript">
@@ -40,16 +42,26 @@ print ("""<html>
          initialize();
       });
 
+      function percentwidth(elem){
+        """)
+print('        return (elem.offsetWidth/{});'.format(w))
+print("""
+        }
+
 
       // works out the X, Y position of the click inside the canvas from the X, Y position on the page
       function getPosition(mouseEvent, sigCanvas) {
          var x, y;
          var rect = sigCanvas.getBoundingClientRect();
+         var tx = percentwidth(sigCanvas)
+         console.log(tx)
 
             //x = mouseEvent.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            x = mouseEvent.clientX -rect.left;
+            //x = mouseEvent.clientX -rect.left;
+            x = (mouseEvent.clientX -rect.left)/tx;
             //y = mouseEvent.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-            y = mouseEvent.clientY - rect.top;
+            //y = mouseEvent.clientY - rect.top;
+            y = (mouseEvent.clientY - rect.top)/tx;
 
 
          return { X: x , Y: y };
@@ -228,29 +240,25 @@ print("""
                });
            });
    </script>
+   <style>
+""")
+print('@media (max-width: {}px) '.format(round(w/0.9)))
+print("""
+{
+  #ma_case,#canvasSignature,#canvasDiv {
+  width: 90%;
+  }
+
+}
+</style>
 
 </head>
 
 <body onload="initialize()">
- <!-- Entete -->
- <div class="w3-container w3-center w3-section">
-    <h1>Annotations</h1>
+<!-- Entete -->
+<div class="w3-container w3-center w3-section w3-hide-small">
+   <h1>Annotations</h1>
 </div>
-
-
-<div class="w3-bar w3-grey w3-center">
-      <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
-      <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
-</div>
-
-   <div id="canvasDiv" style="position:relative;height:250px;">
-      <!-- It's bad practice (to me) to put your CSS here.  I'd recommend the use of a CSS file! -->
-""")
-print('      <canvas id="ma_case" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;z-index=0"></canvas>'.format(w,h))
-print('      <canvas id="canvasSignature" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;z-index=1"></canvas>'.format(w,h))
-print("""
-   </div>
-<div id="canvas_result" style="position:relative"></div>
 
 <div class="w3-bar">
 """)
@@ -263,6 +271,22 @@ print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlar
 print('<a href="annotation.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="annotation.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1))
 print("""
 </div>
+
+
+<div class="w3-bar w3-grey w3-center">
+      <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
+      <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
+</div>
+""")
+print('   <div id="canvasDiv" style="position:relative;height:250px;">')
+print('      <canvas id="ma_case" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;z-index=0"></canvas>'.format(w,h))
+print('      <canvas id="canvasSignature" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;z-index=1"></canvas>'.format(w,h))
+print("""
+   </div>
+<div id="canvas_result" style="position:relative"></div>
+
+
+
 
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
