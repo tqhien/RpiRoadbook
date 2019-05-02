@@ -1140,11 +1140,18 @@ class countdown_widget (rb_widget):
         global start_decompte,chrono_decompte
         start_decompte = True
         chrono_decompte = time.time() + decompte
+        chronoconfig['Decompte']['start_decompte'] = str(start_decompte)
+        chronoconfig['Decompte']['chrono_decompte'] = str(chrono_decompte)
+        save_chronoconfig()
     def reset(self):
         global decompte,start_decompte,chrono_decompte
+        global chronoconfig
         decompte = 0
         start_decompte = False
         chrono_decompte = 0
+        chronoconfig['Decompte']['start_decompte'] = str(start_decompte)
+        chronoconfig['Decompte']['chrono_decompte'] = str(chrono_decompte)
+        save_chronoconfig()
     def render(self,scr):
         global angle
         if start_decompte:
@@ -1305,6 +1312,8 @@ def check_configfile():
     chrono_time1 = float(chronoconfig['Chronometre1']['chrono_time'])
     chrono_delay2 = int (chronoconfig['Chronometre2']['chrono_delay'])
     chrono_time2 = float(chronoconfig['Chronometre2']['chrono_time'])
+    start_decompte = chronoconfig['Decompte']['start_decompte'] == 'True'
+    chrono_decompte = float(chronoconfig['Decompte']['chrono_decompte'])
 
     # On charge les configuration d'ecran selon le mode
     if rallye == 'Route' :
@@ -1622,7 +1631,7 @@ class SelectionScene(SceneBase):
             if self.iscountdown:
                 self.k = time.time();
                 if (self.k-self.j>=self.countdown) :
-                    self.filename = self.filenames[self.selection]                    
+                    self.filename = self.filenames[self.selection]
                     rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
                     save_rbconfig()
                     if self.rallye == 'Zoom' :
