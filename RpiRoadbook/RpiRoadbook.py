@@ -741,7 +741,7 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases,sprites,old_sprites,mode_jour,force_refresh
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,sprites,old_sprites,mode_jour,force_refresh,rbconfig
 
         # On charge le mode en cours, le roadbook en cours et sa case
         candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -751,6 +751,9 @@ class status_widget (rb_widget):
         current_screen += 1
         if current_screen > nb_screens :
             current_screen = 1
+        rbconfig['Ecran']['ecran'] = str(current_screen)
+        save_rbconfig()
+
         form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
         mode_j = screenconfig['Affichage{}'.format(current_screen)]['jour_nuit'] == 'Jour'
         if mode_j != mode_jour :
@@ -1277,7 +1280,7 @@ def save_screenconfig(mode='Route'):
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
-    global widgets,nb_widgets,ncases
+    global widgets,nb_widgets,ncases,current_screen
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -1289,11 +1292,12 @@ def check_configfile():
     developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
     orientation = setupconfig['Parametres']['orientation']
 
-    # On charge le mode en cours, le roadbook en cours et sa case
+    # On charge le mode en cours, l'ecran en cours, le roadbook en cours et sa case
     candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
     rbconfig.read(candidates)
     save_rbconfig()
     rallye = rbconfig['Mode']['mode']
+    current_screen = int(rbconfig['Ecran']['ecran'])
 
     # On charge le trip
     candidates = ['/home/rpi/RpiRoadbook/odo.cfg','/mnt/piusb/.log/odo.cfg']
