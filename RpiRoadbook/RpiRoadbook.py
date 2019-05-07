@@ -859,7 +859,7 @@ class trip1_widget (rb_widget):
         rb_widget.__init__(self,layout,widget)
     def upup(self):
         global distance1,old_distance1
-        distance1+=1000000
+        distance1+=100000
         old_distance1=distance1
         odoconfig['Odometre']['Distance1'] = str(distance1)
         save_odoconfig()
@@ -879,7 +879,7 @@ class trip1_widget (rb_widget):
         save_odoconfig()
     def downdown(self):
         global distance1,old_distance1
-        distance1-=1000000
+        distance1-=100000
         if distance1<0:
             distance1 = 0
         old_distance1=distance1
@@ -1004,7 +1004,7 @@ class trip2_widget (rb_widget):
         rb_widget.__init__(self,layout,widget)
     def upup(self):
         global distance2,old_distance2
-        distance2+=1000000
+        distance2+=100000
         old_distance2=distance2
         odoconfig['Odometre']['Distance2'] = str(distance2)
         save_odoconfig()
@@ -1024,7 +1024,7 @@ class trip2_widget (rb_widget):
         save_odoconfig()
     def downdown(self):
         global distance2,old_distance2
-        distance2-=1000000
+        distance2-=100000
         if distance2<0:
             distance2 = 0
         old_distance2=distance2
