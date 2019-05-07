@@ -445,7 +445,7 @@ labels = {}
 old_labels = {}
 
 def setup_alphabet(police=BLANC25):
-    global alphabet,alphabet_size_x,alphabet_size_y,myfont,angle
+    global alphabet,alphabet_size_x,alphabet_size_y,myfont,angle,mode_jour
     load_font(police)
     #printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ àâäçéèêëîïôöùûü'
     printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
@@ -1290,7 +1290,7 @@ def save_screenconfig(mode='Route'):
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
-    global widgets,nb_widgets,ncases,current_screen
+    global widgets,nb_widgets,ncases,current_screen,mode_jour
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -1336,7 +1336,7 @@ def check_configfile():
         candidates = ['/home/rpi/RpiRoadbook/screen.cfg','/mnt/piusb/.conf/screen.cfg']
     screenconfig.read(candidates)
     save_screenconfig(rallye)
-    mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
+    mode_jour = screenconfig['Affichage{}'.format(current_screen)]['jour_nuit'] == 'Jour'
     form =  screenconfig['Affichage{}'.format(current_screen)]['layout']
     t = 'pa' if orientation == 'Paysage' else 'po'
     t += 'j' if mode_jour else 'n'
