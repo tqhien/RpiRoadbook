@@ -47,6 +47,7 @@ import datetime
 import os
 import configparser
 import re
+import math
 # import serial
 # Pour la lecture des fichiers pdf et conversion en image
 from pdf2image import page_count,convert_from_path,page_size
@@ -87,7 +88,7 @@ chrono_delay2 = 5
 chrono_time2 = 0
 old_distance2 = 0
 
-decompte = 2
+decompte = 0
 start_decompte = False
 chrono_decompte = 0
 
@@ -1145,17 +1146,20 @@ class countdown_widget (rb_widget):
         rb_widget.__init__(self,layout,widget)
         setup_alphabet(self.over_font)
         setup_alphabet(self.inside_font)
-        decompte = 0
+        self.originfont = self.value_font
+        self.originunitfont = self.unit_font
     def up(self):
         global decompte
-        decompte += 30
+        if not start_decompte:
+            decompte += 30
     def down(self):
         global start_decompte,chrono_decompte
-        start_decompte = True
-        chrono_decompte = time.time() + decompte
-        chronoconfig['Decompte']['start_decompte'] = str(start_decompte)
-        chronoconfig['Decompte']['chrono_decompte'] = str(chrono_decompte)
-        save_chronoconfig()
+        if not start_decompte:
+            start_decompte = True
+            chrono_decompte = time.time() + decompte
+            chronoconfig['Decompte']['start_decompte'] = str(start_decompte)
+            chronoconfig['Decompte']['chrono_decompte'] = str(chrono_decompte)
+            save_chronoconfig()
     def reset(self):
         global decompte,start_decompte,chrono_decompte
         global chronoconfig
@@ -1165,26 +1169,48 @@ class countdown_widget (rb_widget):
         chronoconfig['Decompte']['start_decompte'] = str(start_decompte)
         chronoconfig['Decompte']['chrono_decompte'] = str(chrono_decompte)
         save_chronoconfig()
+        self.value_font = self.originfont
+        self.unit_font = self.originunitfont
     def render(self,scr):
         global angle
         if start_decompte:
             t = chrono_decompte - time.time()
-            if t <=30 and t >= 0 :
+            # lorsqu'on a x minutes, on peut pointer entre x et x+29secondes
+            # Il reste moins de 10s, on va bientot pouvoir pointer
+            if t <= 10 :
+                m,s = divmod(t,60)
+                ts = math.floor(s*5)
+                if ts % 2 == 0 :
+                    self.value_font = self.inside_font
+                else:
+                    self.value_font = self.originfont
+            # Tout va bien, on devrait pointer en ce moment
+            if t >-20 and t <= 0 :
                 self.value_font = self.inside_font
+            # entre x+20 secondes et x+29, il faudrait se depecher de pointer
+            if t <= -20 and t > -30 :
+                m,s = divmod (t,60)
+                ts = math.floor(s*5)
+                if ts % 2 == 0 :
+                    self.value_font = self.over_font           
+                else :
+                    self.value_font = self.inside_font
+            # on est en retard
+            if t < -30 :
+                self.value_font =  self.over_font
+                #self.unit_font = self.label_font
             if t < 0 :
-                self.value_font = self.over_font
-                self.unit_font = self.label_font
                 t = -t
         else:
             t = decompte
         m,s = divmod (t,60)
-        ss = (s*100) % 100
+        #ss = math.floor((s*10) % 10)
         blit_text(scr,' Decompte',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f} '.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
             blit_text(scr,'{:02.0f}:{:02.0f} '.format(m,s),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
-        blit_text(scr,'.{:02.0f} '.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
+        #blit_text(scr,'.{:1.0f} '.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
 
@@ -1291,6 +1317,7 @@ def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
     global widgets,nb_widgets,ncases,current_screen,mode_jour
+    global chrono_decompte,start_decompte
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
