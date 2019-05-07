@@ -138,11 +138,16 @@ down_state = False
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
-GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+#GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_LEFT, GPIO.IN)
+#GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_RIGHT, GPIO.IN)
+#GPIO.setup(GPIO_OK, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_OK, GPIO.IN)
+#GPIO.setup(GPIO_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_UP, GPIO.IN)
+#GPIO.setup(GPIO_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(GPIO_DOWN, GPIO.IN)
 
 # Test bouton au démarrage pour menu de configuration
 gotoConfig = not GPIO.input(GPIO_OK)
@@ -192,6 +197,7 @@ def input_roue_callback(channel):
 def input_left_callback(channel):
     global left_state
     GPIO.remove_event_detect(channel)
+    print('Bouton gauche')
     left_long_state = False
     b4_time = time.time()
     time.sleep(.2)
@@ -221,6 +227,7 @@ def input_left_callback(channel):
 def input_right_callback(channel):
     global right_state
     GPIO.remove_event_detect(channel)
+    print('Bouton droit')
     right_long_state = False
     b4_time = time.time()
     time.sleep(.2)
@@ -250,6 +257,7 @@ def input_right_callback(channel):
 def input_ok_callback(channel):
     global ok_state
     GPIO.remove_event_detect(channel)
+    print('Bouton OK')
     ok_long_state = False
     b4_time = time.time()
     time.sleep(.2)
@@ -273,6 +281,7 @@ def input_ok_callback(channel):
 def input_up_callback(channel):
     global up_state
     GPIO.remove_event_detect(channel)
+    print('Bouton haut')
     up_long_state = False
     b4_time = time.time()
     time.sleep(.2)
@@ -296,6 +305,7 @@ def input_up_callback(channel):
 def input_down_callback(channel):
     global down_state
     GPIO.remove_event_detect(channel)
+    print('Bouton bas')
     down_long_state = False
     b4_time = time.time()
     time.sleep(.2)
