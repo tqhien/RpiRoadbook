@@ -1,0 +1,364 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="w3.css">
+   <link rel="stylesheet" href="font-awesome.min.css">
+   <link rel="stylesheet" href="material-icons.css">
+
+
+    <script type="text/javascript" src="fabric.min.js"></script>
+    <script type="text/javascript" src="jquery-3.3.0.min.js"></script>
+    <script>
+
+    $(document).ready(function () {
+          initialize();
+       });
+
+    function initialize() {
+      $(function () {
+         $("#save_canvas").click(function () {
+           canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
+            var image = canvas.toDataURL("image/png");
+            image = image.replace('data:image/png;base64,', '');
+            $.ajax({
+                type : 'POST',
+                url: 'save_annotation.py',
+                data: {
+                  imagedata : image ,
+                  fn : 'test',
+                  num : '0'
+                },
+                 success: function (result) {
+                      $( "#canvas_result" ).append( result + "<br>" );
+                 }
+            });
+            canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
+                     originX: 'left',
+                     originY: 'top',
+                     left: 0,
+                     top: 0
+                 });
+         });
+      });
+    };
+
+
+      function rgb(r, g, b){
+        return "rgb("+r+","+g+","+b+")";
+      }
+
+      function rgba(r, g, b,a){
+        return "rgba("+r+","+g+","+b+","+a+")";
+      }
+
+      function setcolor(r,g,b) {
+        current_color = rgb(r,g,b,0.5);
+        current_alpha_color = rgba(r,g,b,alpha);
+        canvas.freeDrawingBrush.color = rgb(r,g,b) ;
+      };
+
+      function setbgcolor(r,g,b,a) {
+        current_bg_color = rgba(r,g,b,a);
+      };
+
+      function setPencilMode()
+      {
+        canvas.off('mouse:down');
+        canvas.off('mouse:move');
+        canvas.isDrawingMode = true;
+        canvas.freeDrawingBrush.width = slider1.value;
+      };
+
+      function setRectMode()
+      {
+        canvas.isDrawingMode = false;
+        canvas.off('mouse:down');
+        canvas.off('mouse:move');
+        var rect, isDown, origX, origY;
+
+        canvas.on('mouse:down', function(o){
+            isDown = true;
+            var pointer = canvas.getPointer(o.e);
+            origX = pointer.x;
+            origY = pointer.y;
+            var pointer = canvas.getPointer(o.e);
+            rect = new fabric.Rect({
+                left: origX,
+                top: origY,
+                originX: 'left',
+                originY: 'top',
+                width: pointer.x-origX,
+                height: pointer.y-origY,
+                angle: 0,
+                fill: current_alpha_color,
+                transparentCorners: false
+            });
+            canvas.add(rect);
+
+        });
+
+        canvas.on('mouse:move', function(o){
+            if (!isDown) return;
+            var pointer = canvas.getPointer(o.e);
+
+            if(origX>pointer.x){
+                rect.set({ left: Math.abs(pointer.x) });
+            }
+            if(origY>pointer.y){
+                rect.set({ top: Math.abs(pointer.y) });
+            }
+
+            rect.set({ width: Math.abs(origX - pointer.x) });
+            rect.set({ height: Math.abs(origY - pointer.y) });
+
+
+            canvas.renderAll();
+        });
+
+        canvas.on('mouse:up', function(o){
+          var i, tablinks;
+          isDown = false;
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          tablinks = document.getElementsByClassName("toollink");
+          for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+          }
+        });
+      };
+
+      function setTextMode()
+      {
+        canvas.isDrawingMode = false;
+        canvas.off('mouse:down');
+        canvas.off('mouse:move');
+        var textbox, isDown, origX, origY;
+
+        canvas.on('mouse:down', function(o){
+            isDown = true;
+            var pointer = canvas.getPointer(o.e);
+            origX = pointer.x;
+            origY = pointer.y;
+            textbox = new fabric.Textbox('Texte',{
+                left: origX,
+                top: origY,
+                originX: 'left',
+                originY: 'top',
+                width: 150,
+                height: 50,
+                angle: 0,
+                fill: current_color,
+                strokeWidth: 2,
+                stroke: current_color,
+                textBackgroundColor: current_bg_color,
+                fontSize: slider3.value,
+                transparentCorners: false
+            });
+            canvas.add(textbox);
+
+        });
+
+        canvas.on('mouse:up', function(o){
+          var i, tablinks;
+          isDown = false;
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          tablinks = document.getElementsByClassName("toollink");
+          for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+          }
+        });
+      };
+
+      function gopage() {
+        var mytext = document.getElementById("myPos") ;
+        var jto = mytext.value;
+        console.log(jto)
+      }
+
+    </script>
+    <style>
+    @media (max-width: 620px)
+    {
+      #ma_case,#canvasDiv {
+      width: 90%;
+      }
+
+    }
+    </style>
+  </head>
+
+<body>
+  <!-- Entete -->
+  <div class="w3-container w3-center w3-section w3-hide-small">
+     <h1>Annotations</h1>
+  </div>
+
+  <div class="w3-bar">
+  <input type="text" id="myPos" value="15"><input type="button" value="Aller..." onClick="gopage()">
+  </div>
+
+  <div class="w3-bar w3-black">
+    <button class="w3-bar-item w3-button w3-red toollink" onclick="setPencilMode();openScreen(event, 'Pencil');"><i class="w3-xlarge fa fa-pencil"></i></button>
+    <button class="w3-bar-item w3-button toollink" onclick="setRectMode();openScreen(event, 'Rectangle');"><i class="w3-xlarge fa fa-square"></i></button>
+    <button class="w3-bar-item w3-button toollink" onclick="setTextMode();openScreen(event, 'Text');"><i class="w3-xlarge material-icons">text_fields</i></button>
+
+  </div>
+  <div class="w3-bar" id="Colorbar">
+    <button class="w3-button w3-circle w3-red w3-border" onclick="setcolor(255,0,0);">R</button>
+    <button class="w3-button w3-circle w3-border w3-green" onclick="setcolor(0,255,0);">V</button>
+    <button class="w3-button w3-circle w3-border w3-blue " onclick="setcolor(0,0,255);">B</button>
+    <button class="w3-button w3-circle w3-border w3-yellow" onclick="setcolor(255,255,0);">J</button>
+    <button class="w3-button w3-circle w3-border w3-orange" onclick="setcolor(255,125,0);">O</button>
+    <button class="w3-button w3-circle w3-border w3-black " onclick="setcolor(0,0,0);">N</button>
+    <button class="w3-button w3-circle w3-border w3-white " onclick="setcolor(255,255,255);">W</button>
+  </div>
+  <div class="w3-bar tools" id="Pencil">
+    <div class="w3-bar slidecontainer">
+      <input type="range" min="1" max="10" value="5" class="slider" id="myWidth">
+      <div id="demo1" class="w3-bar-item">Epaisseur : 5 px</div>
+    </div>
+  </div>
+  <div class="w3-bar tools" id="Rectangle" style="display:none">
+    <div class="w3-bar slidecontainer">
+      <input type="range" min="0" max="100" value="50" class="slider" id="myAlpha">
+      <div id="demo2" class="w3-bar-item">Transparence : 50 %</div>
+    </div>
+  </div>
+  <div class="w3-bar tools" id="Text" style="display:none">
+    <div class="w3-bar slidecontainer">
+      <input type="range" min="6" max="60" value="30" class="slider" id="myPolice">
+      <div id="demo3" class="w3-bar-item">Taille Police : 30 px</div>
+    </div>
+    <div class="w3-container">Couleur du Fond :
+    <button class="w3-button w3-border w3-black Text" onclick="setbgcolor(0,0,0,1);">Noir</button>
+    <button class="w3-button w3-border w3-white Text" onclick="setbgcolor(255,255,255,1);">Blanc</button>
+    <button class="w3-button w3-border w3-light-grey Text" onclick="setbgcolor(255,255,255,0.5);">Transparent</button>
+    </div>
+  </div>
+<div id="canvasDiv" style="position:relative;height:177px;">
+  <canvas id="ma_case" width="620px" height="177px" style="position:absolute;top:0px;border:2px solid #000000;"></canvas>
+</div>
+<script>
+  function erase() {
+     var m = confirm("Effacer ?");
+     if (m) {
+         canvas.clear();
+         canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
+                  originX: 'left',
+                  originY: 'top',
+                  left: 0,
+                  top: 0
+              });
+     }
+  }
+
+  function resize() {
+	var canvasSizer = document.getElementById("canvasDiv");
+	var canvasScaleFactor = canvasSizer.offsetWidth/680;
+	var width = canvasSizer.offsetWidth;
+	var height = canvasSizer.offsetHeight;
+	var ratio = canvas.getWidth() /canvas.getHeight();
+		 if((width/height)>ratio){
+			 width = height*ratio;
+		 } else {
+			 height = width / ratio;
+		 }
+  var scale = width / canvas.getWidth();
+  var zoom = canvas.getZoom();
+  zoom *= scale;
+  canvas.setDimensions({ width: width, height: height });
+	canvas.setViewportTransform([zoom , 0, 0, zoom , 0, 0])
+}
+
+window.addEventListener('load', resize, false);
+window.addEventListener('resize', resize, false);
+
+var current_color = rgb(255,0,0) ;
+var current_alpha_color = rgba(255,0,0,0.5) ;
+var current_bg_color = rgba(255,255,255,0.5) ;
+
+var canvas = this.__canvas = new fabric.Canvas('ma_case'
+ ,{isDrawingMode: true
+}
+ );
+ canvas.freeDrawingBrush.width = 5;
+ canvas.freeDrawingBrush.color = '#ff0000' ;
+
+var img = new Image();
+img.onload = function(){
+   canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
+            originX: 'left',
+            originY: 'top',
+            left: 0,
+            top: 0
+        });
+};
+img.src = "Conversions/test/test_000.jpg"
+
+  </script>
+
+  <script>
+function openScreen(evt, toolName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("tools");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("toollink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(toolName).style.display = "block";
+  evt.currentTarget.className += " w3-red";
+
+
+}
+
+var slider1 = document.getElementById("myWidth");
+var output1 = document.getElementById("demo1");
+output1.innerHTML = 'Epaisseur : '+slider1.value + ' px'; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider1.oninput = function() {
+  output1.innerHTML = 'Epaisseur : '+this.value + ' px';
+  canvas.freeDrawingBrush.width = this.value;
+}
+
+var slider2 = document.getElementById("myAlpha");
+var output2 = document.getElementById("demo2");
+output2.innerHTML = 'Transparence : '+slider2.value + ' %'; // Display the default slider value
+var alpha = 1- slider2.value/100 ;
+
+// Update the current slider value (each time you drag the slider handle)
+slider2.oninput = function() {
+  output2.innerHTML = 'Transparence : '+this.value + ' %';
+  alpha = 1 - this.value/100 ;
+  current_alpha_color = current_color.replace(")",","+alpha+")") ;
+}
+
+var slider3 = document.getElementById("myPolice");
+var output3 = document.getElementById("demo3");
+output3.innerHTML = 'Taille Police : '+slider3.value + ' px'; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider3.oninput = function() {
+  output3.innerHTML = 'Taille Police : '+this.value + ' px';
+}
+
+
+</script>
+<div class="w3-bar">
+  <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
+  <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
+  <a href="add_case.py" class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-indent"></i> Ins&eacute;rer</a>
+  <button class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-remove"></i> Supprimer</button>
+</div>
+<div id="canvas_result" style="position:relative"></div>
+<!-- Pied de page -->
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+</div>
+
+  </body>
+<//html>
