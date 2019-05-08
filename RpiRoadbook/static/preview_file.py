@@ -51,6 +51,10 @@ if 'filename' in form:
   height_px = math.floor(height/72*150)
   width_mm = width/72*25.4
   height_mm = height/72*25.4
+  if 300 / width_px * height_px > 425 :
+    ratio = 425 / height_px
+  else :
+    ratio = 300 / width_px    
   #print(width,height,width_mm,height_mm)
   page = convert_from_path('/mnt/piusb/'+fn, output_folder='/mnt/piusb/thumbnail/',first_page = 1, last_page=1, dpi=150, singlefile='{:03}'.format(0), fmt='jpg')
   print("""
@@ -127,7 +131,9 @@ if 'filename' in form:
   print("""
     layer1 = document.getElementById("imageView");
     ctx1 = layer1.getContext("2d");
-    ctx1.drawImage(base, 0, 0, 300,425);
+    """)
+  print('ctx1.drawImage(base, 0, 0, {},{});'.format(ratio*width_px,ratio*height_px))
+  print ("""
     layer2 = document.getElementById("annotation");
     ctx2 = layer2.getContext("2d");
     layer3 = document.getElementById("hiddenImg");
