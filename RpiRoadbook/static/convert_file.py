@@ -3,6 +3,7 @@
 import cgi, os
 import cgitb; cgitb.enable()
 import re
+import math
 
 form = cgi.FieldStorage()
 
@@ -41,6 +42,17 @@ if 'fn' in form:
   filename = form['fn'].value
   filename = re.sub(r"[\s-]","-",filename)
 
+filedir = os.path.splitext(filename)[0]
+if os.path.isdir('/mnt/piusb/Conversions/'+filedir) == False: # Pas de répertoire d'images, on cree le repertoire
+    os.mkdir('/mnt/piusb/Conversions/'+filedir)
+
+# on vérifie le format de la page :
+width, height = page_size ('/mnt/piusb/'+filename)
+width_px = math.floor(width/72*150)
+height_px = math.floor(height/72*150)
+width_mm = width/72*25.4
+height_mm = height/72*25.4
+
 if 'nb_colonnes' in form:
   nb_colonnes = int(form['nb_colonnes'].value)
 
@@ -48,27 +60,23 @@ if 'nb_lignes' in form:
   nb_lignes = int(form['nb_lignes'].value)
 
 if 'margin_up' in form:
-  marge_up = int(form['margin_up'].value)/297*1754
+  marge_up = int(form['margin_up'].value)/height_mm*height_px
 
 if 'margin_down' in form:
-  marge_down = int(form['margin_down'].value)/297*1754
+  marge_down = int(form['margin_down'].value)/height_mm*height_px
 
 if 'lecture' in form:
   lecture = form['lecture'].value == 'rb'
 else :
     lecture = False
 
-filedir = os.path.splitext(filename)[0]
-if os.path.isdir('/mnt/piusb/Conversions/'+filedir) == False: # Pas de répertoire d'images, on cree le repertoire
-    os.mkdir('/mnt/piusb/Conversions/'+filedir)
 
-# on vérifie le format de la page :
-width, height = page_size ('/mnt/piusb/'+filename)
 # conversion et découpage des cases
 nb_pages = page_count ('/mnt/piusb/'+filename)
-hauteur = (height/72*150-marge_up-marge_down)/nb_lignes ;
-#Largeur d'une case (mm)
-largeur = width/72*150/nb_colonnes
+#hauteur en pixels
+hauteur = (height_px-marge_up-marge_down)/nb_lignes ;
+#Largeur d'une case (en pixel)
+largeur = width_px/nb_colonnes
 #Nombre de case par page
 nb_cases = nb_lignes * nb_colonnes
 total = nb_pages * nb_cases

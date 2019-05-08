@@ -5,6 +5,7 @@ import cgitb; cgitb.enable()
 form = cgi.FieldStorage()
 
 import re
+import math
 
 # Pour la lecture des fichiers pdf et conversion en image
 from pdf2image import page_count,convert_from_path,page_size
@@ -46,7 +47,11 @@ if 'filename' in form:
   # Taille en Postcript point, soit en 72 dpi donc /72*2.54 pour avoir la taille en cm puis ou /72*150 pour avoir le nb de pixel si on extrait a 150dpi
   # pour une page A4, on a donc 595x842 pts, soit une image de 1240x1754px (595/72*150,842/72*150)
   width, height = page_size ('/mnt/piusb/'+fn)
-  #print(width,height)
+  width_px = math.floor(width/72*150)
+  height_px = math.floor(height/72*150)
+  width_mm = width/72*25.4
+  height_mm = height/72*25.4
+  #print(width,height,width_mm,height_mm)
   page = convert_from_path('/mnt/piusb/'+fn, output_folder='/mnt/piusb/thumbnail/',first_page = 1, last_page=1, dpi=150, singlefile='{:03}'.format(0), fmt='jpg')
   print("""
 </div>
@@ -63,8 +68,8 @@ if 'filename' in form:
   print("""
         <div><label>NB Colonnes</label><input type="number" class="w3-input w3-border w3-margin" name="nb_colonnes" id="nb_colonnes" value="2" onchange="init()" min="1" step="1" oninput="validity.valid||(value='');"></div>
         <div><label>NB Lignes par colonne</label><input type="number" class="w3-input w3-border w3-margin" name="nb_lignes" id="nb_lignes" value="8" onchange="init()" min="1" step="1" oninput="validity.valid||(value='');"></div>
-        <div><label>Marge haute</label><input type="number" class="w3-input w3-border w3-margin" name="margin_up" id="margin_up" value="30" onchange="init()" min="1" step="1" oninput="validity.valid||(value='');"></div>
-        <div><label>Marge basse</label><input type="number" class="w3-input w3-border w3-margin" name="margin_down" id="margin_down" value="27" onchange="init()" min="1" step="1" oninput="validity.valid||(value='');"></div>
+        <div><label>Marge haute (mm)</label><input type="number" class="w3-input w3-border w3-margin" name="margin_up" id="margin_up" value="30" onchange="init()" min="0" step="1" oninput="validity.valid||(value='');"></div>
+        <div><label>Marge basse (mm)</label><input type="number" class="w3-input w3-border w3-margin" name="margin_down" id="margin_down" value="27" onchange="init()" min="0" step="1" oninput="validity.valid||(value='');"></div>
         <div><label>Lecture de bas en haut</label><input type="checkbox" class="w3-check w3-margin" name="lecture" id="lecture" value="rb" checked onchange="init()"></div>
 
 </div>
@@ -94,10 +99,12 @@ if 'filename' in form:
 <p><h3>Preview de la 1&egrave;re case</h3></p>
 </div>
 <div>
-<canvas id="hiddenImg" width="1240" height="1754" style="display:none"></canvas>
+""")
+  print('<canvas id="hiddenImg" width="{}" height="{}" style="display:none"></canvas>'.format(width_px,height_px))
+  print("""
 </div>
 <div>
-<canvas id="previewImg" width="620" height="180"></canvas>
+<canvas id="previewImg" width="1240" height="180"></canvas>
 </div>
 </div>
 </div>
@@ -132,7 +139,9 @@ if 'filename' in form:
     var nb_lignes = parseInt(document.getElementById("nb_lignes").value) ;
     var marge_up = parseInt(document.getElementById("margin_up").value) ;
     var marge_down = parseInt(document.getElementById("margin_down").value) ;
-    var hauteur = (297-marge_up-marge_down)/nb_lignes ;
+    """)
+  print('var hauteur = ({}-marge_up-marge_down)/nb_lignes ;'.format(height_mm))
+  print("""
     var lecture = document.getElementById("lecture").checked ;
     ctx2.clearRect(0,0,layer2.width,layer2.height)
     ctx2.strokeStyle = "#FF0000";
@@ -147,8 +156,10 @@ if 'filename' in form:
         } else {
             y = marge_up+(i-1)*hauteur;
         }
-        ctx2.strokeRect(0, y/297*425, 300/nb_colonnes,hauteur/297*425);
-        ctx2.fillText(i, 300/nb_colonnes/2, y/297*425+2*hauteur/297*425/3);
+        """)
+  print('ctx2.strokeRect(0, y/{}*425, 300/nb_colonnes,hauteur/{}*425);'.format(height_mm,height_mm))
+  print('ctx2.fillText(i, 300/nb_colonnes/2, y/{}*425+2*hauteur/{}*425/3);'.format(height_mm,height_mm))
+  print("""
     }
     if (lecture) {
         y = marge_up+(nb_lignes-1)*hauteur;
@@ -156,7 +167,9 @@ if 'filename' in form:
         y = marge_up;
     }
     //preview = ctx1.getImageData(0, marge_up/297*425, 300/nb_colonnes,hauteur/297*425);
-    preview = ctx3.getImageData(0, y/297*1754, 1240/nb_colonnes,hauteur/297*1754);
+    """)
+  print('preview = ctx3.getImageData(0, y/{}*{}, {}/nb_colonnes,hauteur/{}*{});'.format(height_mm,height_px,width_px,height_mm,height_px))
+  print("""
     ctx4.clearRect(0,0,layer4.width,layer4.height)
     ctx4.putImageData(preview,0,0)
   }
