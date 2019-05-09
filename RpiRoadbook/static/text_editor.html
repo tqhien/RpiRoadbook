@@ -4,7 +4,15 @@
    <link rel="stylesheet" href="w3.css">
    <link rel="stylesheet" href="font-awesome.min.css">
    <link rel="stylesheet" href="material-icons.css">
+   <style>
+       @media (max-width: 620px)
+       {
+         #ma_case,#canvasDiv {
+         width: 90%;
+         }
 
+       }
+   </style>
 
     <script type="text/javascript" src="fabric.min.js"></script>
     <script type="text/javascript" src="jquery-3.3.0.min.js"></script>
@@ -55,22 +63,77 @@
         current_color = rgb(r,g,b,0.5);
         current_alpha_color = rgba(r,g,b,alpha);
         canvas.freeDrawingBrush.color = rgb(r,g,b) ;
+        if (canvas.getActiveObject()) {
+          var e = canvas.getActiveObject() ;
+          switch (e.get('type')) {
+            case 'textbox' :
+              canvas.getActiveObject().fill = current_color ;
+              canvas.getActiveObject().stroke = current_color ;
+              break ;
+            case 'rect' :
+              canvas.getActiveObject().fill = current_alpha_color ;
+              break;
+            case 'path' :
+              canvas.getActiveObject().stroke = current_color ;
+              break ;
+          }
+          canvas.getActiveObject().dirty = true ;
+          canvas.renderAll() ;
+        }
       };
 
       function setbgcolor(r,g,b,a) {
         current_bg_color = rgba(r,g,b,a);
+        if (canvas.getActiveObject()) {
+          var e = canvas.getActiveObject() ;
+          if (e.get('type') === 'textbox') {
+            canvas.getActiveObject().textBackgroundColor = current_bg_color ;
+            canvas.getActiveObject().dirty = true ;
+            canvas.renderAll() ;
+          }
+        }
+
+      };
+
+      function setNoMode()
+      {
+        canvas.off('mouse:down');
+        canvas.off('mouse:move');
+        canvas.isDrawingMode = false;
+        var i, tablinks;
+        tablinks = document.getElementsByClassName("toollink");
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+        } ;
+        canvas.discardActiveObject();
+        canvas.renderAll() ;
       };
 
       function setPencilMode()
       {
+        canvas.discardActiveObject();
+        canvas.renderAll() ;
         canvas.off('mouse:down');
         canvas.off('mouse:move');
         canvas.isDrawingMode = true;
         canvas.freeDrawingBrush.width = slider1.value;
+
+        canvas.on('mouse:up', function(o){
+          var i, tablinks;
+          canvas.off('mouse:down');
+          canvas.off('mouse:move');
+          tablinks = document.getElementsByClassName("toollink");
+          for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+          }
+          canvas.isDrawingMode = false;
+        });
       };
 
       function setRectMode()
       {
+        canvas.discardActiveObject();
+        canvas.renderAll() ;
         canvas.isDrawingMode = false;
         canvas.off('mouse:down');
         canvas.off('mouse:move');
@@ -129,6 +192,8 @@
 
       function setTextMode()
       {
+        canvas.discardActiveObject();
+        canvas.renderAll() ;
         canvas.isDrawingMode = false;
         canvas.off('mouse:down');
         canvas.off('mouse:move');
@@ -152,7 +217,11 @@
                 stroke: current_color,
                 textBackgroundColor: current_bg_color,
                 fontSize: slider3.value,
-                transparentCorners: false
+                transparentCorners: false,
+                lockScalingX: true,
+                lockScalingY: true,
+                lockRotation: true,
+                hasControls: false
             });
             canvas.add(textbox);
 
@@ -168,24 +237,90 @@
             tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
           }
         });
+
+
+
       };
 
       function gopage() {
         var mytext = document.getElementById("myPos") ;
         var jto = mytext.value;
         console.log(jto)
-      }
+      };
+
+      function openScreen(evt, toolName) {
+        var i, x, tablinks;
+        x = document.getElementsByClassName("tools");
+        for (i = 0; i < x.length; i++) {
+          x[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("toollink");
+        for (i = 0; i < x.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+        }
+        document.getElementById(toolName).style.display = "block";
+        evt.currentTarget.className += " w3-red";
+        canvas.discardActiveObject();
+      };
+
+      function updateObject() {
+        var e = canvas.getActiveObject() ;
+        switch (e.get('type')) {
+          case 'textbox' :
+            slider3.value = e.fontSize ;
+            output3.innerHTML = 'Taille Police : '+e.fontSize + ' px';
+            var c = new fabric.Color(e.fill) ;
+            current_color = c.getSource() ;
+            current_bg_color = e.textBackgroundColor ;
+            var i, x, tablinks;
+            x = document.getElementsByClassName("tools");
+            for (i = 0; i < x.length; i++) {
+              x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("toollink");
+            for (i = 0; i < x.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+            }
+            document.getElementById('Text').style.display = "block";
+            break ;
+          case 'rect' :
+            var c = new fabric.Color(e.fill) ;
+            alpha = c.getAlpha() ;
+            var b = c.getSource() ;
+            current_alpha_color = c ;
+            slider2.value = Math.round((1-alpha)*100) ;
+            output2.innerHTML = 'Transparence : '+Math.round((1-alpha)*100) + ' %';
+            var i, x, tablinks;
+            x = document.getElementsByClassName("tools");
+            for (i = 0; i < x.length; i++) {
+              x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("toollink");
+            for (i = 0; i < x.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+            }
+            document.getElementById('Rectangle').style.display = "block";
+            break ;
+          case 'path' :
+            slider1.value = e.strokeWidth ;
+            output1.innerHTML = 'Epaisseur : '+e.strokeWidth+ ' px';
+            canvas.freeDrawingBrush.width = e.strokeWidth;
+            var i, x, tablinks;
+            x = document.getElementsByClassName("tools");
+            for (i = 0; i < x.length; i++) {
+              x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("toollink");
+            for (i = 0; i < x.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+            }
+            document.getElementById('Pencil').style.display = "block";
+            break ;
+        }
+      } ;
 
     </script>
-    <style>
-    @media (max-width: 620px)
-    {
-      #ma_case,#canvasDiv {
-      width: 90%;
-      }
 
-    }
-    </style>
   </head>
 
 <body>
@@ -199,7 +334,8 @@
   </div>
 
   <div class="w3-bar w3-black">
-    <button class="w3-bar-item w3-button w3-red toollink" onclick="setPencilMode();openScreen(event, 'Pencil');"><i class="w3-xlarge fa fa-pencil"></i></button>
+    <button class="w3-bar-item w3-button toollink" onclick="setNoMode();"><i class="w3-xlarge fa fa-mouse-pointer"></i></button>
+    <button class="w3-bar-item w3-button toollink" onclick="setPencilMode();openScreen(event, 'Pencil');"><i class="w3-xlarge fa fa-pencil"></i></button>
     <button class="w3-bar-item w3-button toollink" onclick="setRectMode();openScreen(event, 'Rectangle');"><i class="w3-xlarge fa fa-square"></i></button>
     <button class="w3-bar-item w3-button toollink" onclick="setTextMode();openScreen(event, 'Text');"><i class="w3-xlarge material-icons">text_fields</i></button>
 
@@ -215,7 +351,7 @@
   </div>
   <div class="w3-bar tools" id="Pencil">
     <div class="w3-bar slidecontainer">
-      <input type="range" min="1" max="10" value="5" class="slider" id="myWidth">
+      <input type="range" min="1" max="20" value="5" class="slider" id="myWidth">
       <div id="demo1" class="w3-bar-item">Epaisseur : 5 px</div>
     </div>
   </div>
@@ -227,10 +363,9 @@
   </div>
   <div class="w3-bar tools" id="Text" style="display:none">
     <div class="w3-bar slidecontainer">
-      <input type="range" min="6" max="60" value="30" class="slider" id="myPolice">
+      <input type="range" min="6" max="100" value="30" class="slider" id="myPolice">
       <div id="demo3" class="w3-bar-item">Taille Police : 30 px</div>
-    </div>
-    <div class="w3-container">Couleur du Fond :
+    Couleur du Fond :
     <button class="w3-button w3-border w3-black Text" onclick="setbgcolor(0,0,0,1);">Noir</button>
     <button class="w3-button w3-border w3-white Text" onclick="setbgcolor(255,255,255,1);">Blanc</button>
     <button class="w3-button w3-border w3-light-grey Text" onclick="setbgcolor(255,255,255,0.5);">Transparent</button>
@@ -239,6 +374,20 @@
 <div id="canvasDiv" style="position:relative;height:177px;">
   <canvas id="ma_case" width="620px" height="177px" style="position:absolute;top:0px;border:2px solid #000000;"></canvas>
 </div>
+
+<div class="w3-bar">
+  <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
+  <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
+  <a href="add_case.py" class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-indent"></i> Ins&eacute;rer</a>
+  <button class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-remove"></i> Supprimer</button>
+</div>
+<div id="canvas_result" style="position:relative"></div>
+<!-- Pied de page -->
+<div class="w3-bar w3-black">
+  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+</div>
+
+
 <script>
   function erase() {
      var m = confirm("Effacer ?");
@@ -254,66 +403,52 @@
   }
 
   function resize() {
-	var canvasSizer = document.getElementById("canvasDiv");
-	var canvasScaleFactor = canvasSizer.offsetWidth/680;
-	var width = canvasSizer.offsetWidth;
-	var height = canvasSizer.offsetHeight;
-	var ratio = canvas.getWidth() /canvas.getHeight();
-		 if((width/height)>ratio){
-			 width = height*ratio;
-		 } else {
-			 height = width / ratio;
-		 }
-  var scale = width / canvas.getWidth();
-  var zoom = canvas.getZoom();
-  zoom *= scale;
-  canvas.setDimensions({ width: width, height: height });
-	canvas.setViewportTransform([zoom , 0, 0, zoom , 0, 0])
-}
+  	var canvasSizer = document.getElementById("canvasDiv");
+  	var canvasScaleFactor = canvasSizer.offsetWidth/680;
+  	var width = canvasSizer.offsetWidth;
+  	var height = canvasSizer.offsetHeight;
+  	var ratio = canvas.getWidth() /canvas.getHeight();
+      if((width/height)>ratio){
+       width = height*ratio;
+      } else {
+       height = width / ratio;
+      } ;
+    var scale = width / canvas.getWidth();
+    var zoom = canvas.getZoom();
+    zoom *= scale;
+    canvas.setDimensions({ width: width, height: height });
+  	canvas.setViewportTransform([zoom , 0, 0, zoom , 0, 0]);
+  }
 
-window.addEventListener('load', resize, false);
-window.addEventListener('resize', resize, false);
+  window.addEventListener('load', resize, false);
+  window.addEventListener('resize', resize, false);
 
-var current_color = rgb(255,0,0) ;
-var current_alpha_color = rgba(255,0,0,0.5) ;
-var current_bg_color = rgba(255,255,255,0.5) ;
+  var current_color = rgb(255,0,0) ;
+  var current_alpha_color = rgba(255,0,0,0.5) ;
+  var current_bg_color = rgba(255,255,255,0.5) ;
 
-var canvas = this.__canvas = new fabric.Canvas('ma_case'
- ,{isDrawingMode: true
-}
- );
- canvas.freeDrawingBrush.width = 5;
- canvas.freeDrawingBrush.color = '#ff0000' ;
+  var canvas = this.__canvas = new fabric.Canvas('ma_case'
+    //,{isDrawingMode: true}
+  );
 
-var img = new Image();
-img.onload = function(){
-   canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
-            originX: 'left',
-            originY: 'top',
-            left: 0,
-            top: 0
-        });
-};
-img.src = "Conversions/test/test_000.jpg"
+  canvas.freeDrawingBrush.width = 5;
+  canvas.freeDrawingBrush.color = '#ff0000' ;
+
+  var img = new Image();
+  img.onload = function(){
+     canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
+              originX: 'left',
+              originY: 'top',
+              left: 0,
+              top: 0
+          });
+  };
+  img.src = "Conversions/test/test_000.jpg"
 
   </script>
 
   <script>
-function openScreen(evt, toolName) {
-  var i, x, tablinks;
-  x = document.getElementsByClassName("tools");
-  for (i = 0; i < x.length; i++) {
-    x[i].style.display = "none";
-  }
-  tablinks = document.getElementsByClassName("toollink");
-  for (i = 0; i < x.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
-  }
-  document.getElementById(toolName).style.display = "block";
-  evt.currentTarget.className += " w3-red";
 
-
-}
 
 var slider1 = document.getElementById("myWidth");
 var output1 = document.getElementById("demo1");
@@ -323,6 +458,13 @@ output1.innerHTML = 'Epaisseur : '+slider1.value + ' px'; // Display the default
 slider1.oninput = function() {
   output1.innerHTML = 'Epaisseur : '+this.value + ' px';
   canvas.freeDrawingBrush.width = this.value;
+  if (canvas.getActiveObject()) {
+    if (canvas.getActiveObject().get('type') === 'path') {
+      canvas.getActiveObject().strokeWidth = parseInt(this.value) ;
+      canvas.getActiveObject().dirty = true;
+      canvas.renderAll() ;
+    }
+  }
 }
 
 var slider2 = document.getElementById("myAlpha");
@@ -335,6 +477,13 @@ slider2.oninput = function() {
   output2.innerHTML = 'Transparence : '+this.value + ' %';
   alpha = 1 - this.value/100 ;
   current_alpha_color = current_color.replace(")",","+alpha+")") ;
+  if (canvas.getActiveObject()) {
+    if (canvas.getActiveObject().get('type') === 'rect') {
+      canvas.getActiveObject().fill = current_alpha_color ;
+      canvas.getActiveObject().dirty = true;
+      canvas.renderAll() ;
+    }
+  }
 }
 
 var slider3 = document.getElementById("myPolice");
@@ -344,21 +493,16 @@ output3.innerHTML = 'Taille Police : '+slider3.value + ' px'; // Display the def
 // Update the current slider value (each time you drag the slider handle)
 slider3.oninput = function() {
   output3.innerHTML = 'Taille Police : '+this.value + ' px';
+  if (canvas.getActiveObject()) {
+    canvas.getActiveObject().fontSize = this.value ;
+    canvas.renderAll() ;
+  }
 }
 
+canvas.on('selection:created', updateObject);
+canvas.on('selection:updated', updateObject);
 
 </script>
-<div class="w3-bar">
-  <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
-  <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
-  <a href="add_case.py" class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-indent"></i> Ins&eacute;rer</a>
-  <button class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-remove"></i> Supprimer</button>
-</div>
-<div id="canvas_result" style="position:relative"></div>
-<!-- Pied de page -->
-<div class="w3-bar w3-black">
-  <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-</div>
 
   </body>
 <//html>
