@@ -1,3 +1,37 @@
+#!/usr/bin/python
+# -*- coding: latin-1 -*-
+import cgi, os
+import cgitb; cgitb.enable()
+import base64
+import re
+from PIL import Image
+
+form = cgi.FieldStorage()
+#print(form)
+
+if 'fn' in form:
+    filename = form['fn'].value
+    filename = re.sub(r"[\s-]","-",filename)
+    filedir = os.path.splitext(filename)[0]
+
+if 'num' in form:
+    num = int(form['num'].value)
+else:
+    num = 0
+
+
+DIR = '/mnt/piusb/Conversions/{}'.format(filedir)
+files = [f for f in os.listdir(DIR) if re.search('.jpg$', f)]
+files.sort()
+nmax = len(files)
+img_name = os.path.join(DIR,files[num])
+img = Image.open(img_name)
+w,h = img.size
+anum = os.path.splitext(files[num])[0]
+anum = anum.replace(filedir,'')
+anum = anum.replace('.jpg','')
+
+print("""
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -5,7 +39,9 @@
    <link rel="stylesheet" href="font-awesome.min.css">
    <link rel="stylesheet" href="material-icons.css">
    <style>
-       @media (max-width: 620px)
+   """)
+print('       @media (max-width: {}px)'.format(w))
+print("""
        {
          #ma_case,#canvasDiv {
          width: 90%;
@@ -33,8 +69,10 @@
                 url: 'save_annotation.py',
                 data: {
                   imagedata : image ,
-                  fn : 'test',
-                  num : '0'
+""")
+print('         fn : "{}",'.format(filename))
+print('                  num : "{}"'.format(anum))
+print("""
                 },
                  success: function (result) {
                       $( "#canvas_result" ).append( result + "<br>" );
@@ -46,6 +84,26 @@
                      left: 0,
                      top: 0
                  });
+         });
+
+         $("#add_case").click(function () {
+            var canvas_add = document.getElementById("new_case")
+            var image = canvas_add.toDataURL("image/png");
+            image = image.replace('data:image/png;base64,', '');
+            $.ajax({
+                type : 'POST',
+                url: 'add_case.py',
+                data: {
+                  imagedata : image ,
+""")
+print('         fn : "{}",'.format(filename))
+print('         num : "{}"'.format(os.path.splitext(files[num])[0]))
+print("""
+                },
+                 success: function (result) {
+                      $( "#canvas_result" ).append( result + "<br>" );
+                 }
+            });
          });
       });
     };
@@ -332,7 +390,15 @@
   </div>
 
   <div class="w3-bar">
-  <input type="text" id="myPos" value="15"><input type="button" value="Aller..." onClick="gopage()">
+""")
+print('<a href="text_editor.py?fn={}&num=0" class="w3-button"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename) if num > 0 else '<a href="text_editor.py?fn={}&num=0" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename))
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10) if num-10>=0 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10))
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1) if num-1 >= 0 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1))
+print('    <input type="text" id="myPos" value="{}"><input type="button" value="Aller..." onClick="gopage()">'.format(num+1))
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1) if nmax > num+1 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1))
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10) if nmax > num+10 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10))
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1))
+print("""
   </div>
 
   <div class="w3-bar w3-black">
@@ -373,20 +439,34 @@
     <button class="w3-button w3-border w3-light-grey Text" onclick="setbgcolor(255,255,255,0.5);">Transparent</button>
     </div>
   </div>
-<div id="canvasDiv" style="position:relative;height:177px;">
-  <canvas id="ma_case" width="620px" height="177px" style="position:absolute;top:0px;border:2px solid #000000;"></canvas>
+  """)
+print('<div id="canvasDiv" style="position:relative;height:{}px;">'.format(h))
+
+print('<canvas id="ma_case" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;"></canvas>'.format(w,h))
+print("""
 </div>
 
 <div class="w3-bar">
   <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
   <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
-  <a href="add_case.py" class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-indent"></i> Ins&eacute;rer</a>
-  <button class="w3-bar-item w3-button"><i class="w3-xlarge fa fa-remove"></i> Supprimer</button>
+  <a href="#" class="w3-bar-item w3-button" id="add_case"><i class="w3-xlarge fa fa-indent"></i> Ins&eacute;rer</a>
+  <form action="rm_case.py" method="POST">
+  """)
+print('    <input type="text" id="fn" name="fn" value="{}" style="display:none">'.format(filename))
+print('    <input type="text" id="num" name="num" value="{}" style="display:none">'.format(num))
+print("""
+  <button class="w3-bar-item w3-button" type="submit"><i class="w3-xlarge fa fa-remove"></i> Supprimer</button>
+</form>
 </div>
 <div id="canvas_result" style="position:relative"></div>
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
+</div>
+<div style="display:none">
+""")
+print('  <canvas id="new_case" width="{}px" height="{}px" style="position:absolute;top:0px;border:2px solid #000000;"></canvas>'.format(w,h))
+print("""
 </div>
 
 
@@ -445,8 +525,9 @@
               top: 0
           });
   };
-  img.src = "Conversions/test/test_000.jpg"
-
+""")
+print('  img.src = "Conversions/{}/{}"'.format(filedir,files[num]))
+print("""
   </script>
 
   <script>
@@ -508,3 +589,4 @@ canvas.on('selection:updated', updateObject);
 
   </body>
 <//html>
+""")

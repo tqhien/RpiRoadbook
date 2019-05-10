@@ -58,7 +58,7 @@ print("""
 """)
 
 for fileitem in files:
-  print ('<tr><td><input class="w3-check" type="checkbox" name="choix" value="{}"></td><td><a class="w3-button w3-block w3-left-align" href="annotation.py?fn={}"> {} </a></td>'.format(fileitem,fileitem,fileitem))
+  print ('<tr><td><input class="w3-check" type="checkbox" name="choix" value="{}"></td><td><a class="w3-button w3-block w3-left-align" href="text_editor.py?fn={}"> {} </a></td>'.format(fileitem,fileitem,fileitem))
 
 print ("""
 </table>

@@ -20,9 +20,6 @@ if 'fn' in form:
     filename = re.sub(r"[\s-]","-",filename)
     filedir = os.path.splitext(filename)[0]
 
-if os.path.isdir('/mnt/piusb/Annotations/'+filedir) == False: # Pas de répertoire d'images, on cree le repertoire
-    os.mkdir('/mnt/piusb/Annotations/'+filedir)
-
 if 'num' in form:
     num = form['num'].value
 
@@ -31,8 +28,8 @@ if 'imagedata' in form:
     #imageData = form['imagedata'].value
     #imageData = bytearray([imageData])
     #print (form['imageData'].value)
-    open('/mnt/piusb/Annotations/{}/annotation{}.png'.format(filedir,num), 'wb').write(imageData)
-    print('Image sauvegard&eacute;e')
+    open('/mnt/piusb/Conversions/{}/{}_.jpg'.format(filedir,num), 'wb').write(imageData)
+    print('Case ins&eacute;r&eacute;e')
 else :
     print ('no imagedata')
 #print('Image sauvegardee')
