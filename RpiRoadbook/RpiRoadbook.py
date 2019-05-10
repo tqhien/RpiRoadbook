@@ -98,6 +98,7 @@ developpe = 1.0*roue / aimants
 orientation = 'Paysage'
 ncases = 3
 force_refresh = False
+lecture = 'BasEnHaut'
 
 save_t_moy = time.time()
 save_t_odo = time.time()
@@ -1192,7 +1193,7 @@ class countdown_widget (rb_widget):
                 m,s = divmod (t,60)
                 ts = math.floor(s*5)
                 if ts % 2 == 0 :
-                    self.value_font = self.over_font           
+                    self.value_font = self.over_font
                 else :
                     self.value_font = self.inside_font
             # on est en retard
@@ -1315,7 +1316,7 @@ def save_screenconfig(mode='Route'):
 
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
-    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation
+    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture
     global widgets,nb_widgets,ncases,current_screen,mode_jour
     global chrono_decompte,start_decompte
     # On charge les emplacements des elements d'affichage
@@ -1328,6 +1329,7 @@ def check_configfile():
     aimants = setupconfig['Parametres']['aimants']
     developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
     orientation = setupconfig['Parametres']['orientation']
+    lecture = setupconfig['Parametres']['lecture']
 
     # On charge le mode en cours, l'ecran en cours, le roadbook en cours et sa case
     candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -2527,7 +2529,7 @@ class RoadbookScene(SceneBase):
 
     def Update(self):
         global save_t_odo,angle,totalisateur,distance1,distance2
-        global sprites,old_sprites,rbconfig,chronoconfig,odoconfig
+        global sprites,old_sprites,rbconfig,chronoconfig,odoconfig,lecture
         global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
         global widgets,force_refresh,widget_select_t,current_widget,widget_isselected
 
@@ -2538,10 +2540,16 @@ class RoadbookScene(SceneBase):
             save_rbconfig()
             if angle == 0 :
                 for n in range(ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh-n))
+                    if lecture == 'BasEnHaut' :
+                        sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh-n))
+                    else :
+                        sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(ncases-n)*self.nh-(ncases-n-1)))
             else :
                 for n in range(ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh-n,0))
+                    if lecture == 'BasEnHaut' :
+                        sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh-n,0))
+                    else :
+                        sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(ncases-n)*self.nh-(ncases-n-1),0))
             self.oldcase=self.case
 
         # Deselectionne le widget au bout de 10 secondes

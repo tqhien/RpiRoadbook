@@ -53,6 +53,10 @@ if 'user_orientation' in form:
   setupconfig['Parametres']['orientation'] = form['user_orientation'].value
   print ("Orientation : {}<br>".format(setupconfig['Parametres']['orientation']))
 
+if 'user_lecture' in form:
+  setupconfig['Parametres']['lecture'] = form['user_lecture'].value
+  print ("Sens de lecture : {}<br>".format(setupconfig['Parametres']['lecture']))
+
 for attempt in range(5):
   try :
     with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:

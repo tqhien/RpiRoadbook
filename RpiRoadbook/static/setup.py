@@ -14,6 +14,7 @@ setupconfig.read(candidates)
 roue = setupconfig['Parametres']['roue']
 aimants = setupconfig['Parametres']['aimants']
 orientation = setupconfig['Parametres']['orientation']
+lecture = setupconfig['Parametres']['lecture']
 
 datetime_now = time.localtime ()
 st_date = '{}-{:02d}-{:02d}'.format(datetime_now.tm_year,datetime_now.tm_mon,datetime_now.tm_mday)
@@ -39,17 +40,17 @@ print("""<html>
    <div class="w3-row-padding">
 
 """)
-print('   <div class="w3-third">')
+print('   <div class="w3-quarter">')
 print('    <label>Roue (en mm)</label>')
 print('    <input type="text" id="roue" name="user_roue" value="{}" class="w3-input w3-border" placeholder="1864">'.format(roue))
 print('  </div>')
 
-print('   <div class="w3-third">')
+print('   <div class="w3-quarter">')
 print('    <label for="aimant">Aimant(s)</label>')
 print('    <input type="text" id="aimant" name="user_aimant" value={} class="w3-input w3-border" placeholder="1">'.format(aimants))
 print('  </div>')
 
-print('   <div class="w3-third">')
+print('   <div class="w3-quarter">')
 print('    <label for="orientation">Orientation</label>')
 print('    <select id="orientation" name="user_orientation" class="w3-select">')
 if orientation == 'Paysage' :
@@ -60,6 +61,19 @@ else:
   print('    <option selected="Portrait">Portrait</option>')
 print('     </select>')
 print('  </div>')
+
+print('   <div class="w3-quarter">')
+print('    <label for="lecture">Sens de lecture</label>')
+print('    <select id="lecture" name="user_lecture" class="w3-select">')
+if lecture == 'BasEnHaut' :
+  print('    <option selected="BasEnHaut">BasEnHaut</option>')
+  print('    <option>HautEnBas</option>')
+else:
+  print('    <option>BasEnHaut</option>')
+  print('    <option selected="HautEnBas">HautEnBas</option>')
+print('     </select>')
+print('  </div>')
+
 print("""
 <div class="w3-bar">
         <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">Valider</button>
