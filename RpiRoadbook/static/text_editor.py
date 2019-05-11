@@ -526,7 +526,20 @@ print("""
           });
   };
 """)
-print('  img.src = "Conversions/{}/{}"'.format(filedir,files[num]))
+print('  img.src = "Conversions/{}/{}";'.format(filedir,files[num]))
+
+f = files[num]
+a = f.replace(filedir,'annotation')
+a = a.replace('jpg','png')
+if os.path.isfile('Annotations/{}/{}'.format(filedir,a)) :
+
+    print(' fabric.Image.fromURL("Annotations/{}/{}"'.format(filedir,a))
+    print("""
+        , function (oImg) {
+            canvas.add(oImg);
+            },{left:0,top:0,originX:'left',originY:'top'});
+    """)
+
 print("""
   </script>
 

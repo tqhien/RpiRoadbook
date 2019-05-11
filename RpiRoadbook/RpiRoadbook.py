@@ -375,9 +375,12 @@ def get_image(key,angle=0,mode_jour=True):
             s = pygame.Surface(img.get_rect().size, pygame.SRCALPHA)
             s.fill((255,255,0,200))
             s.blit(img, (0,0), None, BLEND_RGB_SUB)
-        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)) :
-            annot = pygame.image.load('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,key)).convert()
-            annot.set_colorkey(NOIR)
+        f = fichiers[key]
+        a = f.replace(filedir,'annotation')
+        a = a.replace('jpg','png')
+        if os.path.isfile('/mnt/piusb/Annotations/{}/{}'.format(filedir,a)) :
+            annot = pygame.image.load('/mnt/piusb/Annotations/{}/{}'.format(filedir,a))
+            #annot.set_colorkey(NOIR)
             s.blit(annot,(0,0))
         image_cache[(key,angle)] = pygame.transform.rotozoom (s,angle,rb_ratio)
     return image_cache[(key,angle)]
