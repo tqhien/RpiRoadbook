@@ -65,7 +65,12 @@ if 'user_orientation' in form:
 
 if 'user_lecture' in form:
   setupconfig['Parametres']['lecture'] = form['user_lecture'].value
-  print (_('Sens de lecture : {}').format(setupconfig['Parametres']['lecture']))
+  print (_('Sens de lecture : {e}').format(setupconfig['Parametres']['lecture']))
+  print('<br>')
+
+if 'user_langue' in form:
+  setupconfig['Parametres']['langue'] = form['user_langue'].value
+  print (_('Langue : {}').format(setupconfig['Parametres']['langue']))
   print('<br>')
 
 for attempt in range(5):

@@ -142,6 +142,9 @@ right_state = False
 up_state = False
 down_state = False
 
+en = gettext.translation('rpiroadbook', localedir='locales', languages=['en'])
+it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
 #GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -1323,7 +1326,7 @@ def save_screenconfig(mode='Route'):
 
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
-    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture
+    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture,langue
     global widgets,nb_widgets,ncases,current_screen,mode_jour
     global chrono_decompte,start_decompte
     # On charge les emplacements des elements d'affichage
@@ -1337,6 +1340,13 @@ def check_configfile():
     developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
     orientation = setupconfig['Parametres']['orientation']
     lecture = setupconfig['Parametres']['lecture']
+    langue = setupconfig['Parametres']['langue']
+    if langue == 'EN' :
+        en.install()
+        _ = en.gettext # English
+    elif langue == 'IT' :
+        it.install()
+        _ = it.gettext # Italiano
 
     # On charge le mode en cours, l'ecran en cours, le roadbook en cours et sa case
     candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
