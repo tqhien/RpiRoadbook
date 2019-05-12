@@ -139,8 +139,14 @@ for j in range (1,nb_screens+1):
     # Affichage des listes de choix jour_nuit
     print('<td>')
     print('<select name="jour_nuit{}" id="jour_nuit{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
-    print('<option value="Jour" selected="Jour">Jour</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Jour' else '<option value="Jour">Jour</option>')
-    print('<option value="Nuit" selected="Nuit">Nuit</option>' if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Nuit' else '<option value="Nuit">Nuit</option>')
+    if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Jour' :
+        print('<option value="Jour" selected="Jour">',_('Jour'),'</option>')
+    else :
+        print('<option value="Jour">',_('Jour'),'</option>')
+    if screenconfig['Affichage{}'.format(j)]['jour_nuit'] == 'Nuit' :
+        print('<option value="Nuit" selected="Nuit">',_('Nuit'),'</option>')
+    else :
+        print('<option value="Nuit">',_('Nuit'),'</option>')
     print('</select>')
     print('</td>')
     print('</tr>')
@@ -150,10 +156,22 @@ for j in range (1,nb_screens+1):
     print('<td>')
     print('<select name="layout{}" id="layout{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
     if orientation == 'Paysage' :
-        print('<option selected="1" value="1">3 Champs</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '1' else '<option value="1">3 Champs</option>')
-        print('<option selected="2" value="2">4 Champs</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '2' else '<option value="2">4 Champs</option>')
-        print('<option selected="3" value="3">5 Champs</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '3' else '<option value="3">5 Champs</option>')
-        print('<option selected="4" value="4">6 Champs</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '4' else '<option value="4">6 Champs</option>')
+        if screenconfig['Affichage{}'.format(j)]['layout'] == '1' :
+            print('<option selected="1" value="1">',_('3 Champs'),'</option>')
+        else :
+            print('<option value="1">',_('3 Champs'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['layout'] == '2' :
+            print('<option selected="2" value="2">',_('4 Champs'),'</option>')
+        else :
+            print('<option value="2">',_('4 Champs'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['layout'] == '3' :
+            print('<option selected="3" value="3">',_('5 Champs'),'</option>')
+        else :
+            print('<option value="3">',_('5 Champs'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['layout'] == '4' :
+            print('<option selected="4" value="4">',_('6 Champs'),'</option>')
+        else :
+            print('<option value="4">',_('6 Champs'),'</option>')
     else :
         print('<option selected="1" value="1">Layout 1</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '1' else '<option value="1">Layout 1</option>')
         print('<option selected="2" value="2">Layout 2</option>' if screenconfig['Affichage{}'.format(j)]['layout'] == '2' else '<option value="2">Layout 2</option>')
@@ -171,18 +189,54 @@ for j in range (1,nb_screens+1):
         print('<td>')
         print('<select id="champ{}{}" name="champ{}{}" style="width:110px;">'.format(j,i,j,i))
         print('<option selected="" value=""></option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == '' else '<option value=""></option>')
-        print('<option selected="Totalisateur" value="Totalisateur">Odom&egrave;tre</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Totalisateur' else '<option value="Totalisateur">Odom&egrave;tre</option>')
-        print('<option selected="Trip1" value="Trip1">Trip1</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Trip1' else '<option value="Trip1">Trip1</option>')
-        print('<option selected="Trip2" value="Trip2">Trip2</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Trip2' else '<option value="Trip2">Trip2</option>')
-        print('<option selected="Vitesse" value="Vitesse">Vitesse</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vitesse' else '<option value="Vitesse">Vitesse</option>')
-        print('<option selected="Vmoy1" value="Vmoy1">Moyenne1</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmoy1' else '<option value="Vmoy1">Moyenne1</option>')
-        print('<option selected="Vmoy2" value="Vmoy2">Moyenne2</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmoy2' else '<option value="Vmoy2">Moyenne2</option>')
-        print('<option selected="Chrono1" value="Chrono1">Chrono1</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Chrono1' else '<option value="Chrono1">Chrono1</option>')
-        print('<option selected="Chrono2" value="Chrono2">Chrono2</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Chrono2' else '<option value="Chrono2">Chrono2</option>')
-        print('<option selected="Decompte" value="Decompte">Decompte</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Decompte' else '<option value="Decompte">Decompte</option>')
-        print('<option selected="Vmax1" value="Vmax1">Vmax1</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmax1' else '<option value="Vmax1">Vmax1</option>')
-        print('<option selected="Vmax2" value="Vmax2">Vmax2</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmax2' else '<option value="Vmax2">Vmax2</option>')
-        print('<option selected="Heure" value="Heure">Heure</option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Heure' else '<option value="Heure">Heure</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Totalisateur' :
+            print('<option selected="Totalisateur" value="Totalisateur">',_('Odom&egrave;tre'),'</option>')
+        else :
+            print('<option value="Totalisateur">',_('Odom&egrave;tre'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Trip1' :
+            print('<option selected="Trip1" value="Trip1">',_('Trip1'),'</option>')
+        else :
+            print('<option value="Trip1">',_('Trip1'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Trip2' :
+            print('<option selected="Trip2" value="Trip2">',_('Trip2'),'</option>')
+        else :
+            print('<option value="Trip2">',_('Trip2'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vitesse' :
+            print('<option selected="Vitesse" value="Vitesse">',_('Vitesse'),'</option>')
+        else :
+            print('<option value="Vitesse">',_('Vitesse'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmoy1' :
+            print('<option selected="Vmoy1" value="Vmoy1">',_('Moyenne1'),'</option>')
+        else :
+            print('<option value="Vmoy1">',_('Moyenne1'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmoy2' :
+            print('<option selected="Vmoy2" value="Vmoy2">',_('Moyenne2'),'</option>')
+        else :
+            print('<option value="Vmoy2">',_('Moyenne2'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Chrono1' :
+            print('<option selected="Chrono1" value="Chrono1">',_('Chrono1'),'</option>')
+        else :
+            print('<option value="Chrono1">',_('Chrono1'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Chrono2' :
+            print('<option selected="Chrono2" value="Chrono2">',_('Chrono2'),'</option>')
+        else :
+            print('<option value="Chrono2">',_('Chrono2'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Decompte' :
+            print('<option selected="Decompte" value="Decompte">',_('Decompte'),'</option>')
+        else :
+            print('<option value="Decompte">',_('Decompte'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmax1' :
+            print('<option selected="Vmax1" value="Vmax1">',_('Vmax1'),'</option>')
+        else :
+            print('<option value="Vmax1">',_('Vmax1'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Vmax2' :
+            print('<option selected="Vmax2" value="Vmax2">',_('Vmax2'),'</option>')
+        else :
+            print('<option value="Vmax2">',_('Vmax2'),'</option>')
+        if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Heure' :
+            print('<option selected="Heure" value="Heure">',_('Heure'),'</option>')
+        else :
+            print('<option value="Heure">',_('Heure'),'</option>')
         print('</select>')
         print('</td>')
         print('</tr>')

@@ -19,6 +19,7 @@ roue = setupconfig['Parametres']['roue']
 aimants = setupconfig['Parametres']['aimants']
 orientation = setupconfig['Parametres']['orientation']
 lecture = setupconfig['Parametres']['lecture']
+langue = setupconfig['Parametres']['langue']
 
 datetime_now = time.localtime ()
 st_date = '{}-{:02d}-{:02d}'.format(datetime_now.tm_year,datetime_now.tm_mon,datetime_now.tm_mday)
@@ -66,11 +67,11 @@ print(_('Orientation'))
 print('</label>')
 print('    <select id="orientation" name="user_orientation" class="w3-select">')
 if orientation == 'Paysage' :
-  print('    <option selected="Paysage">Paysage</option>')
-  print('    <option>Portrait</option>')
+  print('    <option selected="Paysage" value="Paysage">',_('Paysage'),'</option>')
+  print('    <option value="Portrait">',_('Portrait'),'</option>')
 else:
-  print('    <option>Paysage</option>')
-  print('    <option selected="Portrait">Portrait</option>')
+  print('    <option value="Paysage">',_('Paysage'),'</option>')
+  print('    <option selected="Portrait" value="Portrait">',_('Portrait'),'</option>')
 print('     </select>')
 print('  </div>')
 
@@ -80,11 +81,32 @@ print(_('Sens de lecture'))
 print('</label>')
 print('    <select id="lecture" name="user_lecture" class="w3-select">')
 if lecture == 'BasEnHaut' :
-  print('    <option selected="BasEnHaut">BasEnHaut</option>')
-  print('    <option>HautEnBas</option>')
+  print('    <option selected="BasEnHaut" value="BasEnHaut">',_('De Bas En Haut'),'</option>')
+  print('    <option value="HautEnBas">',_('De Haut En Bas'),'</option>')
 else:
-  print('    <option>BasEnHaut</option>')
-  print('    <option selected="HautEnBas">HautEnBas</option>')
+  print('    <option value="BasEnHaut">',_('De Bas En Haut'),'</option>')
+  print('    <option selected="HautEnBas" value="HautEnBas">',_('De Haut En Bas'),'</option>')
+print('     </select>')
+print('  </div>')
+
+print('   <div class="w3-quarter">')
+print('    <label for="langue">')
+print(_('Langue'))
+print('</label>')
+print('    <select id="langue" name="user_langue" class="w3-select">')
+if langue == 'EN' :
+  print('    <option value="FR">Francais</option>')
+  print('    <option selected="EN" value="EN">English</option>')
+  print('    <option value="IT">Italiano</option>')
+elif langue == 'IT':
+  print('    <option value="FR">Francais</option>')
+  print('    <option value="EN">English</option>')
+  print('    <option selected="IT" value="IT">Italiano</option>')
+else :
+  print('    <option selected="FR" value="FR">Francais</option>')
+  print('    <option value="EN">English</option>')
+  print('    <option value="IT">Italiano</option>')
+
 print('     </select>')
 print('  </div>')
 
