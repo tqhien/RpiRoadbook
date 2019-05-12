@@ -65,6 +65,10 @@ if os.path.isdir ("/dev/input/event0") :
 else:
     is_tactile = False
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 fps = 5
 
 distance = 0
@@ -825,7 +829,7 @@ class odo_widget (rb_widget):
         rb_widget.__init__(self,layout,widget)
     def render(self,scr):
         global angle
-        blit_text(scr,' Totalisateur',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Totalisateur'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:05.0f} '.format(totalisateur/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -848,7 +852,7 @@ class speed_widget (rb_widget):
             old_totalisateur = totalisateur
     def render(self,scr):
         global angle
-        blit_text(scr,' Vitesse',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Vitesse'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:3.0f} '.format(speed),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -911,7 +915,7 @@ class trip1_widget (rb_widget):
         save_t_odo = time.time()
     def render(self,scr):
         global angle
-        blit_text(scr,' Trip1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Trip1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:6.2f} '.format(distance1/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -934,7 +938,7 @@ class vmoy1_widget(rb_widget):
             vmoy1 = distance1 * 3.6 / temps / 1000
     def render(self,scr):
         global angle
-        blit_text(scr,' Vmoy1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Vmoy1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:3.0f} '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -959,7 +963,7 @@ class vmax1_widget(rb_widget):
             vmax1 = speed
     def render(self,scr):
         global angle
-        blit_text(scr,' Vmax1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Vmax1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:03.0f} '.format(vmax1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -995,7 +999,7 @@ class chrono1_widget(rb_widget):
         if m >= 100 :
             h,m = divmod (m,100)
         ss = (s*100) % 100
-        blit_text(scr,' Chrono1',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Chrono1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1055,7 +1059,7 @@ class trip2_widget (rb_widget):
         save_t_odo = time.time()
     def render(self,scr):
         global angle
-        blit_text(scr,' Trip2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Trip2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:6.2f} '.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1076,7 +1080,7 @@ class vmoy2_widget(rb_widget):
             vmoy2 = distance2 * 3.6 / temps /1000
     def render(self,scr):
         global angle
-        blit_text(scr,' Vmoy2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Vmoy2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:03.0f} '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1099,7 +1103,7 @@ class vmax2_widget(rb_widget):
             vmax2 = speed
     def render(self,scr):
         global angle
-        blit_text(scr,' Vmax2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Vmax2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:03.0f} '.format(vmax2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1133,7 +1137,7 @@ class chrono2_widget(rb_widget):
         if m >= 100:
             h,m = divmod (m,100)
         ss = (s*100) % 100
-        blit_text(scr,' Chrono2',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Chrono2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1209,7 +1213,7 @@ class countdown_widget (rb_widget):
             t = decompte
         m,s = divmod (t,60)
         #ss = math.floor((s*10) % 10)
-        blit_text(scr,' Decompte',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Decompte'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f} '.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1225,7 +1229,7 @@ class heure_widget(rb_widget):
         self.now = time.localtime()
     def render(self,scr):
         global angle,chrono_time2
-        blit_text(scr,' Heure',(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(' Heure'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1541,15 +1545,15 @@ class SelectionScene(SceneBase):
         self.gotoEdit = False
 
         if self.orientation == 'Paysage' :
-            labels['infos'] = ('Demarrage automatique dans 5s...',(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
-            labels['invite'] = ('Selectionnez le roadbook a charger :',(10,10),BLANC25,angle)
+            labels['infos'] = (_('Demarrage automatique dans 5s...'),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
+            labels['invite'] = (_('Selectionnez le roadbook a charger :'),(10,10),BLANC25,angle)
             labels['up'] = ('        ',(10,50),BLANC25,angle)
             labels['down'] = ('        ',(10,380),BLANC25,angle)
             for i in range (10) :
                 labels['liste{}'.format(i)] = ('',(10,80+i*30),BLANC25,angle)
         else :
-            labels['infos'] = ('Demarrage automatique dans 5s...',(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
-            labels['invite'] = ('Selectionnez le roadbook a charger :',(0,480),BLANC25,angle)
+            labels['infos'] = (_('Demarrage automatique dans 5s...'),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
+            labels['invite'] = (_('Selectionnez le roadbook a charger :'),(0,480),BLANC25,angle)
             labels['up'] = ('        ',(50,480),BLANC25,angle)
             labels['down'] = ('        ',(380,480),BLANC25,angle)
             for i in range (10) :
@@ -1634,7 +1638,7 @@ class SelectionScene(SceneBase):
         else :
             # Mise à jour de la liste de choix
             if self.fenetre > 0 :
-                labels['up'] = ('(moins)',labels['up'][1],labels['up'][2],labels['up'][3])
+                labels['up'] = (_('(moins)'),labels['up'][1],labels['up'][2],labels['up'][3])
 
             for i in range (10) :
                 if self.next == self :
@@ -1643,7 +1647,7 @@ class SelectionScene(SceneBase):
                 if i >= self.fenetre and i <self.fenetre+10 :
                     p = 'liste{}'.format(i-self.fenetre)
                     if self.filenames[i] == self.saved :
-                        text = self.filenames[i]+' (En cours)'
+                        text = self.filenames[i]+_(' (En cours)')
                         if i == self.selection :
                             couleur = ROUGE25inv
                         else :
@@ -1657,7 +1661,7 @@ class SelectionScene(SceneBase):
                     if self.next == self :
                         labels[p] = (text,labels[p][1],couleur,labels[p][3])
             if self.fenetre+10<len(self.filenames):
-                labels['down'] = ('(plus)',labels['down'][1],labels['down'][2],labels['down'][3])
+                labels['down'] = (_('(plus)'),labels['down'][1],labels['down'][2],labels['down'][3])
 
             self.k = time.time()
             if self.next == self:
@@ -1669,7 +1673,7 @@ class SelectionScene(SceneBase):
                     #labels['infos'] = ('{}'.format('Chargement'),labels['infos'][1],labels['infos'][2],labels['infos'][3])
                 #else :
                     if self.next == self :
-                        labels['infos'] = ('Demarrage automatique dans {:1.0f}s...'.format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3])
+                        labels['infos'] = (_('Demarrage automatique dans {:1.0f}s...').format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3])
             else :
                 if self.next == self :
                     labels['infos'] = ('                                                         ',labels['infos'][1],labels['infos'][2],labels['infos'][3])
@@ -1712,9 +1716,9 @@ class NoneScene(SceneBase):
         pygame.display.update()
 
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
-        labels['text1'] = ('Aucun roadbook present.', (100,200),ROUGE25,0)
-        labels['text2'] = ('Appuyez sur un bouton pour revenir', (100,230),ROUGE25,0)
-        labels['text3'] = ('au menu en mode Route', (100,260),ROUGE25,0)
+        labels['text1'] = (_('Aucun roadbook present.'), (100,200),ROUGE25,0)
+        labels['text2'] = (_('Appuyez sur un bouton pour revenir'), (100,230),ROUGE25,0)
+        labels['text3'] = (_('au menu en mode Route'), (100,260),ROUGE25,0)
 
     def ProcessInput(self, events, pressed_keys):
         global setupconfig
@@ -1758,12 +1762,12 @@ class ModeScene(SceneBase):
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
 
-        labels ['t_mode'] = ('Mode :',(int(guiconfig[self.orientation]['mode_l_mode_x']),int(guiconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
-        labels ['mode'] = ('Rallye',(int(guiconfig[self.orientation]['mode_mode_x']),int(guiconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
-        labels ['t_nuit'] = ('Jour/Nuit :',(int(guiconfig[self.orientation]['mode_l_jour_nuit_x']),int(guiconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
-        labels ['jour_nuit'] = ('Rallye',(int(guiconfig[self.orientation]['mode_jour_nuit_x']),int(guiconfig[self.orientation]['mode_jour_nuit_y'])),BLANC50,angle)
-        labels ['t_orientation'] = ('Orientation :',(int(guiconfig[self.orientation]['mode_l_orientation_x']),int(guiconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
-        labels ['orientation'] = ('Portrait ',(int(guiconfig[self.orientation]['mode_orientation_x']),int(guiconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
+        labels ['t_mode'] = (_('Mode :'),(int(guiconfig[self.orientation]['mode_l_mode_x']),int(guiconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
+        labels ['mode'] = (_('Rallye'),(int(guiconfig[self.orientation]['mode_mode_x']),int(guiconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
+        labels ['t_nuit'] = (_('Jour/Nuit :'),(int(guiconfig[self.orientation]['mode_l_jour_nuit_x']),int(guiconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
+        labels ['jour_nuit'] = (_('Rallye'),(int(guiconfig[self.orientation]['mode_jour_nuit_x']),int(guiconfig[self.orientation]['mode_jour_nuit_y'])),BLANC50,angle)
+        labels ['t_orientation'] = (_('Orientation :'),(int(guiconfig[self.orientation]['mode_l_orientation_x']),int(guiconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
+        labels ['orientation'] = (_('Portrait '),(int(guiconfig[self.orientation]['mode_orientation_x']),int(guiconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
 
         labels ['suivant'] = ('->',(int(guiconfig[self.orientation]['mode_suiv_x']),int(guiconfig[self.orientation]['mode_suiv_y'])),BLANC50,angle)
 
@@ -1905,14 +1909,14 @@ class ModeScene(SceneBase):
             labels['mode'] = (self.rallye,labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else (self.rallye,labels['mode'][1],BLANC50,labels['mode'][3])
 
             if mode_jour :
-                labels['jour_nuit'] = ('Jour   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Jour   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
+                labels['jour_nuit'] = (_('Jour   '),labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else (_('Jour   '),labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
             else :
-                labels['jour_nuit'] = ('Nuit   ',labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else ('Nuit   ',labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
+                labels['jour_nuit'] = (_('Nuit   '),labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else (_('Nuit   '),labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
 
             if self.paysage :
-                labels['orientation'] = ('Paysage',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else ('Paysage ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+                labels['orientation'] = (_('Paysage'),labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else (_('Paysage '),labels['orientation'][1],BLANC50,labels['orientation'][3])
             else :
-                labels['orientation'] = ('Portrait ',labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else ('Portrait ',labels['orientation'][1],BLANC50,labels['orientation'][3])
+                labels['orientation'] = (_('Portrait '),labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else (_('Portrait '),labels['orientation'][1],BLANC50,labels['orientation'][3])
 
             labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 3 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
             sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 4 else (self.bouton_ok,sprites['ok'][1])
@@ -1947,15 +1951,15 @@ class ConfigScene(SceneBase):
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
 
-        labels ['t_roue'] = ('Roue :',(int(guiconfig[self.orientation]['config_l_roue_x']),int(guiconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
+        labels ['t_roue'] = (_('Roue :'),(int(guiconfig[self.orientation]['config_l_roue_x']),int(guiconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
         labels ['roue'] = ('{:4d}'.format(0),(int(guiconfig[self.orientation]['config_roue_x']),int(guiconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
-        labels ['t_aimants'] = ('Nb aimants :',(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
+        labels ['t_aimants'] = (_('Nb aimants :'),(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
         labels ['aimants'] = ('{:2d}  '.format(0),(int(guiconfig[self.orientation]['config_aimants_x']),int(guiconfig[self.orientation]['config_aimants_y'])),BLANC50,angle)
-        labels ['t_date'] = ('Date :',(int(guiconfig[self.orientation]['config_l_date_x']),int(guiconfig[self.orientation]['config_l_date_y'])),BLANC50,angle)
+        labels ['t_date'] = (_('Date :'),(int(guiconfig[self.orientation]['config_l_date_x']),int(guiconfig[self.orientation]['config_l_date_y'])),BLANC50,angle)
         labels ['jj'] = ('01/',(int(guiconfig[self.orientation]['config_d_x']),int(guiconfig[self.orientation]['config_d_y'])),BLANC50,angle)
         labels ['mm'] = ('01/',(int(guiconfig[self.orientation]['config_m_x']),int(guiconfig[self.orientation]['config_m_y'])),BLANC50,angle,)
         labels ['aaaa'] = ('2018',(int(guiconfig[self.orientation]['config_y_x']),int(guiconfig[self.orientation]['config_y_y'])),BLANC50,angle)
-        labels ['t_heure'] = ('Heure:',(int(guiconfig[self.orientation]['config_l_heure_x']),int(guiconfig[self.orientation]['config_l_heure_y'])),BLANC50,angle)
+        labels ['t_heure'] = (_('Heure:'),(int(guiconfig[self.orientation]['config_l_heure_x']),int(guiconfig[self.orientation]['config_l_heure_y'])),BLANC50,angle)
         labels ['hh'] = ('00:',(int(guiconfig[self.orientation]['config_hour_x']),int(guiconfig[self.orientation]['config_hour_y'])),BLANC50,angle)
         labels ['min'] = ('00:',(int(guiconfig[self.orientation]['config_minute_x']),int(guiconfig[self.orientation]['config_minute_y'])),BLANC50,angle)
         labels ['ss'] = ('00 ',(int(guiconfig[self.orientation]['config_seconde_x']),int(guiconfig[self.orientation]['config_seconde_y'])),BLANC50,angle,)
@@ -2171,7 +2175,7 @@ class ConversionScene(SceneBase):
         else:
             screen.fill(NOIR)
         pygame.display.update()
-        labels['text1'] = ('Preparation du roadbook... Patience...',labels['text1'][1],labels['text1'][2],labels['text1'][3])
+        labels['text1'] = (_('Preparation du roadbook... Patience...'),labels['text1'][1],labels['text1'][2],labels['text1'][3])
         filedir = os.path.splitext(self.filename)[0]
         if os.path.isdir('/mnt/piusb/Conversions/'+filedir) == False: # Pas de répertoire d'images, on convertit le fichier
             os.mkdir('/mnt/piusb/Conversions/'+filedir)
@@ -2179,16 +2183,16 @@ class ConversionScene(SceneBase):
 			# on vérifie le format de la page :
             width, height = page_size ('/mnt/piusb/'+self.filename)
             if width > height :
-                labels['text2'] = ('Conversion des cases en cours...',labels['text2'][1],labels['text2'][2],labels['text2'][3])
+                labels['text2'] = (_('Conversion des cases en cours...'),labels['text2'][1],labels['text2'][2],labels['text2'][3])
                 total = page_count ('/mnt/piusb/'+self.filename)
                 for i in range (total) :
-                    labels['text'] = ('Case {}/{}'.format(i,total),labels['text'][1],labels['text'][2],labels['text'][3])
+                    labels['text'] = (_('Case {}/{}').format(i,total),labels['text'][1],labels['text'][2],labels['text'][3])
                     update_labels(screen)
                     self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
 
             else:
                 # conversion et découpage des cases
-                labels['text2'] = ('Format Tripy. Conversion en cours...',labels['text2'][1],labels['text2'][2],labels['text2'][3])
+                labels['text2'] = (_('Format Tripy. Conversion en cours...'),labels['text2'][1],labels['text2'][2],labels['text2'][3])
 
                 nb_pages = page_count ('/mnt/piusb/'+self.filename)
                 #Marge supperieur (pix)
@@ -2216,7 +2220,7 @@ class ConversionScene(SceneBase):
                         else :
                             x = round(milieu)
                             y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
-                        labels['text'] = ('Case {}/{}'.format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3])
+                        labels['text'] = (_('Case {}/{}').format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3])
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                         update_labels(screen)
             # On se positionne à la premiere case
@@ -2231,9 +2235,9 @@ class ConversionScene(SceneBase):
             if width > height :
                 total = nb_pages
                 if total != nb_images :
-                    labels['text2'] = ('Pas le meme nombre de cases ! On verifie...', labels['text2'][1],labels['text2'][2],labels['text2'][3])
+                    labels['text2'] = (_('Pas le meme nombre de cases ! On verifie...'), labels['text2'][1],labels['text2'][2],labels['text2'][3])
                     for i in range (total) :
-                        labels['text'] = ('Case {}/{}'.format(i,total), labels['text'][1],labels['text'][2],labels['text'][3])
+                        labels['text'] = (_('Case {}/{}').format(i,total), labels['text'][1],labels['text'][2],labels['text'][3])
                         self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = total-i, last_page=total-i, dpi=150, singlefile='{:03}'.format(i+1), fmt='jpg')
                         update_labels(screen)
             else :
@@ -2245,7 +2249,7 @@ class ConversionScene(SceneBase):
                 total = nb_pages * nb_cases
                 nb_images = len([f for f in os.listdir('/mnt/piusb/Conversions/'+filedir) if re.search('.jpg$', f)])
                 if total != nb_images :
-                    labels['text2'] = ('Pas le meme nombre de cases ! On verifie...', labels['text2'][1],labels['text2'][2],labels['text2'][3])
+                    labels['text2'] = (_('Pas le meme nombre de cases ! On verifie...'), labels['text2'][1],labels['text2'][2],labels['text2'][3])
                     #Marge supperieur (pix)
                     marge_up = 178
                     #Hauteur d'une case (pix)
@@ -2271,7 +2275,7 @@ class ConversionScene(SceneBase):
                             else :
                                 x = round(milieu)
                                 y = round(marge_up+(2*nb_ligne-j-1)*hauteur)
-                            labels['text'] = ('Case {}/{}'.format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3])
+                            labels['text'] = (_('Case {}/{}').format(i*nb_cases+j+1,total),labels['text'][1],labels['text'][2],labels['text'][3])
                             self.pages = convert_from_path('/mnt/piusb/'+self.filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(i*nb_cases+j),fmt='jpg')
                             update_labels(screen)
             if int(rbconfig['Roadbooks']['case']) < 0 or int(rbconfig['Roadbooks']['case']) > total -2 :

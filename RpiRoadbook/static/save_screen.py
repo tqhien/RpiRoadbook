@@ -6,6 +6,10 @@ form = cgi.FieldStorage()
 
 import configparser
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 nb_screens = 4
 
 screenconfig = configparser.ConfigParser()
@@ -26,9 +30,10 @@ print("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-  <h1>Configuration des &eacute;crans</h1>
-</div>
-""")
+  <h1>""")
+print(_('Configuration des &eacute;crans'))
+print('</h1></div>')
+
 for k in range (1,nb_screens+1) :
     jour_nuit = 'jour_nuit{}'.format(k)
     if jour_nuit in form:
@@ -49,7 +54,9 @@ for attempt in range(5):
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
   else :
-    print('<h3>Configuration sauvegard&eacute;e !</h3>')
+    print('<h3>')
+    print(_('Configuration sauvegard&eacute;e !'))
+    print('</h3>')
     break
 else :
   print('<h3>Write Error screen.cfg after 5 tries</h3>')
@@ -58,8 +65,11 @@ print ("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
-  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> Personnalisation des &eacute;crans</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>""")
+print(_('Configuration'))
+print('</a>  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> ')
+print(_('Personnalisation des &eacute;crans'))
+print("""</a>
 </div>
 </body>
 </html>""")

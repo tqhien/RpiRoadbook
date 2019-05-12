@@ -5,6 +5,10 @@ import cgitb; cgitb.enable()
 import configparser
 import time
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 nb_screens = 4
 
 screenconfig = configparser.ConfigParser()
@@ -80,23 +84,35 @@ print("""            var b = document.getElementById("jour_nuit"+k)[document.get
   <body onload=update_preview()>
   <!-- Entete -->
   <div class="w3-container w3-center w3-section">
-  <h1>Personnalisation des &eacute;crans</h1>
+  <h1>""")
+print(_('Personnalisation des &eacute;crans'))
+print("""</h1>
   </div>
 <div class="w3-container">
-<h3>Choisissez un &eacute;cran &agrave; personnaliser</h3>
+<h3>""")
+print(_('Choisissez un &eacute;cran &agrave; personnaliser'))
+print("""</h3>
     <form action="save_screen.py" method="post">
         <div class="w3-row w3-black">
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran1');">
-          <div class="w3-quarter tablink w3-hover-grey w3-padding w3-grey">Ecran 1</div>
+          <div class="w3-quarter tablink w3-hover-grey w3-padding w3-grey">""")
+print(_('Ecran 1'))
+print("""</div>
         </a>
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran2');">
-          <div class="w3-quarter tablink w3-hover-light-blue w3-padding">Ecran 2</div>
+          <div class="w3-quarter tablink w3-hover-light-blue w3-padding">""")
+print(_('Ecran 2'))
+print("""</div>
         </a>
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran3');">
-          <div class="w3-quarter tablink w3-hover-light-green w3-padding">Ecran 3</div>
+          <div class="w3-quarter tablink w3-hover-light-green w3-padding">""")
+print(_('Ecran 3'))
+print("""</div>
         </a>
         <a href="javascript:void(0)" onclick="openScreen(event, 'Ecran4');">
-          <div class="w3-quarter tablink w3-hover-yellow w3-padding">Ecran 4</div>
+          <div class="w3-quarter tablink w3-hover-yellow w3-padding">""")
+print(_('Ecran 4'))
+print("""</div>
         </a>
         </div>
 """)

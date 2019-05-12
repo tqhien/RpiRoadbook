@@ -4,6 +4,9 @@ import cgi, os
 import cgitb; cgitb.enable()
 import re
 import math
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
 
 form = cgi.FieldStorage()
 
@@ -24,14 +27,19 @@ print ("""<html>
 
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>Conversion</h1>
+<h1>""")
+print(_('Conversion'))
+print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
 <div class="w3-row">
   <div class="w3-col w3-light-grey s12 w3-center">
-<p><h3>Traitement en cours. Veuillez patienter</h3></p>
+<p><h3>""")
+print(_('Traitement en cours. Veuillez patienter'))
+print('</h3></p>')
 
-La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (environ 1 seconde/case)
+print(_('La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (environ 1 seconde/case)'))
+print("""
 </div>
 </div>
 </div>

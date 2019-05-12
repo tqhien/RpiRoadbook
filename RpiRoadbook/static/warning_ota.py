@@ -3,6 +3,10 @@
 import cgi, os
 import cgitb; cgitb.enable()
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 print("""
 <html>
 <head>
@@ -14,14 +18,25 @@ print("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-  <h1>Mise &agrave; jour Firmware</h1>
+  <h1>""")
+print(_('Mise &agrave; jour Firmware'))
+print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue w3-center">
-   <h3>Attention : une mauvaise mise &agrave; jour peut rendre votre RpiRoadbook non fonctionnel</h3>
-   <h3>Etes-vous s&ucirc;r de vouloir continuer ?</h3>
+   <h3>""")
+print(_('Attention : une mauvaise mise &agrave; jour peut rendre votre RpiRoadbook non fonctionnel'))
+print('</h3>   <h3>')
+print(_('Etes-vous s&ucirc;r de vouloir continuer ?'))
+print("""</h3>
     <div class="w3-bar w3-margin">
-      <a class="w3-bar-item w3-button w3-black w3-hover-blue w3-margin-right" href="index.py">Annuler et revenir &agrave; l'accueil</a>
-      <a class="w3-bar-item w3-button w3-red w3-hover-orange w3-margin-left" href="ota.py" onclick="return confirm('Etes-vous s&ucirc;r ?');">Continuer</a>
+      <a class="w3-bar-item w3-button w3-black w3-hover-blue w3-margin-right" href="index.py">""")
+print(_("Annuler et revenir &agrave; l'accueil"))
+print("""</a>
+      <a class="w3-bar-item w3-button w3-red w3-hover-orange w3-margin-left" href="ota.py" onclick="return confirm(' """)
+print(_('Etes-vous s&ucirc;r ?'))
+print(""" ');"> """)
+print(_('Continuer'))
+print("""</a>
     </div>
 </div>
 <!-- Pied de page -->

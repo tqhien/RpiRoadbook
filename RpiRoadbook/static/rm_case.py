@@ -5,6 +5,10 @@ import cgitb; cgitb.enable()
 import base64
 import re
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 form = cgi.FieldStorage()
 #print(form)
 
@@ -32,13 +36,13 @@ a = a.replace('jpg','png')
 
 try:
     os.remove(os.path.join(DIR,f))
-    print('Case supprim&eacute;e')
+    print(_('Case supprim&eacute;e'))
 except :
     pass
 
 try:
     os.remove("/mnt/piusb/Annotations/{}/{}".format(filedir,a))
-    print('Annotation supprim&eacute;e')
+    print(_('Annotation supprim&eacute;e'))
 except :
     pass
 

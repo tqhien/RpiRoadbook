@@ -6,6 +6,10 @@ import configparser
 import time
 import subprocess
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 form = cgi.FieldStorage()
 
 st_date = ''
@@ -23,10 +27,13 @@ print ("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>R&eacute;glage de l'horloge</h1>
+<h1>""")
+print(_("R&eacute;glage de l'horloge"))
+print("""</h1>
 </div>
-<h3>R&eacute;glage sauvegard&eacute; :</h3>
-""")
+<h3>""")
+print(_('R&eacute;glage sauvegard&eacute; :'))
+print('</h3>')
 
 if 'user_date' in form:
   st_date = form['user_date'].value
@@ -44,7 +51,9 @@ print("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>""")
+print(_('Configuration'))
+print("""</a>
 </div>
 </body>
 </html>

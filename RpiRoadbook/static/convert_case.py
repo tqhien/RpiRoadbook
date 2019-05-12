@@ -3,6 +3,10 @@ import cgi, os
 import cgitb; cgitb.enable()
 import re
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 form = cgi.FieldStorage()
 
 # Pour la lecture des fichiers pdf et conversion en image
@@ -65,6 +69,6 @@ for i in range (nb_pages) :
             num = i*nb_cases+k*nb_lignes+j
             pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
 
-            print('Case {} / {}<br>'.format(num+1,total))
+            print(_('Case {} / {}<br>').format(num+1,total))
 
 print ('</html>')

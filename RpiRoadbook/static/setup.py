@@ -5,6 +5,10 @@ import cgitb; cgitb.enable()
 import configparser
 import time
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 setupconfig = configparser.ConfigParser()
 
 # On charge les reglages : mode, orientation, etc
@@ -31,7 +35,9 @@ print("""<html>
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>Configuration g&eacute;n&eacute;rale</h1>
+<h1>""")
+print(_('Configuration g&eacute;n&eacute;rale'))
+print("""</h1>
 </div>
 
 <!-- Table des reglages -->
@@ -41,17 +47,23 @@ print("""<html>
 
 """)
 print('   <div class="w3-quarter">')
-print('    <label>Roue (en mm)</label>')
+print('    <label>')
+print(_('Roue (en mm)'))
+print('</label>')
 print('    <input type="text" id="roue" name="user_roue" value="{}" class="w3-input w3-border" placeholder="1864">'.format(roue))
 print('  </div>')
 
 print('   <div class="w3-quarter">')
-print('    <label for="aimant">Aimant(s)</label>')
+print('    <label for="aimant">')
+print(_('Aimant(s)'))
+print('</label>')
 print('    <input type="text" id="aimant" name="user_aimant" value={} class="w3-input w3-border" placeholder="1">'.format(aimants))
 print('  </div>')
 
 print('   <div class="w3-quarter">')
-print('    <label for="orientation">Orientation</label>')
+print('    <label for="orientation">')
+print(_('Orientation'))
+print('</label>')
 print('    <select id="orientation" name="user_orientation" class="w3-select">')
 if orientation == 'Paysage' :
   print('    <option selected="Paysage">Paysage</option>')
@@ -63,7 +75,9 @@ print('     </select>')
 print('  </div>')
 
 print('   <div class="w3-quarter">')
-print('    <label for="lecture">Sens de lecture</label>')
+print('    <label for="lecture">')
+print(_('Sens de lecture'))
+print('</label>')
 print('    <select id="lecture" name="user_lecture" class="w3-select">')
 if lecture == 'BasEnHaut' :
   print('    <option selected="BasEnHaut">BasEnHaut</option>')
@@ -76,7 +90,9 @@ print('  </div>')
 
 print("""
 <div class="w3-bar">
-        <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">Valider</button>
+        <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">""")
+print(_('Valider'))
+print("""</button>
 </div>
 </div>
 </form>
@@ -85,11 +101,16 @@ print("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> Personnaliser les affichages</a>
-  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-clock-o"></i> Ajuster l'horloge</a>
-  <a href="wifi_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-wifi"></i> Wifi</a>
-  <a href="warning_raz.py" class="w3-bar-item w3-button w3-right w3-hover-red" ><i class="w3-xlarge fa fa-undo"></i> Config. Usine</a>
-  <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge material-icons">system_update</i> MAJ Firmware</a>
+  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> """)
+print(_('Personnaliser les affichages'))
+print('</a>  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-clock-o"></i> ')
+print(_("Ajuster l'horloge"))
+print('</a>  <a href="wifi_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-wifi"></i> Wifi</a>')
+print('<a href="warning_raz.py" class="w3-bar-item w3-button w3-right w3-hover-red" ><i class="w3-xlarge fa fa-undo"></i> ')
+print(_('Config. Usine'))
+print('</a>  <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge material-icons">system_update</i> ')
+print(_('MAJ Firmware'))
+print("""</a>
 </div>
 
 </body>

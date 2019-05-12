@@ -10,6 +10,10 @@ import time
 
 import subprocess
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 print ('Content-Type: text/html\n')
 print ("""
   <html>
@@ -22,7 +26,9 @@ print ("""
   <body>
 <!-- Entete -->
   <div class="w3-container w3-center w3-section">
-  <h1>Mise &agrave; jour de firmware</h1>
+  <h1>""")
+print(_('Mise &agrave; jour de firmware'))
+print("""</h1>
   </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
 <div class="w3-row">
@@ -38,9 +44,15 @@ if 'filename' in form:
     open('/mnt/piusb/ota/ota.tar.gz', 'wb').write(fileitem.file.read())
     # On attend au moins 5 secondes, le temps que le cache btrfs soit mis sur disque
     time.sleep (6.0)
-    print('<h3>Firmware t&eacute;l&eacute;charg&eacute;.</h3><br>')
-    print('<h3>Red&eacute;marrez le RpiRoadbook</h3><br>')
-    print('<h3>pour appliquer la mise &agrave; jour.</h3><br>')
+    print('<h3>')
+    print(_('Firmware t&eacute;l&eacute;charg&eacute;.'))
+    print('</h3><br>')
+    print('<h3>')
+    print(_('Red&eacute;marrez le RpiRoadbook'))
+    print('</h3><br>')
+    print('<h3>')
+    print(_('pour appliquer la mise &agrave; jour.'))
+    print('</h3><br>')
 print("""
 </div>
 </div>

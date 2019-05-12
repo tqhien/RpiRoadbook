@@ -3,6 +3,9 @@
 import cgi, os
 import cgitb; cgitb.enable()
 import shutil
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
 
 print ('Content-Type: text/html')
 print("""
@@ -16,11 +19,15 @@ print("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>Annulation</h1>
+<h1>""")
+print(_('Annulation'))
+print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
-<h3>Annulation du t&eacute;l&eacute;chargement :</h3>
-""")
+<h3>""")
+print(_('Annulation du t&eacute;l&eacute;chargement :'))
+print('</h3>')
+
 
 form = cgi.FieldStorage()
 
@@ -46,7 +53,7 @@ if 'fn' in form:
         pass
     print("{}<br>".format(fileitem.value))
 else:
-    print ("Pas de choix")
+    print (_('Pas de choix'))
 print ("""
 </div>
 

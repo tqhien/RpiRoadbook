@@ -5,6 +5,9 @@ import cgitb; cgitb.enable()
 import base64
 import re
 from PIL import Image
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
 
 form = cgi.FieldStorage()
 #print(form)
@@ -257,7 +260,9 @@ print("""
 <body onload="initialize()">
 <!-- Entete -->
 <div class="w3-container w3-center w3-section w3-hide-small">
-   <h1>Annotations</h1>
+   <h1>""")
+print(_('Annotations'))
+print("""</h1>
 </div>
 
 <div class="w3-bar">
@@ -274,8 +279,13 @@ print("""
 
 
 <div class="w3-bar w3-grey w3-center">
-      <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
-      <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
+      <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">""")
+print(_('Sauvegarder '))
+print("""
+</a>
+      <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> """)
+print(_('RAZ Annot.'))
+print("""</a>
 </div>
 """)
 print('   <div id="canvasDiv" style="position:relative;height:250px;">')

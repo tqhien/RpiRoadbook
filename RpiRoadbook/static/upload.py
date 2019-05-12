@@ -3,6 +3,10 @@
 import cgi, os
 import cgitb; cgitb.enable()
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 print("""
 <html>
 <head>
@@ -14,13 +18,19 @@ print("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-  <h1>Ajout d'un Roadbook</h1>
+  <h1>""")
+print(_("Ajout d'un Roadbook"))
+print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue">
    <form enctype="multipart/form-data" action="preview_file.py" method = "post">
-   <h3>S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : </h3>
+   <h3>""")
+print(_('S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : '))
+print("""'</h3>
    <input class="w3-input w3-button " type="file" name="filename" />
-   <input class="w3-input w3-teal w3-button w3-hover-blue w3-left-align w3-margin" type="submit" value="Pr&eacute;visualiser..." />
+   <input class="w3-input w3-teal w3-button w3-hover-blue w3-left-align w3-margin" type="submit" value=" """)
+print(_('Pr&eacute;visualiser...'))
+print(""" " />
    </form>
 </div>
 <!-- Pied de page -->

@@ -4,6 +4,9 @@ import cgi, os
 import cgitb; cgitb.enable()
 import base64
 import re
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
 
 form = cgi.FieldStorage()
 #print(form)
@@ -29,9 +32,9 @@ if 'imagedata' in form:
     #imageData = bytearray([imageData])
     #print (form['imageData'].value)
     open('/mnt/piusb/Conversions/{}/{}_.jpg'.format(filedir,num), 'wb').write(imageData)
-    print('Case ins&eacute;r&eacute;e')
+    print(_('Case ins&eacute;r&eacute;e'))
 else :
-    print ('no imagedata')
+    print (_('Erreur pas de donn&eacute;es'))
 #print('Image sauvegardee')
 
 print("""

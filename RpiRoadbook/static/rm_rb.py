@@ -4,6 +4,10 @@ import cgi, os
 import cgitb; cgitb.enable()
 import shutil
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 print ("""Content-Type: text/html\n
 <html>
 <head>
@@ -16,11 +20,14 @@ print ("""Content-Type: text/html\n
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>Suppression de roadbooks</h1>
+<h1>""")
+print(_('Suppression de roadbooks'))
+print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
-<h3>Fichiers supprim&eacute;s :</h3>
-""")
+<h3>""")
+print(_('Fichiers supprim&eacute;s :'))
+print('</h3>')
 
 form = cgi.FieldStorage()
 
@@ -46,16 +53,20 @@ if 'choix' in form:
         pass
     print("{}<br>".format(fileitem.value))
 else:
-    print ("Pas de choix")
+    print (_("Pas de choix"))
 print ("""
 </div>
 
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">Personnaliser les affichages</a>
-  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">Ajuster l'horloge</a>
-  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">MAJ Firmware</a>
+  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">""")
+print(_('Personnaliser les affichages'))
+print('</a>  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">')
+print(_("Ajuster l'horloge"))
+print('</a>  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">')
+print(_('MAJ Firmware'))
+print("""</a>
 </div>
 </body>
 </html>""")

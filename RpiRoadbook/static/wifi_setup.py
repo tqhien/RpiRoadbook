@@ -5,6 +5,10 @@ import cgitb; cgitb.enable()
 import configparser
 import time
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 wificonfig = configparser.ConfigParser()
 
 # On charge les reglages wifi
@@ -30,7 +34,9 @@ print("""<html>
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-<h1>Configuration g&eacute;n&eacute;rale</h1>
+<h1>""")
+print(_('Configuration g&eacute;n&eacute;rale'))
+print("""</h1>
 </div>
 
 <!-- Table des reglages -->
@@ -40,18 +46,24 @@ print("""<html>
 
 """)
 print('   <div class="w3-half">')
-print('    <label>R&eacute;seau wifi (SSID) :</label>')
+print('    <label>')
+print(_('R&eacute;seau wifi (SSID) :'))
+print('</label>')
 print('    <input type="text" id="roue" name="user_ssid" value="{}" class="w3-input w3-border" placeholder="rpirb_custom">'.format(ssid))
 print('  </div>')
 
 print('   <div class="w3-half">')
-print('    <label for="passphrase">Mot de passe : </label>')
+print('    <label for="passphrase">')
+print(_('Mot de passe : '))
+print('</label>')
 print('    <input type="text" id="user_passphrase" name="user_passphrase" value={} class="w3-input w3-border" placeholder="rpiroadbook">'.format(wpa_passphrase))
 print('  </div>')
 
 print("""
 <div class="w3-bar">
-        <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">Valider</button>
+        <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">""")
+print(_('Valider'))
+print("""</button>
 </div>
 </div>
 </form>
@@ -60,7 +72,9 @@ print("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i>Configurer</a>
+  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i>""")
+print(_('Configurer'))
+print("""</a>
 </div>
 
 </body>

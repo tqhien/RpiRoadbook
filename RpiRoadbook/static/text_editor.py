@@ -6,6 +6,10 @@ import base64
 import re
 from PIL import Image
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 form = cgi.FieldStorage()
 #print(form)
 
@@ -386,7 +390,9 @@ print("""
 <body>
   <!-- Entete -->
   <div class="w3-container w3-center w3-section w3-hide-small">
-     <h1>Annotations</h1>
+     <h1>""")
+print(_('Annotations'))
+print("""</h1>
   </div>
 
   <div class="w3-bar">
@@ -420,23 +426,35 @@ print("""
   <div class="w3-bar tools" id="Pencil">
     <div class="w3-bar slidecontainer">
       <input type="range" min="1" max="20" value="5" class="slider" id="myWidth">
-      <div id="demo1" class="w3-bar-item">Epaisseur : 5 px</div>
+      <div id="demo1" class="w3-bar-item">""")
+print(_('Epaisseur'))
+print(' : 5 px</div>')
+print("""
     </div>
   </div>
   <div class="w3-bar tools" id="Rectangle" style="display:none">
     <div class="w3-bar slidecontainer">
       <input type="range" min="0" max="100" value="50" class="slider" id="myAlpha">
-      <div id="demo2" class="w3-bar-item">Transparence : 50 %</div>
+      <div id="demo2" class="w3-bar-item">""")
+print(_('Transparence'))
+print(' : 50 %</div>')
+print("""
     </div>
   </div>
   <div class="w3-bar tools" id="Text" style="display:none">
     <div class="w3-bar slidecontainer">
       <input type="range" min="6" max="100" value="30" class="slider" id="myPolice">
-      <div id="demo3" class="w3-bar-item">Taille Police : 30 px</div>
-    Couleur du Fond :
-    <button class="w3-button w3-border w3-black Text" onclick="setbgcolor(0,0,0,1);">Noir</button>
-    <button class="w3-button w3-border w3-white Text" onclick="setbgcolor(255,255,255,1);">Blanc</button>
-    <button class="w3-button w3-border w3-light-grey Text" onclick="setbgcolor(255,255,255,0.5);">Transparent</button>
+      <div id="demo3" class="w3-bar-item">""")
+print(_('Taille Police'))
+print(' : 30 px</div>')
+print(_('Couleur du Fond :'))
+print('    <button class="w3-button w3-border w3-black Text" onclick="setbgcolor(0,0,0,1);">')
+print(_('Noir'))
+print('</button>    <button class="w3-button w3-border w3-white Text" onclick="setbgcolor(255,255,255,1);">')
+print(_('Blanc'))
+print('</button>    <button class="w3-button w3-border w3-light-grey Text" onclick="setbgcolor(255,255,255,0.5);">')
+print(_('Transparent'))
+print("""</button>
     </div>
   </div>
   """)
@@ -447,15 +465,21 @@ print("""
 </div>
 
 <div class="w3-bar">
-  <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">Sauvegarder </a>
-  <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> RAZ Annot.</a>
-  <a href="#" class="w3-bar-item w3-button" id="add_case"><i class="w3-xlarge fa fa-indent"></i> Ins&eacute;rer</a>
+  <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">""")
+print(_('Sauvegarder'))
+print(' </a>  <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> ')
+print(_('RAZ Annot.'))
+print('</a>  <a href="#" class="w3-bar-item w3-button" id="add_case"><i class="w3-xlarge fa fa-indent"></i> ')
+print(_('Ins&eacute;rer'))
+print("""</a>
   <form action="rm_case.py" method="POST">
   """)
 print('    <input type="text" id="fn" name="fn" value="{}" style="display:none">'.format(filename))
 print('    <input type="text" id="num" name="num" value="{}" style="display:none">'.format(num))
 print("""
-  <button class="w3-bar-item w3-button" type="submit"><i class="w3-xlarge fa fa-remove"></i> Supprimer</button>
+  <button class="w3-bar-item w3-button" type="submit"><i class="w3-xlarge fa fa-remove"></i> """)
+print(_('Supprimer'))
+print("""</button>
 </form>
 </div>
 <div id="canvas_result" style="position:relative"></div>
@@ -471,8 +495,9 @@ print("""
 
 
 <script>
-  function erase() {
-     var m = confirm("Effacer ?");
+  function erase() {""")
+print('var m = confirm("',_('Effacer ?'),'");')
+print("""
      if (m) {
          canvas.clear();
          canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
@@ -547,12 +572,14 @@ print("""
 
 
 var slider1 = document.getElementById("myWidth");
-var output1 = document.getElementById("demo1");
-output1.innerHTML = 'Epaisseur : '+slider1.value + ' px'; // Display the default slider value
+var output1 = document.getElementById("demo1");""")
+print("output1.innerHTML = '",_('Epaisseur :'),"'+slider1.value + ' px';")
+print(""" // Display the default slider value
 
 // Update the current slider value (each time you drag the slider handle)
-slider1.oninput = function() {
-  output1.innerHTML = 'Epaisseur : '+this.value + ' px';
+slider1.oninput = function() { """)
+print("  output1.innerHTML = '",_('Epaisseur :'),"'+this.value + ' px';")
+print("""
   canvas.freeDrawingBrush.width = this.value;
   if (canvas.getActiveObject()) {
     if (canvas.getActiveObject().get('type') === 'path') {
@@ -564,13 +591,15 @@ slider1.oninput = function() {
 }
 
 var slider2 = document.getElementById("myAlpha");
-var output2 = document.getElementById("demo2");
-output2.innerHTML = 'Transparence : '+slider2.value + ' %'; // Display the default slider value
+var output2 = document.getElementById("demo2"); """)
+print("output2.innerHTML = '",_('Transparence :'),"'+slider2.value + ' %';")
+print(""" // Display the default slider value
 var alpha = 1- slider2.value/100 ;
 
 // Update the current slider value (each time you drag the slider handle)
-slider2.oninput = function() {
-  output2.innerHTML = 'Transparence : '+this.value + ' %';
+slider2.oninput = function() { """)
+print("  output2.innerHTML = '",_('Transparence :'),"'+this.value + ' %';")
+print("""
   alpha = 1 - this.value/100 ;
   current_alpha_color = current_color.replace(")",","+alpha+")") ;
   if (canvas.getActiveObject()) {
@@ -583,12 +612,14 @@ slider2.oninput = function() {
 }
 
 var slider3 = document.getElementById("myPolice");
-var output3 = document.getElementById("demo3");
-output3.innerHTML = 'Taille Police : '+slider3.value + ' px'; // Display the default slider value
+var output3 = document.getElementById("demo3");""")
+print("output3.innerHTML = '",_('Taille Police :'),"'+slider3.value + ' px';")
+print(""" // Display the default slider value
 
 // Update the current slider value (each time you drag the slider handle)
-slider3.oninput = function() {
-  output3.innerHTML = 'Taille Police : '+this.value + ' px';
+slider3.oninput = function() {""")
+print("  output3.innerHTML = '",_('Taille Police :'),"'+this.value + ' px';")
+print("""
   if (canvas.getActiveObject()) {
     canvas.getActiveObject().fontSize = this.value ;
     canvas.renderAll() ;

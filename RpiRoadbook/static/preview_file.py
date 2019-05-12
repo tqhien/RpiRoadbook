@@ -11,6 +11,10 @@ import math
 from pdf2image import page_count,convert_from_path,page_size
 import subprocess
 
+# Pour l'internationalisation
+import gettext
+_ = gettext.gettext
+
 if 'filename' in form:
   # On recupere le nom de fichier
   fileitem = form['filename']
@@ -26,7 +30,9 @@ if 'filename' in form:
   <body onload=init()>
   <!-- Entete -->
   <div class="w3-container w3-center w3-section">
-  <h1>Ajout de roadbooks</h1>
+  <h1>""")
+  print(_('Ajout de roadbooks'))
+  print("""</h1>
   </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
 <div class="w3-row">
@@ -40,9 +46,9 @@ if 'filename' in form:
     fn = re.sub(r"[\s-]","_",fn)
     filedir = os.path.splitext(fn)[0]
     open('/mnt/piusb/' + fn, 'wb').write(fileitem.file.read())
-    message = 'Apercu du fichier {}'.format(fn)
+    message = _('Apercu du fichier {}').format(fn)
   else:
-    message = 'Aucun fichier telecharge'
+    message = _('Aucun fichier t&eacute;l&eacute;charg&eacute;')
   print('<p><h3>{}</h3></p>'.format(message))
   # Taille en Postcript point, soit en 72 dpi donc /72*2.54 pour avoir la taille en cm puis ou /72*150 pour avoir le nb de pixel si on extrait a 150dpi
   # pour une page A4, on a donc 595x842 pts, soit une image de 1240x1754px (595/72*150,842/72*150)
@@ -54,7 +60,7 @@ if 'filename' in form:
   if 300 / width_px * height_px > 425 :
     ratio = 425 / height_px
   else :
-    ratio = 300 / width_px    
+    ratio = 300 / width_px
   #print(width,height,width_mm,height_mm)
   page = convert_from_path('/mnt/piusb/'+fn, output_folder='/mnt/piusb/thumbnail/',first_page = 1, last_page=1, dpi=150, singlefile='{:03}'.format(0), fmt='jpg')
   print("""
@@ -69,13 +75,22 @@ if 'filename' in form:
 <div class="w3-half">
     """)
   print('<input type="hidden" name="fn" value="{}">'.format(fn))
+  print('<div><label>')
+  print(_('NB Colonnes'))
+  print('</label><input type="number" class="w3-input w3-border w3-margin" name="nb_colonnes" id="nb_colonnes" value="2" onchange="init()" min="1" step="1" oninput="validity.valid||(value="");"></div>')
+  print('<div><label>')
+  print(_('NB Lignes par colonne'))
+  print('</label><input type="number" class="w3-input w3-border w3-margin" name="nb_lignes" id="nb_lignes" value="8" onchange="init()" min="1" step="1" oninput="validity.valid||(value="");"></div>')
+  print('<div><label>')
+  print(_('Marge haute (mm)'))
+  print('</label><input type="number" class="w3-input w3-border w3-margin" name="margin_up" id="margin_up" value="30" onchange="init()" min="0" step="1" oninput="validity.valid||(value="");"></div>')
+  print('<div><label>')
+  print(_('Marge basse (mm)'))
+  print('</label><input type="number" class="w3-input w3-border w3-margin" name="margin_down" id="margin_down" value="27" onchange="init()" min="0" step="1" oninput="validity.valid||(value="");"></div>')
+  print('<div><label>')
+  print(_('Lecture de bas en haut'))
+  print('</label><input type="checkbox" class="w3-check w3-margin" name="lecture" id="lecture" value="rb" checked onchange="init()"></div>')
   print("""
-        <div><label>NB Colonnes</label><input type="number" class="w3-input w3-border w3-margin" name="nb_colonnes" id="nb_colonnes" value="2" onchange="init()" min="1" step="1" oninput="validity.valid||(value='');"></div>
-        <div><label>NB Lignes par colonne</label><input type="number" class="w3-input w3-border w3-margin" name="nb_lignes" id="nb_lignes" value="8" onchange="init()" min="1" step="1" oninput="validity.valid||(value='');"></div>
-        <div><label>Marge haute (mm)</label><input type="number" class="w3-input w3-border w3-margin" name="margin_up" id="margin_up" value="30" onchange="init()" min="0" step="1" oninput="validity.valid||(value='');"></div>
-        <div><label>Marge basse (mm)</label><input type="number" class="w3-input w3-border w3-margin" name="margin_down" id="margin_down" value="27" onchange="init()" min="0" step="1" oninput="validity.valid||(value='');"></div>
-        <div><label>Lecture de bas en haut</label><input type="checkbox" class="w3-check w3-margin" name="lecture" id="lecture" value="rb" checked onchange="init()"></div>
-
 </div>
 
 <div class="w3-half" id="mycanvas" style="float:left;position:relative;height:425px">
@@ -86,9 +101,13 @@ if 'filename' in form:
 </div>
 
 <div class="w3-bar w3-grey">
-    <button class="w3-submit w3-btn w3-red w3-hover-teal" type="submit">Valider</button>
-    """)
-  print('<a href="cancel_file.py?fn={}" class="w3-bar-item w3-button w3-hover-blue"> Annuler</a>'.format(fn))
+    <button class="w3-submit w3-btn w3-red w3-hover-teal" type="submit">""")
+  print(_('Valider'))
+  print('</button>')
+
+  print('<a href="cancel_file.py?fn={}" class="w3-bar-item w3-button w3-hover-blue"> '.format(fn))
+  print(_('Annuler'))
+  print('</a>')
   print("""
 </div>
 </form>
@@ -100,7 +119,9 @@ if 'filename' in form:
 <div class="w3-container w3-section w3-border-grey w3-center">
 <div class="w3-row">
 	<div class="w3-col w3-light-grey s12 w3-center">
-<p><h3>Preview de la 1&egrave;re case</h3></p>
+<p><h3>""")
+  print(_('Apercu de la 1&egrave;re case'))
+  print("""</h3></p>
 </div>
 <div>
 """)
