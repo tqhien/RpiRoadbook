@@ -10,9 +10,22 @@ import gettext
 _ = gettext.gettext
 
 setupconfig = configparser.ConfigParser()
+rbconfig = configparser.ConfigParser()
+
+# On charge les reglages : mode, orientation, etc
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+setupconfig.read(candidates)
+
+en = gettext.translation('static', localedir='locales', languages=['en'])
+#it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
+langue = setupconfig['Parametres']['langue']
+if langue == 'EN' :
+    en.install()
+    _ = en.gettext # English
+
 # On charge les reglages : mode, orientation, etc
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/RpiRoadbook.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
-setupconfig.read(candidates)
+rbconfig.read(candidates)
 
 #files = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
 files = [f for f in os.listdir('/mnt/piusb/') if re.search('.pdf$', f)]
@@ -45,15 +58,15 @@ print("""</h3></p></div>
 <div class="w3-row">
 		<!-- <div class="w3-col s12 m4 w3-red w3-center"><a class="w3-button w3-block" href="upload.html"><i class="w3-xlarge fa fa-map-signs"></i> Rallye</a></div> -->
 """)
-print('	<div class="w3-col s12 m4 w3-red w3-center w3-disabled">' if setupconfig['Mode']['mode']=='Rallye' else '	<div class="w3-col s12 m4 w3-red w3-center">')
+print('	<div class="w3-col s12 m4 w3-red w3-center w3-disabled">' if rbconfig['Mode']['mode']=='Rallye' else '	<div class="w3-col s12 m4 w3-red w3-center">')
 print('<a class="w3-button w3-block" href="mode_rallye.py"><i class="w3-xlarge material-icons">call_split</i> ')
 print(_('Rallye'))
 print('</a></div>')
-print('	<div class="w3-col s12 m4 w3-green w3-center w3-disabled">' if setupconfig['Mode']['mode']=='Route' else '	<div class="w3-col s12 m4 w3-green w3-center">')
+print('	<div class="w3-col s12 m4 w3-green w3-center w3-disabled">' if rbconfig['Mode']['mode']=='Route' else '	<div class="w3-col s12 m4 w3-green w3-center">')
 print('<a class="w3-button w3-block" href="mode_route.py"><i class="w3-xlarge fa fa-tachometer"></i> ')
 print(_('Route'))
 print('</a></div>')
-print('	<div class="w3-col s12 m4 w3-teal w3-center w3-disabled">' if setupconfig['Mode']['mode']=='Zoom' else '	<div class="w3-col s12 m4 w3-teal w3-center">')
+print('	<div class="w3-col s12 m4 w3-teal w3-center w3-disabled">' if rbconfig['Mode']['mode']=='Zoom' else '	<div class="w3-col s12 m4 w3-teal w3-center">')
 print('<a class="w3-button w3-block" href="mode_zoom.py"><i class="w3-xlarge fa fa-search-plus"></i> ')
 print(_('Zoom'))
 print('</a></div>')
@@ -101,6 +114,13 @@ print('</a>')
 print('  <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i> ')
 print(_('Configuration'))
 print("""</a>
+</div>
+<div class="w3-bar">
+  <a class="w3-bar-item" href="set_fr.py">FR</a>
+  <a class="w3-bar-item" href="set_en.py">EN</a>
+  <a class="w3-bar-item" href="set_it.py">IT</a>
+  <a class="w3-bar-item" href="set_de.py">DE</a>
+  <a class="w3-bar-item" href="set_es.py">ES</a>
 </div>
 
 </body>
