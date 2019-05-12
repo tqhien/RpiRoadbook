@@ -26,7 +26,7 @@ print ("""<html>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Changement de mode')
+print(_('Changement de mode'))
 print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
@@ -44,7 +44,9 @@ for attempt in range(5):
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
   else :
-    print ('<h3>Route</h3>')
+    print ('<h3>')
+    print(_('Route'))
+    print('</h3>')
     break
 else :
   print('Write Error RpiRoadbook.cfg after 5 tries')
@@ -56,9 +58,12 @@ print("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>""")
+  <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>
+  """)
 print(_('Configurer'))
-print("""</a>
+print("""
+</a>
 </div>
 </body>
-</html>""")
+</html>
+""")
