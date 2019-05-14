@@ -143,7 +143,9 @@ up_state = False
 down_state = False
 
 en = gettext.translation('rpiroadbook', localedir='locales', languages=['en'])
-#it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
+it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
+de = gettext.translation('rpiroadbook', localedir='locales', languages=['de'])
+es = gettext.translation('rpiroadbook', localedir='locales', languages=['es'])
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
@@ -1344,9 +1346,15 @@ def check_configfile():
     if langue == 'EN' :
         en.install()
         _ = en.gettext # English
-    #elif langue == 'IT' :
-    #    it.install()
-    #    _ = it.gettext # Italiano
+    elif langue == 'IT' :
+        it.install()
+        _ = it.gettext # Italiano
+    elif langue == 'DE' :
+        de.install()
+        _ = de.gettext
+    elif langue == 'ES' :
+        es.install
+        _ = es.gettext
 
     # On charge le mode en cours, l'ecran en cours, le roadbook en cours et sa case
     candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
