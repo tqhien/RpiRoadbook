@@ -19,7 +19,24 @@ roue = setupconfig['Parametres']['roue']
 aimants = setupconfig['Parametres']['aimants']
 orientation = setupconfig['Parametres']['orientation']
 lecture = setupconfig['Parametres']['lecture']
+
+en = gettext.translation('static', localedir='locales', languages=['en'])
+it = gettext.translation('static', localedir='locales', languages=['it'])
+de = gettext.translation('static', localedir='locales', languages=['de'])
+es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
+if langue == 'EN' :
+    en.install()
+    _ = en.gettext # English
+elif langue == 'IT' :
+    it.install()
+    _ = it.gettext # Italiano
+elif langue == 'DE' :
+    de.install()
+    _ = de.gettext
+elif langue == 'ES' :
+    es.install
+    _ = es.gettext
 
 datetime_now = time.localtime ()
 st_date = '{}-{:02d}-{:02d}'.format(datetime_now.tm_year,datetime_now.tm_mon,datetime_now.tm_mday)
