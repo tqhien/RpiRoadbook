@@ -17,11 +17,22 @@ candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/hom
 setupconfig.read(candidates)
 
 en = gettext.translation('static', localedir='locales', languages=['en'])
-#it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
+it = gettext.translation('static', localedir='locales', languages=['it'])
+de = gettext.translation('static', localedir='locales', languages=['de'])
+es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
 if langue == 'EN' :
     en.install()
     _ = en.gettext # English
+elif langue == 'IT' :
+    it.install()
+    _ = it.gettext # Italiano
+elif langue == 'DE' :
+    de.install()
+    _ = de.gettext
+elif langue == 'ES' :
+    es.install
+    _ = es.gettext
 
 # On charge les reglages : mode, orientation, etc
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/RpiRoadbook.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
