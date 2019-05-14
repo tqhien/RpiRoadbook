@@ -5,9 +5,33 @@ import cgitb; cgitb.enable()
 
 import time
 
+import configparser
+setupconfig = configparser.ConfigParser()
 # Pour l'internationalisation
 import gettext
 _ = gettext.gettext
+# On charge les reglages : mode, orientation, etc
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+setupconfig.read(candidates)
+
+en = gettext.translation('static', localedir='locales', languages=['en'])
+it = gettext.translation('static', localedir='locales', languages=['it'])
+de = gettext.translation('static', localedir='locales', languages=['de'])
+es = gettext.translation('static', localedir='locales', languages=['es'])
+langue = setupconfig['Parametres']['langue']
+if langue == 'EN' :
+    en.install()
+    _ = en.gettext # English
+elif langue == 'IT' :
+    it.install()
+    _ = it.gettext # Italiano
+elif langue == 'DE' :
+    de.install()
+    _ = de.gettext
+elif langue == 'ES' :
+    es.install
+    _ = es.gettext
+
 
 datetime_now = time.localtime ()
 st_date = '{}-{:02d}-{:02d}'.format(datetime_now.tm_year,datetime_now.tm_mon,datetime_now.tm_mday)

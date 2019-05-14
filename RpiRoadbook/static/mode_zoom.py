@@ -5,14 +5,38 @@ import cgitb; cgitb.enable()
 import re
 import configparser
 
+setupconfig = configparser.ConfigParser()
 # Pour l'internationalisation
 import gettext
 _ = gettext.gettext
 
 setupconfig = configparser.ConfigParser()
 # On charge les reglages : mode, orientation, etc
-candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/RpiRoadbook.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
+
+en = gettext.translation('static', localedir='locales', languages=['en'])
+it = gettext.translation('static', localedir='locales', languages=['it'])
+de = gettext.translation('static', localedir='locales', languages=['de'])
+es = gettext.translation('static', localedir='locales', languages=['es'])
+langue = setupconfig['Parametres']['langue']
+if langue == 'EN' :
+    en.install()
+    _ = en.gettext # English
+elif langue == 'IT' :
+    it.install()
+    _ = it.gettext # Italiano
+elif langue == 'DE' :
+    de.install()
+    _ = de.gettext
+elif langue == 'ES' :
+    es.install
+    _ = es.gettext
+
+# On charge les reglages : mode, orientation, etc
+rbconfig = configparser.ConfigParser()
+candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/RpiRoadbook.cfg','/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
+rbconfig.read(candidates)
 
 print ('Content-Type: text/html\n')
 print ("""<html>
@@ -34,12 +58,12 @@ print("""</h1>
 print(_('Nouveau mode :'))
 print('</h3>')
 
-setupconfig['Mode']['mode'] = 'Zoom'
+rbconfig['Mode']['mode'] = 'Zoom'
 
 for attempt in range(5):
   try :
     with open('/mnt/piusb/.conf/RpiRoadbook.cfg', 'w') as configfile:
-      setupconfig.write(configfile)
+      rbconfig.write(configfile)
   except :
     subprocess.Popen('sudo mount -a',shell=True)
     time.sleep(.2)
