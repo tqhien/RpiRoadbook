@@ -265,7 +265,9 @@ for j in range (1,nb_screens+1):
 print("""
 
         <div class="w3-bar">
-                <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">Valider</button>
+                <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">""")
+print(_('Valider'))
+print("""</button>
         </div>
     </form>
     </div>
@@ -273,7 +275,9 @@ print("""
     <!-- Pied de page -->
     <div class="w3-bar w3-black">
       <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-      <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>Configuration</a>
+      <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>""")
+print(_('Configuration'))
+print("""</a>
     </div>
 
     <script>
