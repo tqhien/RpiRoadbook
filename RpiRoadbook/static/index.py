@@ -73,13 +73,13 @@ print('	<div class="w3-col s12 m4 w3-red w3-center w3-disabled">' if rbconfig['M
 print('<a class="w3-button w3-block" href="mode_rallye.py"><i class="w3-xlarge material-icons">call_split</i> ')
 print(_('Rallye'))
 print('</a></div>')
-print('	<div class="w3-col s12 m4 w3-green w3-center w3-disabled">' if rbconfig['Mode']['mode']=='Route' else '	<div class="w3-col s12 m4 w3-green w3-center">')
-print('<a class="w3-button w3-block" href="mode_route.py"><i class="w3-xlarge fa fa-tachometer"></i> ')
-print(_('Route'))
-print('</a></div>')
 print('	<div class="w3-col s12 m4 w3-teal w3-center w3-disabled">' if rbconfig['Mode']['mode']=='Zoom' else '	<div class="w3-col s12 m4 w3-teal w3-center">')
 print('<a class="w3-button w3-block" href="mode_zoom.py"><i class="w3-xlarge fa fa-search-plus"></i> ')
 print(_('Zoom'))
+print('</a></div>')
+print('	<div class="w3-col s12 m4 w3-green w3-center w3-disabled">' if rbconfig['Mode']['mode']=='Route' else '	<div class="w3-col s12 m4 w3-green w3-center">')
+print('<a class="w3-button w3-block" href="mode_route.py"><i class="w3-xlarge fa fa-tachometer"></i> ')
+print(_('Route'))
 print('</a></div>')
 print("""
 </div>
