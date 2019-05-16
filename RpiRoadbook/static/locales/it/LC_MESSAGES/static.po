@@ -1,457 +1,698 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"POT-Creation-Date: 2019-05-12 03:44+CEST\n"
-"PO-Revision-Date: 2019-05-13 01:17+0200\n"
-"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 2.2.1\n"
-"Last-Translator: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.2.2\n"
+"Project-Id-Version: RpiRoadbook\n"
 "Language: it\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
 
-#: static/add_case.py:35
-msgid "Case ins&eacute;r&eacute;e"
-msgstr ""
+#: RpiRoadbook.py:832
+msgid " Totalisateur"
+msgstr " Distanza"
 
-#: static/add_case.py:37
-msgid "Erreur pas de donn&eacute;es"
-msgstr ""
+#: RpiRoadbook.py:855
+msgid " Vitesse"
+msgstr " Velocit&agrave;"
 
-#: static/annotation.py:264 static/text_editor.py:394
-msgid "Annotations"
-msgstr ""
+#: RpiRoadbook.py:918
+msgid " Trip1"
+msgstr " Trip1"
 
-#: static/annotation.py:283
-msgid "Sauvegarder "
-msgstr ""
+#: RpiRoadbook.py:941
+msgid " Vmoy1"
+msgstr " Vel.media1"
 
-#: static/annotation.py:287 static/text_editor.py:471
-msgid "RAZ Annot."
-msgstr ""
+#: RpiRoadbook.py:966
+msgid " Vmax1"
+msgstr " Vel.max1"
 
-#: static/cancel_file.py:23
-msgid "Annulation"
-msgstr ""
+#: RpiRoadbook.py:1002
+msgid " Chrono1"
+msgstr " Chrono1"
 
-#: static/cancel_file.py:28
-msgid "Annulation du t&eacute;l&eacute;chargement :"
-msgstr ""
+#: RpiRoadbook.py:1062
+msgid " Trip2"
+msgstr " Trip2"
 
-#: static/cancel_file.py:56 static/rm_rb.py:56
-msgid "Pas de choix"
-msgstr ""
+#: RpiRoadbook.py:1083
+msgid " Vmoy2"
+msgstr " Vel.media2"
 
-#: static/clock_setup.py:29 static/save_clock.py:31
-msgid "R&eacute;glage de l'horloge"
-msgstr ""
+#: RpiRoadbook.py:1106
+msgid " Vmax2"
+msgstr " Vel.max2"
 
-#: static/clock_setup.py:37
-msgid "Date:"
-msgstr ""
+#: RpiRoadbook.py:1140
+msgid " Chrono2"
+msgstr " Chrono2"
 
-#: static/clock_setup.py:45
-msgid "Heure:"
-msgstr ""
+#: RpiRoadbook.py:1216
+msgid " Decompte"
+msgstr " Countdown"
 
-#: static/clock_setup.py:55 static/preview_file.py:105 static/setup.py:94
-#: static/wifi_setup.py:65
-msgid "Valider"
-msgstr ""
+#: RpiRoadbook.py:1232
+msgid " Heure"
+msgstr " Orario"
 
-#: static/clock_setup.py:66 static/index.py:102 static/save_clock.py:55
-#: static/save_screen.py:69
-msgid "Configuration"
-msgstr ""
+#: RpiRoadbook.py:1548 RpiRoadbook.py:1555
+msgid "Demarrage automatique dans 5s..."
+msgstr "Riavvio in 5s..."
 
-#: static/convert_case.py:72
-msgid "Case {} / {}<br>"
-msgstr ""
+#: RpiRoadbook.py:1549 RpiRoadbook.py:1556
+msgid "Selectionnez le roadbook a charger :"
+msgstr "Selezione roadbook:"
 
-#: static/convert_file.py:31
-msgid "Conversion"
-msgstr ""
+#: RpiRoadbook.py:1641
+msgid "(moins)"
+msgstr "(Precedente)"
 
-#: static/convert_file.py:38
-msgid "Traitement en cours. Veuillez patienter"
-msgstr ""
+#: RpiRoadbook.py:1650
+msgid " (En cours)"
+msgstr " (Attuale)"
 
-#: static/convert_file.py:41
-msgid ""
-"La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e "
-"(environ 1 seconde/case)"
-msgstr ""
+#: RpiRoadbook.py:1664
+msgid "(plus)"
+msgstr "(Successivo)"
 
-#: static/index.py:34
-msgid "Gestionnaire du RpiRoadbook"
-msgstr ""
+#: RpiRoadbook.py:1676
+msgid "Demarrage automatique dans {:1.0f}s..."
+msgstr "Riavvio in {:1.0f}s.."
 
-#: static/index.py:42 static/mode_rallye.py:29 static/mode_route.py:29
-#: static/mode_zoom.py:29
-msgid "Changement de mode"
-msgstr ""
+#: RpiRoadbook.py:1719
+msgid "Aucun roadbook present."
+msgstr " Roadbook non trovato"
 
-#: static/index.py:50
+#: RpiRoadbook.py:1720
+msgid "Appuyez sur un bouton pour revenir"
+msgstr "Premi pulsante per ritornare"
+
+#: RpiRoadbook.py:1721
+msgid "au menu en mode Route"
+msgstr "Modalit&agrave; Stradale"
+
+#: RpiRoadbook.py:1765
+msgid "Mode :"
+msgstr "Modalit&agrave;:"
+
+#: index.py:74
 msgid "Rallye"
-msgstr ""
+msgstr "Rallye"
 
-#: static/index.py:54 static/mode_route.py:48
+#: RpiRoadbook.py:1767
+msgid "Jour/Nuit :"
+msgstr "Giorno/Notte:"
+
+#: RpiRoadbook.py:1769
+msgid "Orientation :"
+msgstr "Orientamento:"
+
+#: RpiRoadbook.py:1770 RpiRoadbook.py:1919
+msgid "Portrait "
+msgstr "Ritratto verticale "
+
+#: RpiRoadbook.py:1912
+msgid "Jour   "
+msgstr "Giorno "
+
+#: RpiRoadbook.py:1914
+msgid "Nuit   "
+msgstr "Notte "
+
+#: setup.py:87 setup.py:90
+msgid "Paysage"
+msgstr "Paesaggio"
+
+#: RpiRoadbook.py:1917
+msgid "Paysage "
+msgstr "Paesaggio "
+
+#: RpiRoadbook.py:1954
+msgid "Roue :"
+msgstr "Dimensione Ruota:"
+
+#: RpiRoadbook.py:1956
+msgid "Nb aimants :"
+msgstr "Magneti:"
+
+#: RpiRoadbook.py:1958
+msgid "Date :"
+msgstr "Data:"
+
+#: clock_setup.py:47
+msgid "Heure:"
+msgstr "Orario:"
+
+#: RpiRoadbook.py:2178
+msgid "Preparation du roadbook... Patience..."
+msgstr "Roadbook in preparazione..Attendere"
+
+#: RpiRoadbook.py:2186
+msgid "Conversion des cases en cours..."
+msgstr "Conversione dei Waypoint..."
+
+#: RpiRoadbook.py:2189 RpiRoadbook.py:2223 RpiRoadbook.py:2240
+#: RpiRoadbook.py:2278
+msgid "Case {}/{}"
+msgstr "Waypoint {}/{}"
+
+#: RpiRoadbook.py:2195
+msgid "Format Tripy. Conversion en cours..."
+msgstr "Tripy individuato. Conversione..."
+
+#: RpiRoadbook.py:2238 RpiRoadbook.py:2252
+msgid "Pas le meme nombre de cases ! On verifie..."
+msgstr "Waypoint non collimano. Controllo..."
+
+#: add_case.py:35
+msgid "Case ins&eacute;r&eacute;e"
+msgstr "Waypoint inserito"
+
+#: add_case.py:37
+msgid "Erreur pas de donn&eacute;es"
+msgstr "Errore nessun dato"
+
+#: annotation.py:264 text_editor.py:394
+msgid "Annotations"
+msgstr "Note"
+
+#: annotation.py:283
+msgid "Sauvegarder "
+msgstr "Salva "
+
+#: annotation.py:287 text_editor.py:471
+msgid "RAZ Annot."
+msgstr "Azzera le note"
+
+#: cancel_file.py:23
+msgid "Annulation"
+msgstr "Annulla"
+
+#: cancel_file.py:28
+msgid "Annulation du t&eacute;l&eacute;chargement :"
+msgstr "Caricamento annullato"
+
+#: cancel_file.py:56 rm_rb.py:56
+msgid "Pas de choix"
+msgstr "Nulla selezionato"
+
+#: clock_setup.py:30 save_clock.py:31
+msgid "R&eacute;glage de l'horloge"
+msgstr "Imposta orologio"
+
+#: clock_setup.py:39
+msgid "Date:"
+msgstr "Data:"
+
+#: clock_setup.py:58 preview_file.py:105 setup.py:150 wifi_setup.py:65
+msgid "Valider"
+msgstr "OK"
+
+#: clock_setup.py:70 index.py:126 save_clock.py:55 save_screen.py:69
+msgid "Configuration"
+msgstr "Impostazioni"
+
+#: convert_case.py:72
+msgid "Case {} / {}<br>"
+msgstr "Waypoint {} / {}<br>"
+
+#: convert_file.py:31
+msgid "Conversion"
+msgstr "Conversione"
+
+#: convert_file.py:38
+msgid "Traitement en cours. Veuillez patienter"
+msgstr "Elaborazione. Attendere"
+
+#: convert_file.py:41
+msgid "La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (environ 1 seconde/case)"
+msgstr "Waypoint saranno visibili dopo la elaborazione (richiede 1sec/waypoint)"
+
+#: index.py:58
+msgid "Gestionnaire du RpiRoadbook"
+msgstr "Rpiroadbook Centro di Controllo"
+
+#: index.py:66 mode_rallye.py:29 mode_route.py:29 mode_zoom.py:29
+msgid "Changement de mode"
+msgstr "Cambia modalit&agrave;"
+
+#: index.py:78 mode_route.py:48
 msgid "Route"
-msgstr ""
+msgstr "Strada"
 
-#: static/index.py:58
+#: index.py:82
 msgid "Zoom"
-msgstr ""
+msgstr "Zoom"
 
-#: static/index.py:71
+#: index.py:95
 msgid "Nom du roadbook (clic pour annoter)"
-msgstr ""
+msgstr "Roadbook (clicca per le note)"
 
-#: static/index.py:85
+#: index.py:109
 msgid "Ajouter un Roadbook"
-msgstr ""
+msgstr "Aggiungi un Roadbook"
 
-#: static/index.py:88
+#: index.py:112
 msgid "Etes-vous s&ucirc;r de vouloir supprimer ?"
-msgstr ""
+msgstr "Sicuro di voler cancellare?"
 
-#: static/index.py:90
+#: index.py:114
 msgid "Supprimer les roadbooks s&eacute;lectionn&eacute;s"
-msgstr ""
+msgstr "Rimuovi i roadbook selezionati"
 
-#: static/index.py:99
+#: index.py:123
 msgid "Personnaliser les &eacute;crans"
-msgstr ""
+msgstr "Impostazioni schermo"
 
-#: static/mode_rallye.py:34 static/mode_route.py:34 static/mode_zoom.py:34
+#: mode_rallye.py:34 mode_route.py:34 mode_zoom.py:34
 msgid "Nouveau mode :"
-msgstr ""
+msgstr "Nuova modalit&agrave;:"
 
-#: static/mode_rallye.py:53 static/mode_route.py:54 static/mode_zoom.py:52
+#: mode_rallye.py:53 mode_route.py:54 mode_zoom.py:52
 msgid "Attendez 5 secondes et red&eacute;marrez le RpiRoadbook"
-msgstr ""
+msgstr "Attesa 5sec e poi riavvio Rpiroadbook"
 
-#: static/mode_rallye.py:61 static/mode_route.py:63 static/mode_zoom.py:60
-#: static/raz.py:56 static/save_wifi.py:80 static/wifi_setup.py:76
+#: mode_rallye.py:61 mode_route.py:63 mode_zoom.py:60 raz.py:56 save_wifi.py:80
+#: wifi_setup.py:76
 msgid "Configurer"
-msgstr ""
+msgstr "Impostazioni"
 
-#: static/mode_rallye.py:63 static/rm_rb.py:64 static/save_setup.py:96
-#: static/setup.py:105
+#: mode_rallye.py:63 rm_rb.py:64 save_setup.py:109 set_de.py:69 set_en.py:70
+#: set_es.py:69 set_fr.py:63 set_it.py:69 setup.py:161
 msgid "Personnaliser les affichages"
-msgstr ""
+msgstr "Impostazioni schermo"
 
-#: static/ota.py:22 static/warning_ota.py:22
+#: ota.py:22 warning_ota.py:22
 msgid "Mise &agrave; jour Firmware"
-msgstr ""
+msgstr "Aggiornamento firmware"
 
-#: static/ota.py:28
+#: ota.py:28
 msgid "S&eacute;lectionnez le firmware &agrave; t&eacute;l&eacute;charger : "
-msgstr ""
+msgstr "Scegli un firmware da caricare:"
 
-#: static/ota.py:32
+#: ota.py:32
 msgid "T&eacute;l&eacute;charger le firmware..."
-msgstr ""
+msgstr "Caricamento firmware..."
 
-#: static/preview_file.py:34
+#: preview_file.py:34
 msgid "Ajout de roadbooks"
-msgstr ""
+msgstr "Aggiungi Roadbooks"
 
-#: static/preview_file.py:49
+#: preview_file.py:49
 msgid "Apercu du fichier {}"
-msgstr ""
+msgstr "Anteprima : {}"
 
-#: static/preview_file.py:51
+#: preview_file.py:51
 msgid "Aucun fichier t&eacute;l&eacute;charg&eacute;"
-msgstr ""
+msgstr "Nessun file caricato"
 
-#: static/preview_file.py:79
+#: preview_file.py:79
 msgid "NB Colonnes"
-msgstr ""
+msgstr "Colonne"
 
-#: static/preview_file.py:82
+#: preview_file.py:82
 msgid "NB Lignes par colonne"
-msgstr ""
+msgstr "Righe per colonna"
 
-#: static/preview_file.py:85
+#: preview_file.py:85
 msgid "Marge haute (mm)"
-msgstr ""
+msgstr "Margine superiore(mm)"
 
-#: static/preview_file.py:88
+#: preview_file.py:88
 msgid "Marge basse (mm)"
-msgstr ""
+msgstr "Margine inferiore (mm)"
 
-#: static/preview_file.py:91
+#: preview_file.py:91
 msgid "Lecture de bas en haut"
-msgstr ""
+msgstr "Lettura dal basso verso alto"
 
-#: static/preview_file.py:109
+#: preview_file.py:109
 msgid "Annuler"
-msgstr ""
+msgstr "Annulla"
 
-#: static/preview_file.py:123
+#: preview_file.py:123
 msgid "Apercu de la 1&egrave;re case"
-msgstr ""
+msgstr "Anteprima primo waypoint"
 
-#: static/raz.py:23
+#: raz.py:23
 msgid "Retour &agrave la configuration d'usine"
-msgstr ""
+msgstr "Reset"
 
-#: static/raz.py:28 static/rm_rb.py:29
+#: raz.py:28 rm_rb.py:29
 msgid "Fichiers supprim&eacute;s :"
-msgstr ""
+msgstr "Files rimosssi:"
 
-#: static/rm_case.py:39
+#: rm_case.py:39
 msgid "Case supprim&eacute;e"
-msgstr ""
+msgstr "Waipoint cancellato"
 
-#: static/rm_case.py:45
+#: rm_case.py:45
 msgid "Annotation supprim&eacute;e"
-msgstr ""
+msgstr "Nota cancellata"
 
-#: static/rm_rb.py:24
+#: rm_rb.py:24
 msgid "Suppression de roadbooks"
-msgstr ""
+msgstr "Rimuovi roadbook"
 
-#: static/rm_rb.py:66 static/save_setup.py:98 static/setup.py:107
+#: rm_rb.py:66 save_setup.py:111 set_de.py:71 set_en.py:72 set_es.py:71
+#: set_fr.py:65 set_it.py:71 setup.py:163
 msgid "Ajuster l'horloge"
-msgstr ""
+msgstr "Impostazione orologio"
 
-#: static/rm_rb.py:68 static/save_setup.py:102 static/setup.py:112
+#: rm_rb.py:68 save_setup.py:115 set_de.py:75 set_en.py:76 set_es.py:75
+#: set_fr.py:69 set_it.py:75 setup.py:168
 msgid "MAJ Firmware"
-msgstr ""
+msgstr "Aggiornamento firmware"
 
-#: static/save_annotation.py:38
+#: save_annotation.py:38
 msgid "Image sauvegard&eacute;e"
-msgstr ""
+msgstr "Nota salvata"
 
-#: static/save_annotation.py:40
+#: save_annotation.py:40
 msgid "Erreur pas de donn&eacute;es image"
-msgstr ""
+msgstr "Errore nessun file immagine"
 
-#: static/save_clock.py:35
+#: save_clock.py:35
 msgid "R&eacute;glage sauvegard&eacute; :"
-msgstr ""
+msgstr "Impostazioni salvate"
 
-#: static/save_ota.py:30
+#: save_ota.py:30
 msgid "Mise &agrave; jour de firmware"
-msgstr ""
+msgstr "Firmware aggiornato"
 
-#: static/save_ota.py:48
+#: save_ota.py:48
 msgid "Firmware t&eacute;l&eacute;charg&eacute;."
-msgstr ""
+msgstr "Firmware caricato"
 
-#: static/save_ota.py:51
+#: save_ota.py:51
 msgid "Red&eacute;marrez le RpiRoadbook"
-msgstr ""
+msgstr "Riavvio Rpiroadbook"
 
-#: static/save_ota.py:54
+#: save_ota.py:54
 msgid "pour appliquer la mise &agrave; jour."
-msgstr ""
+msgstr "Esegui nuovo firmware"
 
-#: static/save_screen.py:34
+#: save_screen.py:34
 msgid "Configuration des &eacute;crans"
-msgstr ""
+msgstr "Impostazioni schermo"
 
-#: static/save_screen.py:58
+#: save_screen.py:58
 msgid "Configuration sauvegard&eacute;e !"
-msgstr ""
+msgstr "Impostazioni salvate"
 
-#: static/save_screen.py:71 static/screen_setup.py:88
+#: save_screen.py:71 screen_setup.py:88
 msgid "Personnalisation des &eacute;crans"
-msgstr ""
+msgstr "Impostazioni schermo"
 
-#: static/save_setup.py:42 static/save_wifi.py:41 static/setup.py:39
-#: static/wifi_setup.py:38
+#: save_setup.py:50 save_wifi.py:41 setup.py:57 wifi_setup.py:38
 msgid "Configuration g&eacute;n&eacute;rale"
-msgstr ""
+msgstr "Impostazioni generali"
 
-#: static/save_setup.py:48
+#: save_setup.py:56
 msgid "Configuration sauvegard&eacute;e :"
-msgstr ""
+msgstr "Impostazioni salvate"
 
-#: static/save_setup.py:53
+#: save_setup.py:61
 msgid "Roue : {} mm"
-msgstr ""
+msgstr "Dimensioni ruota : {} mm"
 
-#: static/save_setup.py:58
+#: save_setup.py:66
 msgid "Nb aimants : {}"
-msgstr ""
+msgstr "Magneti : {}"
 
-#: static/save_setup.py:63
+#: save_setup.py:71
 msgid "Orientation : {}"
-msgstr ""
+msgstr "Orientamento : {}"
 
-#: static/save_setup.py:68
+#: save_setup.py:76
 msgid "Sens de lecture : {}"
-msgstr ""
+msgstr "Leggi da : {}"
 
-#: static/save_setup.py:100 static/setup.py:110
+#: save_setup.py:81
+msgid "Langue : {}"
+msgstr "Lingua : {}"
+
+#: save_setup.py:113 set_de.py:73 set_en.py:74 set_es.py:73 set_fr.py:67
+#: set_it.py:73 setup.py:166
 msgid "Config. Usine"
-msgstr ""
+msgstr "Reset"
 
-#: static/save_wifi.py:47
+#: save_wifi.py:47
 msgid "Configuration WIFI sauvegard&eacute;e :"
-msgstr ""
+msgstr "Settaggio Wifi salvato:"
 
-#: static/save_wifi.py:56
+#: save_wifi.py:56
 msgid "Mot de passe : {}"
-msgstr ""
+msgstr "Password : {}"
 
-#: static/screen_setup.py:93
+#: screen_setup.py:93
 msgid "Choisissez un &eacute;cran &agrave; personnaliser"
-msgstr ""
+msgstr "Scegli schermo da impostare"
 
-#: static/screen_setup.py:99
+#: screen_setup.py:99
 msgid "Ecran 1"
-msgstr ""
+msgstr "Schermo1"
 
-#: static/screen_setup.py:104
+#: screen_setup.py:104
 msgid "Ecran 2"
-msgstr ""
+msgstr "Schermo2"
 
-#: static/screen_setup.py:109
+#: screen_setup.py:109
 msgid "Ecran 3"
-msgstr ""
+msgstr "Schermo3"
 
-#: static/screen_setup.py:114
+#: screen_setup.py:114
 msgid "Ecran 4"
-msgstr ""
+msgstr "Schermo4"
 
-#: static/setup.py:51
+#: screen_setup.py:143 screen_setup.py:145
+msgid "Jour"
+msgstr "Giorno"
+
+#: screen_setup.py:147 screen_setup.py:149
+msgid "Nuit"
+msgstr "Notte"
+
+#: screen_setup.py:160 screen_setup.py:162
+msgid "3 Champs"
+msgstr "3 Righe"
+
+#: screen_setup.py:164 screen_setup.py:166
+msgid "4 Champs"
+msgstr "4 Righe"
+
+#: screen_setup.py:168 screen_setup.py:170
+msgid "5 Champs"
+msgstr "5 Righe"
+
+#: screen_setup.py:172 screen_setup.py:174
+msgid "6 Champs"
+msgstr "6 Righe"
+
+#: screen_setup.py:193 screen_setup.py:195
+msgid "Odom&egrave;tre"
+msgstr "Distanza"
+
+#: screen_setup.py:197 screen_setup.py:199
+msgid "Trip1"
+msgstr "Trip1"
+
+#: screen_setup.py:201 screen_setup.py:203
+msgid "Trip2"
+msgstr "Trip2"
+
+#: screen_setup.py:205 screen_setup.py:207
+msgid "Vitesse"
+msgstr "Velocit&agrave;"
+
+#: screen_setup.py:209 screen_setup.py:211
+msgid "Moyenne1"
+msgstr "Vel.media1"
+
+#: screen_setup.py:213 screen_setup.py:215
+msgid "Moyenne2"
+msgstr "Vel.media2"
+
+#: screen_setup.py:217 screen_setup.py:219
+msgid "Chrono1"
+msgstr "Orologio1"
+
+#: screen_setup.py:221 screen_setup.py:223
+msgid "Chrono2"
+msgstr "Orologio2"
+
+#: screen_setup.py:225 screen_setup.py:227
+msgid "Decompte"
+msgstr "Countdown"
+
+#: screen_setup.py:229 screen_setup.py:231
+msgid "Vmax1"
+msgstr "Vel.max1"
+
+#: screen_setup.py:233 screen_setup.py:235
+msgid "Vmax2"
+msgstr "Vel.max2"
+
+#: screen_setup.py:237 screen_setup.py:239
+msgid "Heure"
+msgstr "Orario"
+
+#: set_de.py:51 set_en.py:52 set_es.py:51 set_fr.py:45 set_it.py:51
+msgid "Configuration de la langue"
+msgstr "Impostazione lingua"
+
+#: set_de.py:57 set_en.py:58 set_es.py:57 set_fr.py:51 set_it.py:57
+msgid "Langue modifi&eacute;e : {}."
+msgstr "Lingua modificata in:"
+
+#: set_de.py:58 set_en.py:59 set_es.py:58 set_fr.py:52 set_it.py:58
+msgid "Retour &agrave; l'accueil dans 5 secondes"
+msgstr "Torno al menu base in 5 sec"
+
+#: setup.py:69
 msgid "Roue (en mm)"
-msgstr ""
+msgstr "Dimensione Ruota(mm)"
 
-#: static/setup.py:58
+#: setup.py:76
 msgid "Aimant(s)"
-msgstr ""
+msgstr "Magneti(s)"
 
-#: static/setup.py:65
+#: setup.py:83
 msgid "Orientation"
-msgstr ""
+msgstr "Orientamento"
 
-#: static/setup.py:79
+#: setup.py:88 setup.py:91
+msgid "Portrait"
+msgstr "Ritratto verticale"
+
+#: setup.py:97
 msgid "Sens de lecture"
-msgstr ""
+msgstr "Lettura"
 
-#: static/text_editor.py:430
+#: setup.py:101 setup.py:104
+msgid "De Bas En Haut"
+msgstr "Dal basso verso alto"
+
+#: setup.py:102 setup.py:105
+msgid "De Haut En Bas"
+msgstr "Da alto verso basso"
+
+#: setup.py:111
+msgid "Langue"
+msgstr "Lingua"
+
+#: text_editor.py:430
 msgid "Epaisseur"
-msgstr ""
+msgstr "Larghezza"
 
-#: static/text_editor.py:439
+#: text_editor.py:439
 msgid "Transparence"
-msgstr ""
+msgstr "Trasparenza"
 
-#: static/text_editor.py:448
+#: text_editor.py:448
 msgid "Taille Police"
-msgstr ""
+msgstr "Dimensione Font"
 
-#: static/text_editor.py:450
+#: text_editor.py:450
 msgid "Couleur du Fond :"
-msgstr ""
+msgstr "Colore dello sfondo:"
 
-#: static/text_editor.py:452
+#: text_editor.py:452
 msgid "Noir"
-msgstr ""
+msgstr "Nero"
 
-#: static/text_editor.py:454
+#: text_editor.py:454
 msgid "Blanc"
-msgstr ""
+msgstr "Bianco"
 
-#: static/text_editor.py:456
+#: text_editor.py:456
 msgid "Transparent"
-msgstr ""
+msgstr "Trasparente"
 
-#: static/text_editor.py:469
+#: text_editor.py:469
 msgid "Sauvegarder"
-msgstr ""
+msgstr "Salva"
 
-#: static/text_editor.py:473
+#: text_editor.py:473
 msgid "Ins&eacute;rer"
-msgstr ""
+msgstr "Inserisci"
 
-#: static/text_editor.py:481
+#: text_editor.py:481
 msgid "Supprimer"
-msgstr ""
+msgstr "Rimuovi"
 
-#: static/text_editor.py:499
+#: text_editor.py:499
 msgid "Effacer ?"
-msgstr ""
+msgstr "Cancello?"
 
-#: static/text_editor.py:576 static/text_editor.py:581
+#: text_editor.py:576 text_editor.py:581
 msgid "Epaisseur :"
-msgstr ""
+msgstr "Larghezza:"
 
-#: static/text_editor.py:595 static/text_editor.py:601
+#: text_editor.py:595 text_editor.py:601
 msgid "Transparence :"
-msgstr ""
+msgstr "Trasparenza:"
 
-#: static/text_editor.py:616 static/text_editor.py:621
+#: text_editor.py:616 text_editor.py:621
 msgid "Taille Police :"
-msgstr ""
+msgstr "Dimensione Font:"
 
-#: static/upload.py:22
+#: upload.py:22
 msgid "Ajout d'un Roadbook"
-msgstr ""
+msgstr "Aggiungi un Roadbook"
 
-#: static/upload.py:28
+#: upload.py:28
 msgid "S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : "
-msgstr ""
+msgstr "Seleziona file ca caricare:"
 
-#: static/upload.py:32
+#: upload.py:32
 msgid "Pr&eacute;visualiser..."
-msgstr ""
+msgstr "Anteprima..."
 
-#: static/warning_ota.py:27
-msgid ""
-"Attention : une mauvaise mise &agrave; jour peut rendre votre RpiRoadbook "
-"non fonctionnel"
-msgstr ""
+#: warning_ota.py:27
+msgid "Attention : une mauvaise mise &agrave; jour peut rendre votre RpiRoadbook non fonctionnel"
+msgstr "Attenzione: un firmware sbagliato potrebbe manomettere Rpiroadbook"
 
-#: static/warning_ota.py:29 static/warning_raz.py:33
+#: warning_ota.py:29 warning_raz.py:33
 msgid "Etes-vous s&ucirc;r de vouloir continuer ?"
-msgstr ""
+msgstr "Continuo?"
 
-#: static/warning_ota.py:33 static/warning_raz.py:37
+#: warning_ota.py:33 warning_raz.py:37
 msgid "Annuler et revenir &agrave; l'accueil"
-msgstr ""
+msgstr "Annulla e torna al menu base"
 
-#: static/warning_ota.py:36 static/warning_raz.py:40
+#: warning_ota.py:36 warning_raz.py:40
 msgid "Etes-vous s&ucirc;r ?"
-msgstr ""
+msgstr "Continuo?"
 
-#: static/warning_ota.py:38 static/warning_raz.py:42
+#: warning_ota.py:38 warning_raz.py:42
 msgid "Continuer"
-msgstr ""
+msgstr "Continuo "
 
-#: static/warning_raz.py:22
+#: warning_raz.py:22
 msgid "Configuration usine"
-msgstr ""
+msgstr "Reset di fabbrica"
 
-#: static/warning_raz.py:27
-msgid ""
-"Le retour &agrave; la configuration usine effacera vos personnalisations"
-msgstr ""
+#: warning_raz.py:27
+msgid "Le retour &agrave; la configuration usine effacera vos personnalisations"
+msgstr "Il reset di fabbrica canceller&agrave; le tue impostazioni"
 
-#: static/warning_raz.py:29
+#: warning_raz.py:29
 msgid "(Param&egrave;tres et personalisation d'&eacute;crans)"
-msgstr ""
+msgstr "(Impostazioni generali e schermo)"
 
-#: static/warning_raz.py:31
+#: warning_raz.py:31
 msgid "Les roadbooks et leurs annotations sont cependant gard&eacute;s !"
-msgstr ""
+msgstr "I roadbook vengono mantenuti!"
 
-#: static/wifi_setup.py:50
+#: wifi_setup.py:50
 msgid "R&eacute;seau wifi (SSID) :"
-msgstr ""
+msgstr "Wifi SSID :"
 
-#: static/wifi_setup.py:57
+#: wifi_setup.py:57
 msgid "Mot de passe : "
-msgstr ""
+msgstr "Password : "
