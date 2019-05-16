@@ -76,6 +76,16 @@ if 'user_lecture' in form:
   print (_('Sens de lecture : {}').format(setupconfig['Parametres']['lecture']))
   print('<br>')
 
+if 'user_trip' in form:
+  setupconfig['Parametres']['boutonsTrip'] = form['user_trip'].value
+  print (_('Boutons Trip, mode : {}').format(setupconfig['Parametres']['boutonsTrip']))
+  print('<br>')
+
+if 'user_rb' in form:
+  setupconfig['Parametres']['boutonsRB'] = form['user_rb'].value
+  print (_('Boutons RB, mode : {}').format(setupconfig['Parametres']['boutonsRB']))
+  print('<br>')
+
 if 'user_langue' in form:
   setupconfig['Parametres']['langue'] = form['user_langue'].value
   print (_('Langue : {}').format(setupconfig['Parametres']['langue']))

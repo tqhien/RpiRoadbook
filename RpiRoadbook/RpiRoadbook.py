@@ -117,6 +117,9 @@ fichiers = []
 
 rb_ratio = 1
 
+boutonsTrip = 1
+boutonsRB = 1
+
 CAPTEUR_ROUE    = USEREVENT # Odometre
 BOUTON_LEFT     = pygame.K_LEFT # Bouton left (tout en haut)
 BOUTON_HOME     = pygame.K_HOME # Bouton left long
@@ -337,14 +340,30 @@ def input_down_callback(channel):
     down_long_state = False
     GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
 
+# On charge les reglages des boutons
+setupconfig = configparser.ConfigParser()
+candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+setupconfig.read(candidates)
+boutonsTrip = setupconfig['Parametres']['boutonsTrip']
+boutonsRB = setupconfig['Parametres']['boutonsRB']
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
 GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
-GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+
+if boutonsTrip == '2' :
+    GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+else :
+    GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+
+if boutonsRB == '2' :
+    GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+else :
+    GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
 
 
 #*******************************************************************************************************#
@@ -1246,7 +1265,6 @@ class heure_widget(rb_widget):
 #----------------------------------------------------------------------------------------------#
 #-------------------------- Vérification configfiles ------------------------------------------#
 #----------------------------------------------------------------------------------------------#
-setupconfig = configparser.ConfigParser()
 guiconfig = configparser.ConfigParser()
 rbconfig = configparser.ConfigParser()
 odoconfig = configparser.ConfigParser()
@@ -1331,6 +1349,7 @@ def check_configfile():
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture,langue
     global widgets,nb_widgets,ncases,current_screen,mode_jour
     global chrono_decompte,start_decompte,en,_
+    global boutonsTrip,boutonsRB
     # On charge les emplacements des elements d'affichage
     guiconfig.read('/home/rpi/RpiRoadbook/gui.cfg')
 
@@ -1342,7 +1361,10 @@ def check_configfile():
     developpe = float(setupconfig['Parametres']['roue']) / float(setupconfig['Parametres']['aimants'])
     orientation = setupconfig['Parametres']['orientation']
     lecture = setupconfig['Parametres']['lecture']
+    boutonsTrip = setupconfig['Parametres']['boutonsTrip']
+    boutonsRB = setupconfig['Parametres']['boutonsRB']
     langue = setupconfig['Parametres']['langue']
+
     if langue == 'EN' :
         en.install()
         _ = en.gettext # English

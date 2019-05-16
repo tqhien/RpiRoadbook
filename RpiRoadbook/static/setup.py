@@ -19,6 +19,8 @@ roue = setupconfig['Parametres']['roue']
 aimants = setupconfig['Parametres']['aimants']
 orientation = setupconfig['Parametres']['orientation']
 lecture = setupconfig['Parametres']['lecture']
+boutonsTrip = setupconfig['Parametres']['boutonsTrip']
+boutonsRB = setupconfig['Parametres']['boutonsRB']
 
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
@@ -64,21 +66,21 @@ print("""</h1>
    <div class="w3-row-padding">
 
 """)
-print('   <div class="w3-quarter">')
+print('   <div class="w3-col m3">')
 print('    <label>')
 print(_('Roue (en mm)'))
 print('</label>')
 print('    <input type="text" id="roue" name="user_roue" value="{}" class="w3-input w3-border" placeholder="1864">'.format(roue))
 print('  </div>')
 
-print('   <div class="w3-quarter">')
+print('   <div class="w3-col m3">')
 print('    <label for="aimant">')
 print(_('Aimant(s)'))
 print('</label>')
 print('    <input type="text" id="aimant" name="user_aimant" value={} class="w3-input w3-border" placeholder="1">'.format(aimants))
 print('  </div>')
 
-print('   <div class="w3-quarter">')
+print('   <div class="w3-col m3">')
 print('    <label for="orientation">')
 print(_('Orientation'))
 print('</label>')
@@ -92,7 +94,7 @@ else:
 print('     </select>')
 print('  </div>')
 
-print('   <div class="w3-quarter">')
+print('   <div class="w3-col m3">')
 print('    <label for="lecture">')
 print(_('Sens de lecture'))
 print('</label>')
@@ -106,7 +108,38 @@ else:
 print('     </select>')
 print('  </div>')
 
-print('   <div class="w3-quarter">')
+print('  </div>')
+print('<div class="w3-row-padding">')
+
+print('   <div class="w3-col m3">')
+print('    <label for="boutonsTrip">')
+print(_('Boutons Trip'))
+print('</label>')
+print('    <select id="boutonsTrip" name="user_trip" class="w3-select">')
+if boutonsTrip == '1' :
+  print('    <option selected="1" value="1">',_('Gauche/OK/Droite'),'</option>')
+  print('    <option value="2">',_('Gauche/Droite/OK'),'</option>')
+else:
+  print('    <option value="1">',_('Gauche/OK/Droite'),'</option>')
+  print('    <option selected="2" value="2">',_('Gauche/Droite/OK'),'</option>')
+print('     </select>')
+print('  </div>')
+
+print('   <div class="w3-col m3">')
+print('    <label for="boutonsRB">')
+print(_('Boutons RB'))
+print('</label>')
+print('    <select id="boutonsRB" name="user_rb" class="w3-select">')
+if boutonsRB == '1' :
+  print('    <option selected="1" value="1">',_('Haut/Bas'),'</option>')
+  print('    <option value="2">',_('Bas/Haut'),'</option>')
+else:
+  print('    <option value="1">',_('Haut/Bas'),'</option>')
+  print('    <option selected="2" value="2">',_('Bas/Haut'),'</option>')
+print('     </select>')
+print('  </div>')
+
+print('   <div class="w3-col m3">')
 print('    <label for="langue">')
 print(_('Langue'))
 print('</label>')
@@ -144,13 +177,15 @@ else :
 print('     </select>')
 print('  </div>')
 
+print('  </div>')
+
 print("""
 <div class="w3-bar">
         <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">""")
 print(_('Valider'))
 print("""</button>
 </div>
-</div>
+
 </form>
 </div>
 
