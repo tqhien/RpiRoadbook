@@ -17,7 +17,7 @@ msgstr " Distanza"
 
 #: RpiRoadbook.py:855
 msgid " Vitesse"
-msgstr " Velocit&agrave;"
+msgstr " Velocita"
 
 #: RpiRoadbook.py:918
 msgid " Trip1"
@@ -93,11 +93,11 @@ msgstr "Premi pulsante per ritornare"
 
 #: RpiRoadbook.py:1721
 msgid "au menu en mode Route"
-msgstr "Modalit&agrave; Stradale"
+msgstr "Modalita Stradale"
 
 #: RpiRoadbook.py:1765
 msgid "Mode :"
-msgstr "Modalit&agrave;:"
+msgstr "Modalita:"
 
 #: index.py:74
 msgid "Rallye"
@@ -238,7 +238,7 @@ msgstr "Rpiroadbook Centro di Controllo"
 
 #: index.py:66 mode_rallye.py:29 mode_route.py:29 mode_zoom.py:29
 msgid "Changement de mode"
-msgstr "Cambia modalit&agrave;"
+msgstr "Cambia modalita"
 
 #: index.py:78 mode_route.py:48
 msgid "Route"
@@ -507,7 +507,7 @@ msgstr "Trip2"
 
 #: screen_setup.py:205 screen_setup.py:207
 msgid "Vitesse"
-msgstr "Velocit&agrave;"
+msgstr "Velocita"
 
 #: screen_setup.py:209 screen_setup.py:211
 msgid "Moyenne1"
