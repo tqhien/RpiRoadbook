@@ -421,13 +421,13 @@ print("""</h1>
 
   <div class="w3-bar">
 """)
-print('<a href="text_editor.py?fn={}&num=0" class="w3-button"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename) if num > 0 else '<a href="text_editor.py?fn={}&num=0" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename))
-print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10) if num-10>=0 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10))
-print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1) if num-1 >= 0 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1))
+print('<a href="text_editor.py?fn={}&num=0" class="w3-button"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename) if num > 0 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>')
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10) if num-10>=0 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-backward"></i> </a>')
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1) if num-1 >= 0 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>')
 print('    <input type="text" id="myPos" value="{}"><input type="button" value="'.format(num+1),_('Aller...'),'" onClick="gopage()">')
-print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1) if nmax > num+1 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1))
-print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10) if nmax > num+10 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10))
-print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="text_editor.py?fn={}&num={}" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1))
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1) if nmax > num+1 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>')
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10) if nmax > num+10 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-forward"></i> </a>')
+print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>')
 print("""
   </div>
 
