@@ -48,12 +48,11 @@ print("""
 <body>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
-</div>
 <h1>
 """)
 print(_("R&eacute;glage de l'horloge"))
 print("""
-</h1>
+</h1></div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey">
 <form action = "save_clock.py" method = "post">
    <div class="w3-row-padding">
