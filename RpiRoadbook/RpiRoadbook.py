@@ -401,7 +401,7 @@ def get_image(key,angle=0,mode_jour=True):
             s = img
         else :
             s = pygame.Surface(img.get_rect().size, pygame.SRCALPHA)
-            s.fill((255,255,0,200))
+            s.fill((255,255,0,255))
             s.blit(img, (0,0), None, BLEND_RGB_SUB)
         f = fichiers[key]
         a = f.replace(filedir,'annotation')
