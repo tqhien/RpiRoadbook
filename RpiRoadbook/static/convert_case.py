@@ -91,7 +91,10 @@ for i in range (nb_pages) :
             else :
                 y = round(marge_up+j*hauteur)
             num = i*nb_cases+k*nb_lignes+j
-            pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
+            if (nb_cases > 1) or (nb_cases==1 and lecture == False ) :
+                pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = i+1, last_page=i+1, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
+            else :
+                pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = nb_pages-i, last_page=nb_pages-i, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
 
             print(_('Case {} / {}<br>').format(num+1,total))
 
