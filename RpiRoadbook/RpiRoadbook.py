@@ -568,7 +568,9 @@ old_widget = 1
 widgets = {}
 nb_widgets = 1
 widget_isselected = False
+widget_iscountdown = False
 widget_select_t = 0
+default_widget = 7
 
 #------------------------------ Definition des widgets ---------------------------------------------#
 widget_presets = {
@@ -698,8 +700,9 @@ widget_layouts = {
 
 class rb_widget():
     def __init__(self,layout='1',widget=0):
-        global angle
+        global angle,widget_iscountdown
         self.widget_order = widget
+        widget_iscountdown = False
         angle = 0 if layout in ('0','1','2','3','4','11') else 90
         a = widget_layouts[layout][widget]
         setup_alphabet(a['label_font'])
@@ -744,17 +747,23 @@ class rb_widget():
            r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
     def select(self):
+        global widget_iscountdown
         self.selected = True
+        widget_iscountdown = False
     def deselect(self):
         self.selected = False
 
 
 def widget_dispatch(st,layout,widget):
+    global default_widget
     if st == 'Totalisateur' :
         return odo_widget(layout,widget)
     elif st == 'Trip1' :
+        default_widget = widget
         return trip1_widget(layout,widget)
     elif st == 'Trip2' :
+        if default_widget == 7 :
+            default_widget = widget
         return trip2_widget(layout,widget)
     elif st == 'Vitesse' :
         return speed_widget(layout,widget)
@@ -784,7 +793,7 @@ class status_widget (rb_widget):
         global angle
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global widgets,current_screen,screenconfig,nb_widgets,ncases,sprites,old_sprites,mode_jour,force_refresh,rbconfig
+        global widgets,current_screen,screenconfig,nb_widgets,ncases,sprites,old_sprites,mode_jour,force_refresh,rbconfig,default_widget
 
         # On charge le mode en cours, le roadbook en cours et sa case
         candidates = ['/home/rpi/RpiRoadbook/RpiRoadbook.cfg','/mnt/piusb/.conf/RpiRoadbook.cfg']
@@ -823,9 +832,12 @@ class status_widget (rb_widget):
         force_refresh = True
         #old_sprites = {}
 
+        default_widget = 7
         widgets[(0)] = status_widget(layout,0)
         for i in range(1,nb_widgets+1) :
             widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
+        if default_widget == 7 :
+            default_widget = 0
         if mode_jour :
             pygame.display.get_surface().fill(BLANC)
         else :
@@ -1185,13 +1197,15 @@ class countdown_widget (rb_widget):
         if not start_decompte:
             decompte += 30
     def down(self):
-        global start_decompte,chrono_decompte
+        global start_decompte,chrono_decompte,current_widget,default_widget
         if not start_decompte:
             start_decompte = True
             chrono_decompte = time.time() + decompte
             chronoconfig['Decompte']['start_decompte'] = str(start_decompte)
             chronoconfig['Decompte']['chrono_decompte'] = str(chrono_decompte)
             save_chronoconfig()
+            current_widget = default_widget
+            self.deselect()
     def reset(self):
         global decompte,start_decompte,chrono_decompte
         global chronoconfig
@@ -1245,6 +1259,10 @@ class countdown_widget (rb_widget):
         #blit_text(scr,'.{:1.0f} '.format(ss),(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
+    def select(self):
+        global widget_iscountdown
+        rb_widget.select(self)
+        widget_iscountdown = True
 
 class heure_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
@@ -1347,7 +1365,7 @@ def save_screenconfig(mode='Route'):
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture,langue
-    global widgets,nb_widgets,ncases,current_screen,mode_jour
+    global widgets,nb_widgets,ncases,current_screen,mode_jour,default_widget
     global chrono_decompte,start_decompte,en,_
     global boutonsTrip,boutonsRB
     # On charge les emplacements des elements d'affichage
@@ -1431,8 +1449,11 @@ def check_configfile():
         ncases = 3
     nb_widgets = widget_sizes [layout]
     widgets[(0)] = status_widget(layout,0)
+    default_widget = 7
     for i in range(1,nb_widgets+1) :
         widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
+    if default_widget == 7 :
+        default_widget = 0
 
 
 
@@ -2578,7 +2599,7 @@ class RoadbookScene(SceneBase):
         global save_t_odo,angle,totalisateur,distance1,distance2
         global sprites,old_sprites,rbconfig,chronoconfig,odoconfig,lecture
         global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
-        global widgets,force_refresh,widget_select_t,current_widget,widget_isselected
+        global widgets,force_refresh,widget_select_t,current_widget,widget_isselected,default_widget,widget_iscountdown
 
         # MAJ des cases du rb
         if (self.case != self.oldcase) or force_refresh :
@@ -2600,10 +2621,11 @@ class RoadbookScene(SceneBase):
             self.oldcase=self.case
 
         # Deselectionne le widget au bout de 10 secondes
-        if widget_isselected :
+        if widget_isselected and not widget_iscountdown:
             if time.time() - widget_select_t > 10 :
                 widgets[(current_widget)].deselect()
                 widget_isselected = False
+                current_widget = default_widget
 
         # MAJ des infos des widgets
         for j in list(widgets.keys()):
