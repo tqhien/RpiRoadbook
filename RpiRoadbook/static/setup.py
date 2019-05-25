@@ -139,44 +139,6 @@ else:
 print('     </select>')
 print('  </div>')
 
-print('   <div class="w3-col m3">')
-print('    <label for="langue">')
-print(_('Langue'))
-print('</label>')
-print('    <select id="langue" name="user_langue" class="w3-select">')
-if langue == 'EN' :
-  print('    <option value="FR">Francais</option>')
-  print('    <option selected="EN" value="EN">English</option>')
-  print('    <option value="IT">Italiano</option>')
-  print('    <option value="DE">Deutsch</option>')
-  print('    <option value="ES">Espanol</option>')
-elif langue == 'IT':
-  print('    <option value="FR">Francais</option>')
-  print('    <option value="EN">English</option>')
-  print('    <option selected="IT" value="IT">Italiano</option>')
-  print('    <option value="DE">Deutsch</option>')
-  print('    <option value="ES">Espanol</option>')
-elif langue == 'DE':
-  print('    <option value="FR">Francais</option>')
-  print('    <option value="EN">English</option>')
-  print('    <option value="IT">Italiano</option>')
-  print('    <option selected="DE" value="DE">Deutsch</option>')
-  print('    <option value="ES">Espanol</option>')
-elif langue == 'ES':
-  print('    <option value="FR">Francais</option>')
-  print('    <option value="EN">English</option>')
-  print('    <option value="IT">Italiano</option>')
-  print('    <option value="DE">Deutsch</option>')
-  print('    <option selected="ES" value="ES">Espanol</option>')
-else :
-  print('    <option selected="FR" value="FR">Francais</option>')
-  print('    <option value="EN">English</option>')
-  print('    <option value="IT">Italiano</option>')
-  print('    <option value="DE">Deutsch</option>')
-  print('    <option value="ES">Espanol</option>')
-print('     </select>')
-print('  </div>')
-
 print('  </div>')
 
 print("""
@@ -202,13 +164,6 @@ print(_('Config. Usine'))
 print('</a>  <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge material-icons">system_update</i> ')
 print(_('MAJ Firmware'))
 print("""</a>
-</div>
-<div class="w3-bar">
-  <a class="w3-bar-item" href="set_fr.py">FR</a>
-  <a class="w3-bar-item" href="set_en.py">EN</a>
-  <a class="w3-bar-item" href="set_it.py">IT</a>
-  <a class="w3-bar-item" href="set_de.py">DE</a>
-  <a class="w3-bar-item" href="set_es.py">ES</a>
 </div>
 </body>
 </html>""")

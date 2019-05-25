@@ -86,11 +86,6 @@ if 'user_rb' in form:
   print (_('Boutons RB, mode : {}').format(setupconfig['Parametres']['boutonsRB']))
   print('<br>')
 
-if 'user_langue' in form:
-  setupconfig['Parametres']['langue'] = form['user_langue'].value
-  print (_('Langue : {}').format(setupconfig['Parametres']['langue']))
-  print('<br>')
-
 for attempt in range(5):
   try :
     with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:
@@ -124,13 +119,6 @@ print(_('Config. Usine'))
 print('</a>  <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge material-icons">system_update</i> ')
 print(_('MAJ Firmware'))
 print("""</a>
-</div>
-<div class="w3-bar">
-  <a class="w3-bar-item" href="set_fr.py">FR</a>
-  <a class="w3-bar-item" href="set_en.py">EN</a>
-  <a class="w3-bar-item" href="set_it.py">IT</a>
-  <a class="w3-bar-item" href="set_de.py">DE</a>
-  <a class="w3-bar-item" href="set_es.py">ES</a>
 </div>
 </body>
 </html>

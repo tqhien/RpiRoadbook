@@ -75,13 +75,6 @@ print('</a>  <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-h
 print(_('MAJ Firmware'))
 print("""</a>
 </div>
-<div class="w3-bar">
-  <a class="w3-bar-item" href="set_fr.py">FR</a>
-  <a class="w3-bar-item" href="set_en.py">EN</a>
-  <a class="w3-bar-item" href="set_it.py">IT</a>
-  <a class="w3-bar-item" href="set_de.py">DE</a>
-  <a class="w3-bar-item" href="set_es.py">ES</a>
-</div>
 </body>
 </html>
 """)
