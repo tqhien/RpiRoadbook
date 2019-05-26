@@ -50,7 +50,7 @@ print("""</h1>
    <form enctype="multipart/form-data" action="preview_file.py" method = "post">
    <h3>""")
 print(_('S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : '))
-print("""'</h3>
+print("""</h3>
    <input class="w3-input w3-button " type="file" name="filename" />
    <input class="w3-input w3-teal w3-button w3-hover-blue w3-left-align w3-margin" type="submit" value=" """)
 print(_('Pr&eacute;visualiser...'))

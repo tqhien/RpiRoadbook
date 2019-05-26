@@ -84,13 +84,6 @@ print ("""
 <!-- Pied de page -->
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
-  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue">""")
-print(_('Personnaliser les affichages'))
-print('</a>  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue">')
-print(_("Ajuster l'horloge"))
-print('</a>  <a href="ota.py" class="w3-bar-item w3-button w3-right w3-hover-red">')
-print(_('MAJ Firmware'))
-print("""</a>
 </div>
 </body>
 </html>""")
