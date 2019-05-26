@@ -55,7 +55,6 @@ print('</h3>')
 filelist = [
     '.conf/RpiRoadbook.cfg',
     '.conf/RpiRoadbook_setup.cfg',
-    '.conf/RpiRoadbook_screen.cfg',
     '.conf/route.cfg',
     '.conf/screen.cfg',
     '.conf/hostapd.conf',
