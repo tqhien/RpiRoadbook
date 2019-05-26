@@ -1365,7 +1365,7 @@ def save_screenconfig(mode='Route'):
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
     global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture,langue
-    global widgets,nb_widgets,ncases,current_screen,mode_jour,default_widget
+    global widgets,nb_widgets,ncases,current_screen,mode_jour,default_widget,current_widget
     global chrono_decompte,start_decompte,en,_
     global boutonsTrip,boutonsRB
     # On charge les emplacements des elements d'affichage
@@ -1454,6 +1454,7 @@ def check_configfile():
         widgets[(i)] = widget_dispatch(screenconfig['Affichage{}'.format(current_screen)]['ligne{}'.format(i)],layout,i)
     if default_widget == 7 :
         default_widget = 0
+    current_widget = default_widget
 
 
 
@@ -2475,7 +2476,7 @@ class EditScene(SceneBase):
 class RoadbookScene(SceneBase):
     def __init__(self, fname = ''):
         global developpe,roue,aimants, distance1,old_distance1,save_t_moy,save_t_odo,totalisateur,speed,vmoy,vmax,image_cache,filedir,fichiers,rb_ratio,labels, old_labels,sprites, old_sprites,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y
-        global widgets,current_widget,old_widget
+        global widgets,current_widget,old_widget,default_widget
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
 
@@ -2530,8 +2531,8 @@ class RoadbookScene(SceneBase):
 
         save_t_moy = time.time()
         save_t_odo = time.time()
-        current_widget = 0
-        old_widget = 0
+        current_widget = default_widget
+        old_widget = default_widget
 
     def ProcessInput(self, events, pressed_keys):
         global distance1,old_distance1,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay1
