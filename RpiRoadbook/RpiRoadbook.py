@@ -1556,7 +1556,7 @@ class TitleScene(SceneBase):
         global gotoConfig
         if gotoConfig :
             gotoConfig = False
-            self.SwitchToScene(ModeScene())
+            self.SwitchToScene(ConfigScene())
         else :
             self.rallye = rbconfig['Mode']['mode']
             if self.rallye in ('Rallye','Zoom') :
@@ -1772,197 +1772,10 @@ class NoneScene(SceneBase):
     def Render(self, screen):
         update_labels(screen)
 
-#*******************************************************************************************************#
-#---------------------------------------- La partie Mode -----------------------------------------------#
-#*******************************************************************************************************#
-class ModeScene(SceneBase):
-    def __init__(self, fname = ''):
-        global setupconfig,rbconfig,angle,labels,old_labels,sprites,old_sprites, mode_jour,myfont,alphabet,alphabet_size_x,alphabet_size_y
-        SceneBase.__init__(self)
-        self.next = self
-        self.filename = fname
-
-        #check_configfile()
-
-        labels = {}
-        old_labels = {}
-        sprites = {}
-        old_sprites = {}
-
-        self.now = time.localtime()
-        self.orientation = setupconfig['Parametres']['orientation']
-
-        angle = 90 if self.orientation == 'Portrait' else 0
-
-        setup_alphabet(BLANC50)
-        setup_alphabet(BLANC50inv)
-
-        labels ['t_mode'] = (_('Mode :'),(int(guiconfig[self.orientation]['mode_l_mode_x']),int(guiconfig[self.orientation]['mode_l_mode_y'])),BLANC50,angle)
-        labels ['mode'] = (_('Rallye'),(int(guiconfig[self.orientation]['mode_mode_x']),int(guiconfig[self.orientation]['mode_mode_y'])),BLANC50,angle)
-        labels ['t_nuit'] = (_('Jour/Nuit :'),(int(guiconfig[self.orientation]['mode_l_jour_nuit_x']),int(guiconfig[self.orientation]['mode_l_jour_nuit_y'])),BLANC50,angle)
-        labels ['jour_nuit'] = (_('Rallye'),(int(guiconfig[self.orientation]['mode_jour_nuit_x']),int(guiconfig[self.orientation]['mode_jour_nuit_y'])),BLANC50,angle)
-        labels ['t_orientation'] = (_('Orientation :'),(int(guiconfig[self.orientation]['mode_l_orientation_x']),int(guiconfig[self.orientation]['mode_l_orientation_y'])),BLANC50,angle)
-        labels ['orientation'] = (_('Portrait '),(int(guiconfig[self.orientation]['mode_orientation_x']),int(guiconfig[self.orientation]['mode_orientation_y'])),BLANC50,angle)
-
-        labels ['suivant'] = ('->',(int(guiconfig[self.orientation]['mode_suiv_x']),int(guiconfig[self.orientation]['mode_suiv_y'])),BLANC50,angle)
-
-        (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.index = 0 # 0= mode, 1=nuit, 2=orientation, 3=suivant, 4 = ok
-
-        self.rallye = rbconfig['Mode']['mode']
-        mode_jour = screenconfig['Affichage1']['jour_nuit'] == 'Jour'
-        self.paysage = setupconfig['Parametres']['orientation'] == 'Paysage'
-
-        if mode_jour :
-            if angle == 0 :
-                self.bouton_ok_white = pygame.image.load('./images/ok.jpg')
-                self.bouton_ok = pygame.image.load('./images/ok_white.jpg')
-            else :
-                self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
-                self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill(BLANC)
-        else:
-            if angle == 0 :
-                self.bouton_ok = pygame.image.load('./images/ok.jpg')
-                self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
-            else :
-                self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
-                self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill(NOIR)
-        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['mode_ok_x']),int(guiconfig[self.orientation]['mode_ok_y'])))
-        pygame.display.update()
-
-    def ProcessInput(self, events, pressed_keys):
-        global setupconfig,rbconfig,mode_jour,alphabet,alphabet_size_x,alphabet_size_y,old_labels, old_sprites
-        for event in events:
-            if event.type == pygame.QUIT:
-                self.Terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.Terminate()
-                elif event.key == BOUTON_RIGHT:
-                    self.index+=1
-                    if self.index > 5:
-                        self.index = 0
-                elif event.key == BOUTON_LEFT:
-                    self.index -= 1
-                    if self.index < 0 :
-                        self.index = 5
-                elif event.key == BOUTON_DOWN:
-                    if self.index == 0 :
-                        if self.rallye == 'Rallye' :
-                            self.rallye = 'Route'
-                        elif self.rallye == 'Route' :
-                            self.rallye = 'Zoom'
-                        elif self.rallye == 'Zoom' :
-                            self.rallye = 'Rallye'
-                        rbconfig['Mode']['mode'] = self.rallye
-                        save_rbconfig()
-
-                    elif self.index == 1 :
-                        mode_jour = not mode_jour
-                        screenconfig['Affichage1']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
-                        save_setupconfig()
-
-                    elif self.index == 2 :
-                        self.paysage = not self.paysage
-                        setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
-                        if self.paysage :
-                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
-                            subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount', shell=True)
-                        else :
-                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
-                            subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
-                        save_setupconfig()
-
-                elif event.key == BOUTON_UP:
-                    if self.index ==0:
-                        if self.rallye == 'Rallye' :
-                            self.rallye = 'Zoom'
-                        elif self.rallye == 'Zoom' :
-                            self.rallye = 'Route'
-                        elif self.rallye == 'Route' :
-                            self.rallye = 'Rallye'
-                        setupconfig['Parametres']['mode'] = self.rallye
-                        save_setupconfig()
-
-                    elif self.index == 1:
-                        mode_jour = not mode_jour
-                        setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
-                        save_setupconfig
-
-                    elif self.index == 2 :
-                        self.paysage = not self.paysage
-                        setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
-                        if self.paysage :
-                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
-                            subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
-                        else :
-                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
-                            subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
-                        save_setupconfig()
-
-                elif event.key == BOUTON_OK:
-                    # validation
-                    if self.index == 0:
-                        setupconfig['Parametres']['mode'] = self.rallye
-                        save_setupconfig()
-                    elif self.index == 1:
-                        setupconfig['Parametres']['jour_nuit'] = 'Jour' if mode_jour else 'Nuit'
-                        save_setupconfig()
-                    elif self.index == 2:
-                        setupconfig['Parametres']['orientation'] = 'Paysage' if self.paysage else 'Portrait'
-                        if self.paysage :
-                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
-                            subprocess.Popen('sudo cp -f /root/asplash_paysage.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
-                        else :
-                            subprocess.Popen('sudo mount /dev/root / -o rw,remount',shell=True)
-                            subprocess.Popen('sudo cp -f /root/asplash_portrait.sh /root/asplash.sh',shell=True)
-                            subprocess.Popen('sudo mount /dev/root / -o ro,remount',shell=True)
-                        save_setupconfig()
-                    elif self.index == 3 :
-                        self.SwitchToScene(ConfigScene())
-                    elif self.index == 4 :
-                        alphabet = {}
-                        alphabet_size_x = {}
-                        alphabet_size_y = {}
-                        setup_alphabet()
-                        self.SwitchToScene(TitleScene())
-                    # on passe au réglage suivant
-                    self.index +=1
-                    if self.index > 2:
-                        self.index = 0
-
-    def Update(self):
-        global labels,old_labels,sprites,old_sprites
-        if self.next == self :
-            labels['mode'] = (self.rallye,labels['mode'][1],BLANC50inv,labels['mode'][3]) if self.index == 0 else (self.rallye,labels['mode'][1],BLANC50,labels['mode'][3])
-
-            if mode_jour :
-                labels['jour_nuit'] = (_('Jour   '),labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else (_('Jour   '),labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
-            else :
-                labels['jour_nuit'] = (_('Nuit   '),labels['jour_nuit'][1],BLANC50inv,labels['jour_nuit'][3]) if self.index == 1 else (_('Nuit   '),labels['jour_nuit'][1],BLANC50,labels['jour_nuit'][3])
-
-            if self.paysage :
-                labels['orientation'] = (_('Paysage'),labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else (_('Paysage '),labels['orientation'][1],BLANC50,labels['orientation'][3])
-            else :
-                labels['orientation'] = (_('Portrait '),labels['orientation'][1],BLANC50inv,labels['orientation'][3]) if self.index == 2 else (_('Portrait '),labels['orientation'][1],BLANC50,labels['orientation'][3])
-
-            labels ['suivant'] = ('->',labels['suivant'][1],BLANC50inv,labels['suivant'][3]) if self.index == 3 else ('->',labels['suivant'][1],BLANC50,labels['suivant'][3])
-            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 4 else (self.bouton_ok,sprites['ok'][1])
-
-    def Render(self, screen):
-        update_labels(screen)
-        update_sprites(screen)
 
 
 #*******************************************************************************************************#
-#---------------------------------------- La partie Réglages -------------------------------------------#
+#---------------------------------------- La partie Maintenance ----------------------------------------#
 #*******************************************************************************************************#
 class ConfigScene(SceneBase):
     def __init__(self, fname = ''):
@@ -1978,7 +1791,6 @@ class ConfigScene(SceneBase):
         sprites = {}
         old_sprites = {}
 
-        self.now = time.localtime()
         self.orientation = setupconfig['Parametres']['orientation']
 
         angle = 90 if self.orientation == 'Portrait' else 0
@@ -1990,41 +1802,13 @@ class ConfigScene(SceneBase):
         labels ['roue'] = ('{:4d}'.format(0),(int(guiconfig[self.orientation]['config_roue_x']),int(guiconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
         labels ['t_aimants'] = (_('Nb aimants :'),(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
         labels ['aimants'] = ('{:2d}  '.format(0),(int(guiconfig[self.orientation]['config_aimants_x']),int(guiconfig[self.orientation]['config_aimants_y'])),BLANC50,angle)
-        labels ['t_date'] = (_('Date :'),(int(guiconfig[self.orientation]['config_l_date_x']),int(guiconfig[self.orientation]['config_l_date_y'])),BLANC50,angle)
-        labels ['jj'] = ('01/',(int(guiconfig[self.orientation]['config_d_x']),int(guiconfig[self.orientation]['config_d_y'])),BLANC50,angle)
-        labels ['mm'] = ('01/',(int(guiconfig[self.orientation]['config_m_x']),int(guiconfig[self.orientation]['config_m_y'])),BLANC50,angle,)
-        labels ['aaaa'] = ('2018',(int(guiconfig[self.orientation]['config_y_x']),int(guiconfig[self.orientation]['config_y_y'])),BLANC50,angle)
-        labels ['t_heure'] = (_('Heure:'),(int(guiconfig[self.orientation]['config_l_heure_x']),int(guiconfig[self.orientation]['config_l_heure_y'])),BLANC50,angle)
-        labels ['hh'] = ('00:',(int(guiconfig[self.orientation]['config_hour_x']),int(guiconfig[self.orientation]['config_hour_y'])),BLANC50,angle)
-        labels ['min'] = ('00:',(int(guiconfig[self.orientation]['config_minute_x']),int(guiconfig[self.orientation]['config_minute_y'])),BLANC50,angle)
-        labels ['ss'] = ('00 ',(int(guiconfig[self.orientation]['config_seconde_x']),int(guiconfig[self.orientation]['config_seconde_y'])),BLANC50,angle,)
-
-        labels ['prec'] = ('<- ',(int(guiconfig[self.orientation]['config_prec_x']),int(guiconfig[self.orientation]['config_prec_y'])),BLANC50,angle,)
-
-        if mode_jour :
-            if angle == 0 :
-                self.bouton_ok_white = pygame.image.load('./images/ok.jpg')
-                self.bouton_ok = pygame.image.load('./images/ok_white.jpg')
-            else :
-                self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
-                self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-            pygame.display.get_surface().fill(BLANC)
-        else:
-            if angle == 0 :
-                self.bouton_ok = pygame.image.load('./images/ok.jpg')
-                self.bouton_ok_white = pygame.image.load('./images/ok_white.jpg')
-            else :
-                self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
-                self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
-        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['config_ok_x']),int(guiconfig[self.orientation]['config_ok_y'])))
+        labels ['t_RAZ'] = (_('Config Usine :'),(int(guiconfig[self.orientation]['config_l_raz_x']),int(guiconfig[self.orientation]['config_l_raz_y'])),BLANC50,angle)
+        labels ['RAZ'] = (_('RAZ'),(int(guiconfig[self.orientation]['config_raz_x']),int(guiconfig[self.orientation]['config_raz_y'])),BLANC50,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
-        self.index = 8 # de 0 à 5 : date et heure, 6=precedent, 7=ok, 8=roue, 9=nb aimants
+        self.index = 2 # de 0 à 4 : 0=roue, 1=nb aimants, 2 = OK, 3 = RAZ
         self.d_roue = int(setupconfig['Parametres']['roue'])
         self.aimants = int(setupconfig['Parametres']['aimants'])
-
-        self.data = []
-        self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
 
         if mode_jour :
             if angle == 0 :
@@ -2042,32 +1826,8 @@ class ConfigScene(SceneBase):
                 self.bouton_ok = pygame.transform.rotozoom (pygame.image.load('./images/ok.jpg'),90,1)
                 self.bouton_ok_white = pygame.transform.rotozoom (pygame.image.load('./images/ok_white.jpg'),90,1)
             pygame.display.get_surface().fill(NOIR)
-        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['mode_ok_x']),int(guiconfig[self.orientation]['mode_ok_y'])))
+        sprites ['ok'] = (self.bouton_ok,(int(guiconfig[self.orientation]['config_ok_x']),int(guiconfig[self.orientation]['config_ok_y'])))
         pygame.display.update()
-        self.t = time.time()
-
-
-    def update_time(self):
-        # Vérification validité des valeurs
-        if self.data[2] < 2018 : self.data[2] = 2018
-        if self.data[1] < 1 : self.data[1] = 1
-        if self.data[1] > 12 : self.data[1] = 12
-        if self.data[0] < 1 : self.data[0] = 1
-        if self.data[0] > 31 : self.data[0] = 31
-        # Vérification de la validité de la date
-        try:
-            datetime.datetime(self.data[2],self.data[1],self.data[0])
-        except ValueError :
-            self.data[0] -= 1
-        # Validité de l'heure
-        if self.data[3] < 0 : self.data[3] = 0
-        if self.data[3] > 23 : self.data[3] = 23
-        if self.data[4] < 0 : self.data[4] = 0
-        if self.data[4] > 59 : self.data[4] = 59
-        if self.data[5] < 0 : self.data[5] = 0
-        if self.data[5] > 59 : self.data[5] = 59
-        subprocess.Popen ('sudo date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
-        subprocess.Popen ('sudo hwclock --set --date "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" --noadjfile --utc'.format(self.data[2],self.data[1],self.data[0],self.data[3],self.data[4],self.data[5]),shell=True)
 
 
     def ProcessInput(self, events, pressed_keys):
@@ -2076,95 +1836,80 @@ class ConfigScene(SceneBase):
             if event.type == pygame.QUIT:
                 self.Terminate()
             if event.type == pygame.KEYDOWN:
-                self.t = time.time()
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
                 elif event.key == BOUTON_RIGHT:
                     self.index+=1
-                    if self.index > 9:
+                    if self.index > 3:
                         self.index = 0
                 elif event.key == BOUTON_LEFT:
                     self.index -= 1
                     if self.index < 0 :
-                        self.index = 9
+                        self.index = 2
                 elif event.key == BOUTON_DOWN:
-                    if self.index < 5 :
-                        self.data[self.index] -= 1
-                        self.update_time()
-                    elif self.index == 5 :
-                        self.data[5] = 0
-                        self.update_time()
-                    elif self.index == 8 :
+                    if self.index == 0 :
                         self.d_roue -= 1
                         if self.d_roue < 10 : self.d_roue = 10
-                    elif self.index == 9 :
+                    elif self.index == 1 :
                         self.aimants -= 1
                         if self.aimants < 1 : self.aimants = 1
                 elif event.key == BOUTON_UP:
-                    if self.index < 5 :
-                        self.data[self.index] += 1
-                        self.update_time()
-                    elif self.index == 5:
-                        self.data[5] = 0
-                        self.update_time()
-                    elif self.index == 8:
+                    if self.index == 0:
                         self.d_roue += 1
                         if self.d_roue > 9999 : self.d_roue = 9999
-                    elif self.index == 9 :
+                    elif self.index == 1 :
                         self.aimants += 1
                         if self.aimants > 20 : self.aimants = 20
                 elif event.key == BOUTON_OK:
                     # validation
-                    if self.index == 8:
+                    if self.index == 0:
                         setupconfig['Parametres']['roue'] = str(self.d_roue)
                         save_setupconfig()
-                    elif self.index == 9:
+                        self.index = self.index + 1
+                    elif self.index == 1:
                         setupconfig['Parametres']['aimants'] = str(self.aimants)
                         save_setupconfig()
-                    elif self.index == 6 :
-                        self.SwitchToScene(ModeScene())
-                    elif self.index == 7 :
+                        self.index = self.index + 1
+                    elif self.index == 3 :
+                        filelist = [
+                            '.conf/RpiRoadbook.cfg',
+                            '.conf/RpiRoadbook_setup.cfg',
+                            '.conf/route.cfg',
+                            '.conf/screen.cfg',
+                            '.conf/hostapd.conf',
+                            '.log/chrono.cfg',
+                            '.log/odo.cfg',
+                        ]
+
+                        for fileitem in filelist:
+                            try:
+                                os.remove("/mnt/piusb/{}".format(fileitem))
+                            except :
+                                print('error deleting {}'.format(fileitem))
+                        self.index = 2
+                    elif self.index == 2 :
                         alphabet = {}
                         alphabet_size_x = {}
                         alphabet_size_y = {}
                         setup_alphabet()
                         self.SwitchToScene(TitleScene())
-                    # on passe au réglage suivant, en evitant les boutons prec et ok
-                    self.index +=1
-                    if self.index > 9:
-                        self.index = 0
-                    elif self.index == 6 or self.index == 7 :
-                        self.index = 8
-
-
+                    # on passe au réglage suivant
+                    #self.index +=1
 
 
     def Update(self):
         global labels,old_labels,sprites,old_sprites
-        self.now = time.localtime()
-        self.data = []
-        self.data.extend([self.now.tm_mday,self.now.tm_mon,self.now.tm_year,self.now.tm_hour,self.now.tm_min,self.now.tm_sec])
         if self.next == self :
-            labels['jj'] = ('{:02d}/'.format(self.data[0]),labels['jj'][1],BLANC50inv,labels['jj'][3]) if self.index == 0 else ('{:02d}/'.format(self.data[0]),labels['jj'][1],BLANC50,labels['jj'][3])
-            labels['mm'] = ('{:02d}/'.format(self.data[1]),labels['mm'][1],BLANC50inv,labels['mm'][3]) if self.index == 1 else ('{:02d}/'.format(self.data[1]),labels['mm'][1],BLANC50,labels['mm'][3])
-            labels['aaaa'] = ('{:4d}'.format(self.data[2]),labels['aaaa'][1],BLANC50inv,labels['aaaa'][3]) if self.index == 2 else ('{:4d}'.format(self.data[2]),labels['aaaa'][1],BLANC50,labels['aaaa'][3])
-            labels['hh'] = ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50inv,labels['hh'][3]) if self.index == 3 else ('{:02d}:'.format(self.data[3]),labels['hh'][1],BLANC50,labels['hh'][3])
-            labels['min'] = ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50inv,labels['min'][3]) if self.index == 4 else ('{:02d}:'.format(self.data[4]),labels['min'][1],BLANC50,labels['min'][3])
-            labels['ss'] = ('{:02d}'.format(self.data[5]),labels['ss'][1],BLANC50inv,labels['ss'][3]) if self.index == 5 else ('{:02d} '.format(self.data[5]),labels['ss'][1],BLANC50,labels['ss'][3])
-            labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 8 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
-            labels['aimants'] = ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50inv,labels['aimants'][3]) if self.index == 9 else ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50,labels['aimants'][3])
+            labels['RAZ'] = (_('RAZ'),labels['RAZ'][1],BLANC50inv,labels['RAZ'][3]) if self.index == 3 else (_('RAZ'),labels['RAZ'][1],BLANC50,labels['RAZ'][3])
+            labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 0 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
+            labels['aimants'] = ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50inv,labels['aimants'][3]) if self.index == 1 else ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50,labels['aimants'][3])
 
-            labels['prec'] = ('<-  ',labels['prec'][1],BLANC50inv,labels['prec'][3]) if self.index == 6 else ('<-  ',labels['prec'][1],BLANC50,labels['prec'][3])
-            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 6 else (self.bouton_ok,sprites['ok'][1])
+            sprites['ok'] = (self.bouton_ok_white,sprites['ok'][1]) if self.index == 2 else (self.bouton_ok,sprites['ok'][1])
 
     def Render(self, screen):
         global setupconfig
         update_labels(screen)
         update_sprites(screen)
-        k = time.time()
-        if k-self.t >= 5:
-            save_setupconfig()
-            self.SwitchToScene(TitleScene())
 
 
 
