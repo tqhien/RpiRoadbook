@@ -1604,8 +1604,6 @@ class SelectionScene(SceneBase):
         setup_alphabet(ROUGE25inv)
         setup_alphabet(VERT25)
 
-        self.gotoEdit = False
-
         if self.orientation == 'Paysage' :
             labels['infos'] = (_('Demarrage automatique dans 5s...'),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
             labels['invite'] = (_('Selectionnez le roadbook a charger :'),(10,10),BLANC25,angle)
@@ -1634,18 +1632,10 @@ class SelectionScene(SceneBase):
         else : # le fichier rb n'existe plus
             self.filename = ''
 
-        self.column = 1
-
         if mode_jour :
-            self.menu_edit_white = pygame.image.load('./images/icone_edit_white_selected.jpg')
-            self.menu_edit = pygame.image.load('./images/icone_edit_white.jpg')
             pygame.display.get_surface().fill(BLANC)
         else :
-            self.menu_edit = pygame.image.load('./images/icone_edit.jpg')
-            self.menu_edit_white = pygame.image.load('./images/icone_edit_selected.jpg')
             pygame.display.get_surface().fill(NOIR)
-        if is_tactile :
-            sprites['edit'] = (self.menu_edit,(int(guiconfig[self.orientation]['select_edit_x']),int(guiconfig[self.orientation]['select_edit_y'])))
         pygame.display.update()
         self.j = time.time()
 
@@ -1657,99 +1647,82 @@ class SelectionScene(SceneBase):
                 self.iscountdown = False
                 if event.key == BOUTON_UP :
                     self.iscountdown = False
-                    if self.column ==1 : self.selection -= 1
+                    self.selection -= 1
                     if self.selection < 0: self.selection = 0
                     if self.selection < self.fenetre: self.fenetre -= 1
                     if self.fenetre < 0 : self.fenetre = 0
                 elif event.key == BOUTON_DOWN :
                     self.iscountdown = False
-                    if self.column == 1 : self.selection += 1
+                    self.selection += 1
                     if self.selection == len(self.filenames): self.selection = len(self.filenames)-1
                     if self.selection >= self.fenetre+10: self.fenetre+=1
                 elif event.key == BOUTON_LEFT :
                     self.iscountdown = False
-                    if is_tactile:
-                        self.column -= 1
-                    if self.column < 1 : self.column = 2
                 elif event.key == BOUTON_RIGHT :
                     self.iscountdown = False
-                    if is_tactile:
-                        self.column += 1
-                    if self.column > 2 : self.column = 1
                 elif event.key == BOUTON_OK :
                         self.iscountdown = False ;
-                        if self.column == 1 :
-                            if self.filename != self.filenames[self.selection] : # on a sélectionné un nouveau rb, on va se positionner au début
-                                self.filename = self.filenames[self.selection]
-                                rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                                rbconfig['Roadbooks']['case'] = '0'
-                                save_rbconfig()
-                            self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
-                            if self.rallye == 'Zoom' :
-                                self.SwitchToScene(RoadbookZoomScene(self.filename))
-                            else :
-                                self.SwitchToScene(RoadbookScene(self.filename))
-                        else :
+                        if self.filename != self.filenames[self.selection] : # on a sélectionné un nouveau rb, on va se positionner au début
                             self.filename = self.filenames[self.selection]
-                            self.gotoEdit = True
-
+                            rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
+                            rbconfig['Roadbooks']['case'] = '0'
+                            save_rbconfig()
+                        self.k = self.j + self.countdown + 1 # hack pour afficher le message chargement en cours
+                        if self.rallye == 'Zoom' :
+                            self.SwitchToScene(RoadbookZoomScene(self.filename))
+                        else :
+                            self.SwitchToScene(RoadbookScene(self.filename))
     def Update(self):
         global sprites,old_sprites,labels,old_labels,angle, rbconfig
-        if self.gotoEdit :
-            self.SwitchToScene(EditScene(self.filename))
+        # Mise à jour de la liste de choix
+        if self.fenetre > 0 :
+            labels['up'] = (_('(moins)'),labels['up'][1],labels['up'][2],labels['up'][3])
+
+        for i in range (10) :
+            if self.next == self :
+                labels['liste{}'.format(i)] = ('                                                ',labels['liste{}'.format(i)][1],BLANC25,angle)
+        for i in range (len(self.filenames)) :
+            if i >= self.fenetre and i <self.fenetre+10 :
+                p = 'liste{}'.format(i-self.fenetre)
+                if self.filenames[i] == self.saved :
+                    text = self.filenames[i]+_(' (En cours)')
+                    if i == self.selection :
+                        couleur = ROUGE25inv
+                    else :
+                        couleur = ROUGE25
+                else :
+                    text = self.filenames[i]
+                    if i == self.selection :
+                        couleur = BLANC25inv
+                    else :
+                        couleur = BLANC25
+                if self.next == self :
+                    labels[p] = (text,labels[p][1],couleur,labels[p][3])
+        if self.fenetre+10<len(self.filenames):
+            labels['down'] = (_('(plus)'),labels['down'][1],labels['down'][2],labels['down'][3])
+
+        self.k = time.time()
+        if self.iscountdown :
+            if self.k-self.j< self.countdown :
+                #print(labels['infos'])
+                #labels['infos'] = ('{}'.format('Chargement'),labels['infos'][1],labels['infos'][2],labels['infos'][3])
+            #else :
+                if self.next == self :
+                    labels['infos'] = (_('Demarrage automatique dans {:1.0f}s...').format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3])
         else :
-            # Mise à jour de la liste de choix
-            if self.fenetre > 0 :
-                labels['up'] = (_('(moins)'),labels['up'][1],labels['up'][2],labels['up'][3])
+            if self.next == self :
+                labels['infos'] = ('                                                         ',labels['infos'][1],labels['infos'][2],labels['infos'][3])
 
-            for i in range (10) :
-                if self.next == self :
-                    labels['liste{}'.format(i)] = ('                                                ',labels['liste{}'.format(i)][1],BLANC25,angle)
-            for i in range (len(self.filenames)) :
-                if i >= self.fenetre and i <self.fenetre+10 :
-                    p = 'liste{}'.format(i-self.fenetre)
-                    if self.filenames[i] == self.saved :
-                        text = self.filenames[i]+_(' (En cours)')
-                        if i == self.selection :
-                            couleur = ROUGE25inv
-                        else :
-                            couleur = ROUGE25
-                    else :
-                        text = self.filenames[i]
-                        if i == self.selection :
-                            couleur = BLANC25inv
-                        else :
-                            couleur = BLANC25
-                    if self.next == self :
-                        labels[p] = (text,labels[p][1],couleur,labels[p][3])
-            if self.fenetre+10<len(self.filenames):
-                labels['down'] = (_('(plus)'),labels['down'][1],labels['down'][2],labels['down'][3])
-
-            self.k = time.time()
-            if self.next == self:
-                if is_tactile:
-                   sprites['edit'] = (self.menu_edit_white,sprites['edit'][1]) if self.column == 2 else (self.menu_edit,sprites['edit'][1])
-            if self.iscountdown :
-                if self.k-self.j< self.countdown :
-                    #print(labels['infos'])
-                    #labels['infos'] = ('{}'.format('Chargement'),labels['infos'][1],labels['infos'][2],labels['infos'][3])
-                #else :
-                    if self.next == self :
-                        labels['infos'] = (_('Demarrage automatique dans {:1.0f}s...').format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3])
-            else :
-                if self.next == self :
-                    labels['infos'] = ('                                                         ',labels['infos'][1],labels['infos'][2],labels['infos'][3])
-
-            if self.iscountdown:
-                self.k = time.time();
-                if (self.k-self.j>=self.countdown) :
-                    self.filename = self.filenames[self.selection]
-                    rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
-                    save_rbconfig()
-                    if self.rallye == 'Zoom' :
-                        self.SwitchToScene(RoadbookZoomScene(self.filename))
-                    else :
-                        self.SwitchToScene(RoadbookScene(self.filename))
+        if self.iscountdown:
+            self.k = time.time();
+            if (self.k-self.j>=self.countdown) :
+                self.filename = self.filenames[self.selection]
+                rbconfig['Roadbooks']['etape'] = self.filenames[self.selection]
+                save_rbconfig()
+                if self.rallye == 'Zoom' :
+                    self.SwitchToScene(RoadbookZoomScene(self.filename))
+                else :
+                    self.SwitchToScene(RoadbookScene(self.filename))
 
 
     def Render(self, screen):
@@ -2193,123 +2166,6 @@ class ConfigScene(SceneBase):
             save_setupconfig()
             self.SwitchToScene(TitleScene())
 
-
-
-#*******************************************************************************************************#
-#---------------------------------------- La partie Annotations de Roadbooks  --------------------------#
-#*******************************************************************************************************#
-class EditScene(SceneBase):
-    def __init__(self, fname = ''):
-        global labels,old_labels,sprites,old_sprites,filedir,fichiers,rb_ratio,angle,myfont,alphabet,alphabet_size_x,alphabet_size_y,fps
-        SceneBase.__init__(self)
-        self.next = self
-        self.filename = fname
-        filedir = os.path.splitext(self.filename)[0]
-        if os.path.isdir('/mnt/piusb/Annotations/'+filedir) == False: # Pas de répertoire d'annotation, on creeme repertoire
-            os.mkdir('/mnt/piusb/Annotations/'+filedir)
-
-        labels = {}
-        old_labels = {}
-        sprites = {}
-        old_sprites = {}
-        image_cache = {}
-
-        angle = 0
-        fps = 60
-
-        setup_alphabet(BLANC25inv)
-        setup_alphabet(BLANC25)
-
-        #Chargement des images
-        fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
-        self.nb_cases = len(fichiers)
-        samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
-        (w,h) = samplepage.get_rect().size
-        rb_ratio = 800/w
-        # Mise à l'échelle des images
-        self.nh = h * rb_ratio
-        self.case = 0
-        self.old_case = -1
-        sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
-
-        if mode_jour :
-            pygame.display.get_surface().fill(BLANC)
-            labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25inv,0)
-        else :
-            pygame.display.get_surface().fill(NOIR)
-            labels['case'] = ('001/{:03d}'.format(self.nb_cases),(300,430),BLANC25,0)
-        pygame.display.update()
-
-
-        self.last_coords = (800,480)
-        self.canvas = sprites['case'][0].copy()
-        self.canvas.fill(BLANC)
-        if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) :
-            self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
-        self.canvas.set_colorkey(BLANC)
-        self.mouse = pygame.mouse
-
-
-    def ProcessInput(self, events, pressed_keys):
-        global filedir,fps
-        left_pressed, middle_pressed, right_pressed = self.mouse.get_pressed()
-        for event in events:
-            if event.type == pygame.QUIT:
-                self.Terminate()
-            elif event.type == pygame.KEYDOWN :
-                pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
-                if event.key == BOUTON_OK :
-                    self.SwitchToScene(TitleScene())
-                    fps = 5
-                elif event.key == BOUTON_DOWN :
-                    self.case += 1
-                elif event.key == BOUTON_UP :
-                    self.case -= 1
-                elif event.key == BOUTON_BACKSPACE :
-                    self.canvas = sprites['case'][0].copy()
-                    self.canvas.fill(BLANC)
-                    pygame.image.save(self.canvas,'/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case))
-                elif event.key == BOUTON_LEFT :
-                    self.case -= 10
-                elif event.key == BOUTON_RIGHT :
-                    self.case += 10
-                if self.case < 0 : self.case = 0
-                if self.case >= self.nb_cases : self = self.nb_cases-1
-                # On charge l'ancienne annotation si elle existe
-                if os.path.isfile('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)) :
-                    self.canvas = pygame.image.load ('/mnt/piusb/Annotations/{}/annotation_{:03d}.png'.format(filedir,self.case)).convert()
-                else :
-                    self.canvas.fill(BLANC)
-                self.canvas.set_colorkey(BLANC)
-            elif left_pressed :
-                self.c = pygame.mouse.get_pos()
-                if self.last_coords == (800,480) : self.last_coords = self.c
-                self.coords = self.c
-                pygame.draw.line(self.canvas, ROUGE,self.last_coords, self.coords,5)
-                self.last_coords = self.coords
-            else :
-                self.last_coords = (800,480)
-
-    def Update(self):
-        if self.next == self :
-            if self.old_case != self.case :
-                sprites['case'] = (pygame.transform.rotozoom (pygame.image.load(os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[self.case])),0,rb_ratio),(0,0))
-                labels['case'] = ('{:3d}/{:3d}'.format(self.case+1,self.nb_cases),labels['case'][1],labels['case'][2],labels['case'][3])
-                self.old_case = self.case
-
-
-    def Render(self, screen):
-        global sprites
-        if mode_jour :
-            screen.fill(BLANC)
-        else :
-            screen.fill(NOIR)
-        for i in list(labels.keys()) :
-            blit_text (screen,labels[i][0],labels[i][1],labels[i][2],labels[i][3])
-        for i in list(sprites.keys()) :
-            screen.blit (sprites[i][0],sprites[i][1])
-        screen.blit (self.canvas,(0,0))
-        pygame.display.flip()
 
 
 #*******************************************************************************************************#
