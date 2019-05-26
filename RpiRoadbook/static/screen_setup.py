@@ -153,7 +153,7 @@ for j in range (1,nb_screens+1):
     print('<img src="images/pajra1.png" id="preview_img{}">'.format(j))
     print('<table>')
 
-    print('<tr><td>Jour/Nuit</td>')
+    print('<tr><td>',_('Jour/Nuit'),'</td>')
 
     # Affichage des listes de choix jour_nuit
     print('<td>')
@@ -171,7 +171,7 @@ for j in range (1,nb_screens+1):
     print('</tr>')
 
 # Affichage des listes de layout
-    print('<tr><td>Disposition</td>')
+    print('<tr><td>',_('Disposition'),'</td>')
     print('<td>')
     print('<select name="layout{}" id="layout{}" onchange="update_preview()" style="width:110px;">'.format(j,j))
     if orientation == 'Paysage' :
