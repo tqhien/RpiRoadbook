@@ -150,8 +150,32 @@ it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
 de = gettext.translation('rpiroadbook', localedir='locales', languages=['de'])
 es = gettext.translation('rpiroadbook', localedir='locales', languages=['es'])
 
+# On charge les reglages des boutons
+setupconfig = configparser.ConfigParser()
+candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
+setupconfig.read(candidates)
+boutonsTrip = setupconfig['Parametres']['boutonsTrip']
+boutonsRB = setupconfig['Parametres']['boutonsRB']
+boutonsPull = setupconfig['Parametres']['boutonsPull']
+
+# Fonction qui renvoie l'etat du bouton, si le montage est en pull-up
+def bouton_pressed_pup (channel):
+    return not GPIO.input(channel)
+
+# Fonction qui renvoie l'etat du bouton, si le montage est en pull-down
+def bouton_pressed_pdown (channel):
+    return GPIO.input(channel)
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(GPIO_ROUE, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Capteur de vitesse
+# Selon le mode : pullup ou pulldown, on definit le sens du front a detecter et la fonction etat du bouton
+if boutonsPull == 'Up' :
+    edge = GPIO.FALLING
+    bouton_pressed = bouton_pressed_pup
+else :
+    edge = GPIO.RISING
+    bouton_pressed = bouton_pressed_pdown
+
+GPIO.setup(GPIO_ROUE, GPIO.IN) # Capteur de vitesse
 #GPIO.setup(GPIO_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(GPIO_LEFT, GPIO.IN)
 #GPIO.setup(GPIO_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -216,7 +240,7 @@ def input_left_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     t = time.time() - b4_time
-    while not GPIO.input(channel) :# on attend le retour du bouton
+    while bouton_pressed(channel) :# on attend le retour du bouton
         if t >= .2 and t < 2:
             if not left_state:
                 left_state = True
@@ -235,7 +259,7 @@ def input_left_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
     left_state = False
     left_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_left_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_left_callback,bouncetime=300)
 
 
 def input_right_callback(channel):
@@ -246,7 +270,7 @@ def input_right_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     t = time.time() - b4_time
-    while not GPIO.input(channel) :# on attend le retour du bouton
+    while bouton_pressed(channel) :# on attend le retour du bouton
         if t >= .2 and t < 2:
             if not right_state:
                 right_state = True
@@ -265,7 +289,7 @@ def input_right_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
     right_state = False
     right_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_right_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_right_callback,bouncetime=300)
 
 
 def input_ok_callback(channel):
@@ -276,7 +300,7 @@ def input_ok_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     t = time.time() - b4_time
-    while not GPIO.input(channel) :# on attend le retour du bouton
+    while bouton_pressed(channel) :# on attend le retour du bouton
         if t >= .5 and t < 2:
             if not ok_state:
                 ok_state = True
@@ -290,7 +314,7 @@ def input_ok_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
     ok_state = False
     ok_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_ok_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_ok_callback,bouncetime=300)
 
 def input_up_callback(channel):
     global up_state
@@ -300,7 +324,7 @@ def input_up_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     t = time.time() - b4_time
-    while not GPIO.input(channel) :# on attend le retour du bouton
+    while bouton_pressed(channel) :# on attend le retour du bouton
         if t >= .1 and t < 2:
             if not up_state:
                 up_state = True
@@ -314,7 +338,7 @@ def input_up_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
     up_state = False
     up_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_up_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_up_callback,bouncetime=300)
 
 def input_down_callback(channel):
     global down_state
@@ -324,7 +348,7 @@ def input_down_callback(channel):
     b4_time = time.time()
     time.sleep(.2)
     t = time.time() - b4_time
-    while not GPIO.input(channel) :# on attend le retour du bouton
+    while bouton_pressed(channel) :# on attend le retour du bouton
         if t >= .1 and t < 2:
             if not down_state:
                 down_state = True
@@ -338,32 +362,27 @@ def input_down_callback(channel):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
     down_state = False
     down_long_state = False
-    GPIO.add_event_detect(channel,GPIO.FALLING,callback=input_down_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_down_callback,bouncetime=300)
 
-# On charge les reglages des boutons
-setupconfig = configparser.ConfigParser()
-candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
-setupconfig.read(candidates)
-boutonsTrip = setupconfig['Parametres']['boutonsTrip']
-boutonsRB = setupconfig['Parametres']['boutonsRB']
+
 
 #On définit les interruptions sur les GPIO des commandes
-GPIO.add_event_detect(GPIO_ROUE, GPIO.FALLING, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, GPIO.FALLING, callback=input_left_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_ROUE, edge, callback=input_roue_callback,bouncetime=15)
+GPIO.add_event_detect(GPIO_LEFT, edge, callback=input_left_callback, bouncetime=300)
 
 if boutonsTrip == '2' :
-    GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_OK, edge, callback=input_right_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_RIGHT, edge, callback=input_ok_callback, bouncetime=300)
 else :
-    GPIO.add_event_detect(GPIO_RIGHT, GPIO.FALLING, callback=input_right_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_OK, GPIO.FALLING, callback=input_ok_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_RIGHT, edge, callback=input_right_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_OK, edge, callback=input_ok_callback, bouncetime=300)
 
 if boutonsRB == '2' :
-    GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_DOWN, edge, callback=input_up_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_UP, edge, callback=input_down_callback, bouncetime=300)
 else :
-    GPIO.add_event_detect(GPIO_UP, GPIO.FALLING, callback=input_up_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_DOWN, GPIO.FALLING, callback=input_down_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_UP, edge, callback=input_up_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_DOWN, edge, callback=input_down_callback, bouncetime=300)
 
 
 #*******************************************************************************************************#
