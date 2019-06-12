@@ -164,7 +164,7 @@ GPIO.setup(GPIO_UP, GPIO.IN)
 GPIO.setup(GPIO_DOWN, GPIO.IN)
 
 # Test bouton au démarrage pour menu de configuration
-gotoConfig = not GPIO.input(GPIO_LEFT)
+gotoConfig = GPIO.input(GPIO_LEFT) != GPIO.input(GPIO_RIGHT)
 
 #*******************************************************************************************************#
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
