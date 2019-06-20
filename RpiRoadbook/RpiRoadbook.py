@@ -158,6 +158,11 @@ boutonsTrip = setupconfig['Parametres']['boutonsTrip']
 boutonsRB = setupconfig['Parametres']['boutonsRB']
 boutonsPull = setupconfig['Parametres']['boutonsPull']
 
+# Logfile pour debogage
+def logdebug (st) :
+    with open('/mnt/piusb/thumbnail/debug.log','a') as f:
+        f.write('{}\n'.format(st))
+
 # Fonction qui renvoie l'etat du bouton, si le montage est en pull-up
 def bouton_pressed_pup (channel):
     return not GPIO.input(channel)
@@ -236,12 +241,14 @@ def input_left_callback(channel):
     global left_state
     GPIO.remove_event_detect(channel)
     print('Bouton gauche')
+    #logdebug('Bouton gauche @{}'.format(time.time()))
     left_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
     t = time.time() - b4_time
+    time.sleep(.1)
     while bouton_pressed(channel) :# on attend le retour du bouton
-        if t >= .2 and t < 2:
+        t = time.time() - b4_time
+        if t >= .1 and t < 2:
             if not left_state:
                 left_state = True
         if t >=2:
@@ -253,25 +260,27 @@ def input_left_callback(channel):
                 if t - old_t >= .5 :
                     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_HOME}))
                     old_t = time.time() - b4_time
-        time.sleep(.2)
-        t = time.time() - b4_time
-    if t >= .2 and t < 2:
+        time.sleep(.1)
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_LEFT}))
+    #logdebug('Bouton gauche pendant {}s'.format(t))
     left_state = False
     left_long_state = False
-    GPIO.add_event_detect(channel,edge,callback=input_left_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_left_callback,bouncetime=50)
 
 
 def input_right_callback(channel):
     global right_state
     GPIO.remove_event_detect(channel)
     print('Bouton droit')
+    #logdebug('Bouton droit @{}'.format(time.time()))
     right_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
     t = time.time() - b4_time
+    time.sleep(.1)
     while bouton_pressed(channel) :# on attend le retour du bouton
-        if t >= .2 and t < 2:
+        t = time.time() - b4_time
+        if t >= .1 and t < 2:
             if not right_state:
                 right_state = True
         if t >=2 :
@@ -283,48 +292,53 @@ def input_right_callback(channel):
                 if t - old_t >= .5 :
                     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_END}))
                     old_t = time.time() - b4_time
-        time.sleep(.2)
-        t = time.time() - b4_time
-    if t >= .2 and t < 2:
+        time.sleep(.1)
+
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_RIGHT}))
+    #logdebug('Bouton droit pendant {}s'.format(t))
     right_state = False
     right_long_state = False
-    GPIO.add_event_detect(channel,edge,callback=input_right_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_right_callback,bouncetime=50)
 
 
 def input_ok_callback(channel):
     global ok_state
     GPIO.remove_event_detect(channel)
     print('Bouton OK')
+    #logdebug('Bouton ok @{}'.format(time.time()))
     ok_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
     t = time.time() - b4_time
+    time.sleep(.1)
     while bouton_pressed(channel) :# on attend le retour du bouton
-        if t >= .5 and t < 2:
+        t = time.time() - b4_time
+        if t >= .1 and t < 2:
             if not ok_state:
                 ok_state = True
         if t >=2 :
             if not ok_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_BACKSPACE}))
                 ok_long_state = True
-        time.sleep(.2)
-        t = time.time() - b4_time
-    if t >= .5 and t < 2:
+        time.sleep(.1)
+    if t >= .1 and t < 2:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_OK}))
+    #logdebug('Bouton ok pendant {}s'.format(t))
     ok_state = False
     ok_long_state = False
-    GPIO.add_event_detect(channel,edge,callback=input_ok_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_ok_callback,bouncetime=50)
 
 def input_up_callback(channel):
     global up_state
     GPIO.remove_event_detect(channel)
     print('Bouton haut')
+    #logdebug('Bouton haut @{}'.format(time.time()))
     up_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
     t = time.time() - b4_time
+    time.sleep(.1)
     while bouton_pressed(channel) :# on attend le retour du bouton
+        t = time.time() - b4_time
         if t >= .1 and t < 2:
             if not up_state:
                 up_state = True
@@ -332,23 +346,25 @@ def input_up_callback(channel):
             if not up_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGUP}))
                 up_long_state = True
-        time.sleep(.2)
-        t = time.time() - b4_time
+        time.sleep(.1)
     if t >= .1 and t < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_UP}))
+    #logdebug('Bouton haut pendant {}s'.format(t))
     up_state = False
     up_long_state = False
-    GPIO.add_event_detect(channel,edge,callback=input_up_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_up_callback,bouncetime=50)
 
 def input_down_callback(channel):
     global down_state
     GPIO.remove_event_detect(channel)
     print('Bouton bas')
+    #logdebug('Bouton bas @{}'.format(time.time()))
     down_long_state = False
     b4_time = time.time()
-    time.sleep(.2)
     t = time.time() - b4_time
+    time.sleep(.1)
     while bouton_pressed(channel) :# on attend le retour du bouton
+        t = time.time() - b4_time
         if t >= .1 and t < 2:
             if not down_state:
                 down_state = True
@@ -356,33 +372,33 @@ def input_down_callback(channel):
             if not down_long_state:
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_PGDOWN}))
                 down_long_state = True
-        time.sleep(.2)
-        t = time.time() - b4_time
+        time.sleep(.1)
     if t >= .1 and t < 2 :
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key':BOUTON_DOWN}))
+    #logdebug('Bouton down pendant {}s'.format(t))
     down_state = False
     down_long_state = False
-    GPIO.add_event_detect(channel,edge,callback=input_down_callback,bouncetime=300)
+    GPIO.add_event_detect(channel,edge,callback=input_down_callback,bouncetime=50)
 
 
 
 #On définit les interruptions sur les GPIO des commandes
 GPIO.add_event_detect(GPIO_ROUE, edge, callback=input_roue_callback,bouncetime=15)
-GPIO.add_event_detect(GPIO_LEFT, edge, callback=input_left_callback, bouncetime=300)
+GPIO.add_event_detect(GPIO_LEFT, edge, callback=input_left_callback, bouncetime=50)
 
 if boutonsTrip == '2' :
-    GPIO.add_event_detect(GPIO_OK, edge, callback=input_right_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_RIGHT, edge, callback=input_ok_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_OK, edge, callback=input_right_callback, bouncetime=50)
+    GPIO.add_event_detect(GPIO_RIGHT, edge, callback=input_ok_callback, bouncetime=50)
 else :
-    GPIO.add_event_detect(GPIO_RIGHT, edge, callback=input_right_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_OK, edge, callback=input_ok_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_RIGHT, edge, callback=input_right_callback, bouncetime=50)
+    GPIO.add_event_detect(GPIO_OK, edge, callback=input_ok_callback, bouncetime=50)
 
 if boutonsRB == '2' :
-    GPIO.add_event_detect(GPIO_DOWN, edge, callback=input_up_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_UP, edge, callback=input_down_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_DOWN, edge, callback=input_up_callback, bouncetime=50)
+    GPIO.add_event_detect(GPIO_UP, edge, callback=input_down_callback, bouncetime=50)
 else :
-    GPIO.add_event_detect(GPIO_UP, edge, callback=input_up_callback, bouncetime=300)
-    GPIO.add_event_detect(GPIO_DOWN, edge, callback=input_down_callback, bouncetime=300)
+    GPIO.add_event_detect(GPIO_UP, edge, callback=input_up_callback, bouncetime=50)
+    GPIO.add_event_detect(GPIO_DOWN, edge, callback=input_down_callback, bouncetime=50)
 
 
 #*******************************************************************************************************#
