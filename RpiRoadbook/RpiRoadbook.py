@@ -1024,12 +1024,16 @@ class vmax1_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def update(self):
-        global speed,vmax1
+        global speed,vmax1,totalisateur,save_t_moy,old_totalisateur
         temps = time.time() - chrono_time1
         if temps <= 2 :
             speed = 0
         else :
-            speed = distance1 * 3.6 / temps / 1000
+            k = time.time()
+            if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+                speed = (totalisateur-old_totalisateur)*3.6/(k-save_t_moy)/1000;
+                save_t_moy = k
+                old_totalisateur = totalisateur
         if speed > vmax1 :
             vmax1 = speed
     def render(self,scr):
@@ -1164,12 +1168,16 @@ class vmax2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def update(self):
-        global speed,vmax2
+        global speed,vmax2,totalisateur,save_t_moy,old_totalisateur
         temps = time.time() - chrono_time2
         if temps <= 2 :
             speed = 0
         else :
-            speed = distance2 * 3.6 / temps / 1000
+            k = time.time()
+            if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+                speed = (totalisateur-old_totalisateur)*3.6/(k-save_t_moy)/1000;
+                save_t_moy = k
+                old_totalisateur = totalisateur
         if speed > vmax2 :
             vmax2 = speed
     def render(self,scr):
