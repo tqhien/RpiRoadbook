@@ -13,12 +13,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -45,12 +49,12 @@ print ("""Content-Type: text/html\n
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Suppression de roadbooks'))
+print(_("Delete roadbook"))
 print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>""")
-print(_('Fichiers supprim&eacute;s :'))
+print(_("Roadbook deleted :"))
 print('</h3>')
 
 form = cgi.FieldStorage()
@@ -77,7 +81,7 @@ if 'choix' in form:
         pass
     print("{}<br>".format(fileitem.value))
 else:
-    print (_("Pas de choix"))
+    print (_("No selection"))
 print ("""
 </div>
 

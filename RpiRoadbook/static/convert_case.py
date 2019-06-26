@@ -12,12 +12,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -96,6 +100,6 @@ for i in range (nb_pages) :
             else :
                 pages = convert_from_path('/mnt/piusb/'+filename, output_folder='/mnt/piusb/Conversions/'+filedir,first_page = nb_pages-i, last_page=nb_pages-i, dpi=150 , x=x,y=y,w=w,h=h,singlefile='{:03}'.format(num),fmt='jpg')
 
-            print(_('Case {} / {}<br>').format(num+1,total))
+            print(_("Waypoint {} / {}<br>").format(num+1,total))
 
 print ('</html>')

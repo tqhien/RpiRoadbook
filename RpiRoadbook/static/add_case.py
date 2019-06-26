@@ -14,12 +14,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -57,9 +61,9 @@ if 'imagedata' in form:
     #imageData = bytearray([imageData])
     #print (form['imageData'].value)
     open('/mnt/piusb/Conversions/{}/{}_.jpg'.format(filedir,num), 'wb').write(imageData)
-    print(_('Case ins&eacute;r&eacute;e'))
+    print(_("Waypoint inserted"))
 else :
-    print (_('Erreur pas de donn&eacute;es'))
+    print (_("Error no data"))
 #print('Image sauvegardee')
 
 print("""

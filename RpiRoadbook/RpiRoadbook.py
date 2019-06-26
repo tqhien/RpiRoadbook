@@ -145,6 +145,7 @@ right_state = False
 up_state = False
 down_state = False
 
+fr = gettext.translation('rpiroadbook', localedir='locales', languages=['fr'])
 en = gettext.translation('rpiroadbook', localedir='locales', languages=['en'])
 it = gettext.translation('rpiroadbook', localedir='locales', languages=['it'])
 de = gettext.translation('rpiroadbook', localedir='locales', languages=['de'])
@@ -900,7 +901,7 @@ class odo_widget (rb_widget):
         rb_widget.__init__(self,layout,widget)
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Totalisateur'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Distance"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:05.0f} '.format(totalisateur/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -923,7 +924,7 @@ class speed_widget (rb_widget):
             old_totalisateur = totalisateur
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Vitesse'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Speed"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:3.0f} '.format(speed),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -986,7 +987,7 @@ class trip1_widget (rb_widget):
         save_t_odo = time.time()
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Trip1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Trip1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:6.2f}   '.format(distance1/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1009,7 +1010,7 @@ class vmoy1_widget(rb_widget):
             vmoy1 = distance1 * 3.6 / temps / 1000
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Vmoy1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Avg.Speed1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:3.0f} '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1038,7 +1039,7 @@ class vmax1_widget(rb_widget):
             vmax1 = speed
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Vmax1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" MaxSpeed1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:03.0f} '.format(vmax1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1074,7 +1075,7 @@ class chrono1_widget(rb_widget):
         if m >= 100 :
             h,m = divmod (m,100)
         ss = (s*100) % 100
-        blit_text(scr,_(' Chrono1'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Stopwatch1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1134,7 +1135,7 @@ class trip2_widget (rb_widget):
         save_t_odo = time.time()
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Trip2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Trip2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:6.2f} '.format(distance2/1000000),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1155,7 +1156,7 @@ class vmoy2_widget(rb_widget):
             vmoy2 = distance2 * 3.6 / temps /1000
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Vmoy2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Avg.Speed2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:03.0f} '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1182,7 +1183,7 @@ class vmax2_widget(rb_widget):
             vmax2 = speed
     def render(self,scr):
         global angle
-        blit_text(scr,_(' Vmax2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" MaxSpeed2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:03.0f} '.format(vmax2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1216,7 +1217,7 @@ class chrono2_widget(rb_widget):
         if m >= 100:
             h,m = divmod (m,100)
         ss = (s*100) % 100
-        blit_text(scr,_(' Chrono2'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" StopWatch2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f}'.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1294,7 +1295,7 @@ class countdown_widget (rb_widget):
             t = decompte
         m,s = divmod (t,60)
         #ss = math.floor((s*10) % 10)
-        blit_text(scr,_(' Decompte'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Countdown"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02.0f}:{:02.0f} '.format(m,s),(self.x+self.x2,self.y+self.y2),self.selected_font,angle)
         else:
@@ -1314,7 +1315,7 @@ class heure_widget(rb_widget):
         self.now = time.localtime()
     def render(self,scr):
         global angle,chrono_time2
-        blit_text(scr,_(' Heure'),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
+        blit_text(scr,_(" Time"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:02d}:{:02d}'.format(self.now.tm_hour,self.now.tm_min),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
@@ -1426,9 +1427,12 @@ def check_configfile():
     boutonsRB = setupconfig['Parametres']['boutonsRB']
     langue = setupconfig['Parametres']['langue']
 
-    if langue == 'EN' :
+    if langue == 'FR' :
+        fr.install()
+        _ = fr.gettext # Francais
+    elif langue == 'EN' :
         en.install()
-        _ = en.gettext # English
+        _ = en.gettext # Francais
     elif langue == 'IT' :
         it.install()
         _ = it.gettext # Italiano
@@ -1648,15 +1652,15 @@ class SelectionScene(SceneBase):
         setup_alphabet(VERT25)
 
         if self.orientation == 'Paysage' :
-            labels['infos'] = (_('Demarrage automatique dans 5s...'),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
-            labels['invite'] = (_('Selectionnez le roadbook a charger :'),(10,10),BLANC25,angle)
+            labels['infos'] = (_("AutoStart in 5s..."),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
+            labels['invite'] = (_("Select a roadbook :"),(10,10),BLANC25,angle)
             labels['up'] = ('        ',(10,50),BLANC25,angle)
             labels['down'] = ('        ',(10,380),BLANC25,angle)
             for i in range (10) :
                 labels['liste{}'.format(i)] = ('',(10,80+i*30),BLANC25,angle)
         else :
-            labels['infos'] = (_('Demarrage automatique dans 5s...'),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
-            labels['invite'] = (_('Selectionnez le roadbook a charger :'),(0,480),BLANC25,angle)
+            labels['infos'] = (_("AutoStart in 5s..."),(int(guiconfig[self.orientation]['select_text_x']),int(guiconfig[self.orientation]['select_text_y'])),VERT25,angle)
+            labels['invite'] = (_("Select a roadbook :"),(0,480),BLANC25,angle)
             labels['up'] = ('        ',(50,480),BLANC25,angle)
             labels['down'] = ('        ',(380,480),BLANC25,angle)
             for i in range (10) :
@@ -1719,7 +1723,7 @@ class SelectionScene(SceneBase):
         global sprites,old_sprites,labels,old_labels,angle, rbconfig
         # Mise à jour de la liste de choix
         if self.fenetre > 0 :
-            labels['up'] = (_('(moins)'),labels['up'][1],labels['up'][2],labels['up'][3])
+            labels['up'] = (_("(prev)"),labels['up'][1],labels['up'][2],labels['up'][3])
 
         for i in range (10) :
             if self.next == self :
@@ -1728,7 +1732,7 @@ class SelectionScene(SceneBase):
             if i >= self.fenetre and i <self.fenetre+10 :
                 p = 'liste{}'.format(i-self.fenetre)
                 if self.filenames[i] == self.saved :
-                    text = self.filenames[i]+_(' (En cours)')
+                    text = self.filenames[i]+_(" (Current)")
                     if i == self.selection :
                         couleur = ROUGE25inv
                     else :
@@ -1742,7 +1746,7 @@ class SelectionScene(SceneBase):
                 if self.next == self :
                     labels[p] = (text,labels[p][1],couleur,labels[p][3])
         if self.fenetre+10<len(self.filenames):
-            labels['down'] = (_('(plus)'),labels['down'][1],labels['down'][2],labels['down'][3])
+            labels['down'] = (_("(next)"),labels['down'][1],labels['down'][2],labels['down'][3])
 
         self.k = time.time()
         if self.iscountdown :
@@ -1751,7 +1755,7 @@ class SelectionScene(SceneBase):
                 #labels['infos'] = ('{}'.format('Chargement'),labels['infos'][1],labels['infos'][2],labels['infos'][3])
             #else :
                 if self.next == self :
-                    labels['infos'] = (_('Demarrage automatique dans {:1.0f}s...').format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3])
+                    labels['infos'] = (_("AutoStart in {:1.0f}s...").format(self.countdown+1-(self.k-self.j)),labels['infos'][1],labels['infos'][2],labels['infos'][3])
         else :
             if self.next == self :
                 labels['infos'] = ('                                                         ',labels['infos'][1],labels['infos'][2],labels['infos'][3])
@@ -1794,9 +1798,9 @@ class NoneScene(SceneBase):
         pygame.display.update()
 
         #self.img = pygame.image.load('./../Roadbooks/images/nothing.jpg')
-        labels['text1'] = (_('Aucun roadbook present.'), (100,200),ROUGE25,0)
-        labels['text2'] = (_('Appuyez sur un bouton pour revenir'), (100,230),ROUGE25,0)
-        labels['text3'] = (_('au menu en mode Route'), (100,260),ROUGE25,0)
+        labels['text1'] = (_("No Roadbook detected."), (100,200),ROUGE25,0)
+        labels['text2'] = (_("Press a button to return"), (100,230),ROUGE25,0)
+        labels['text3'] = (_("To Road Mode"), (100,260),ROUGE25,0)
 
     def ProcessInput(self, events, pressed_keys):
         global setupconfig
@@ -1841,12 +1845,12 @@ class ConfigScene(SceneBase):
         setup_alphabet(BLANC50)
         setup_alphabet(BLANC50inv)
 
-        labels ['t_roue'] = (_('Roue :'),(int(guiconfig[self.orientation]['config_l_roue_x']),int(guiconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
+        labels ['t_roue'] = (_("Wheelsize :"),(int(guiconfig[self.orientation]['config_l_roue_x']),int(guiconfig[self.orientation]['config_l_roue_y'])),BLANC50,angle)
         labels ['roue'] = ('{:4d}'.format(0),(int(guiconfig[self.orientation]['config_roue_x']),int(guiconfig[self.orientation]['config_roue_y'])),BLANC50,angle)
-        labels ['t_aimants'] = (_('Nb aimants :'),(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
+        labels ['t_aimants'] = (_("Magnets :"),(int(guiconfig[self.orientation]['config_l_aimants_x']),int(guiconfig[self.orientation]['config_l_aimants_y'])),BLANC50,angle)
         labels ['aimants'] = ('{:2d}  '.format(0),(int(guiconfig[self.orientation]['config_aimants_x']),int(guiconfig[self.orientation]['config_aimants_y'])),BLANC50,angle)
-        labels ['t_RAZ'] = (_('Config Usine :'),(int(guiconfig[self.orientation]['config_l_raz_x']),int(guiconfig[self.orientation]['config_l_raz_y'])),BLANC50,angle)
-        labels ['RAZ'] = (_('RAZ'),(int(guiconfig[self.orientation]['config_raz_x']),int(guiconfig[self.orientation]['config_raz_y'])),BLANC50,angle)
+        labels ['t_RAZ'] = (_("Factory Reset :"),(int(guiconfig[self.orientation]['config_l_raz_x']),int(guiconfig[self.orientation]['config_l_raz_y'])),BLANC50,angle)
+        labels ['RAZ'] = (_("Reset"),(int(guiconfig[self.orientation]['config_raz_x']),int(guiconfig[self.orientation]['config_raz_y'])),BLANC50,angle)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.index = 2 # de 0 à 4 : 0=roue, 1=nb aimants, 2 = OK, 3 = RAZ
@@ -1943,7 +1947,7 @@ class ConfigScene(SceneBase):
     def Update(self):
         global labels,old_labels,sprites,old_sprites
         if self.next == self :
-            labels['RAZ'] = (_('RAZ'),labels['RAZ'][1],BLANC50inv,labels['RAZ'][3]) if self.index == 3 else (_('RAZ'),labels['RAZ'][1],BLANC50,labels['RAZ'][3])
+            labels['RAZ'] = (_("Reset"),labels['RAZ'][1],BLANC50inv,labels['RAZ'][3]) if self.index == 3 else (_("Reset"),labels['RAZ'][1],BLANC50,labels['RAZ'][3])
             labels['roue'] = ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50inv,labels['roue'][3]) if self.index == 0 else ('{:4d}mm'.format(self.d_roue),labels['roue'][1],BLANC50,labels['roue'][3])
             labels['aimants'] = ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50inv,labels['aimants'][3]) if self.index == 1 else ('{:2d}  '.format(self.aimants),labels['aimants'][1],BLANC50,labels['aimants'][3])
 

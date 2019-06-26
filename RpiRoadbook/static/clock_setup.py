@@ -14,12 +14,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -50,7 +54,7 @@ print("""
 <div class="w3-container w3-center w3-section">
 <h1>
 """)
-print(_("R&eacute;glage de l'horloge"))
+print(_("Clock setting"))
 print("""
 </h1></div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey">
@@ -59,7 +63,7 @@ print("""
 """)
 print('   <div class="w3-half">')
 print('    <label for="date"><h3>')
-print(_('Date:'))
+print(_("Date:"))
 print('</h3></label>')
 print('    <input type="date" id="date" name="user_date" value={}'.format(st_date))
 print(' pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">')
@@ -67,7 +71,7 @@ print('  </div>')
 
 print('   <div class="w3-half">')
 print('    <label for="time"><h3>')
-print(_('Heure:'))
+print(_("Time:"))
 print('</h3></label>')
 print('    <input type="time" id="time" name="user_time" value={}'.format(st_time))
 print(' pattern="[0-9]{2}:[0-9]{2}">')
@@ -78,7 +82,7 @@ print("""
 <div class="w3-bar">
         <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">
 """)
-print(_('Valider'))
+print(_("OK"))
 print("""
 </button>
 </div>
@@ -90,7 +94,7 @@ print("""
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>
 """)
-print(_('Configuration'))
+print(_("Setup"))
 print("""
  </a>
 </div>

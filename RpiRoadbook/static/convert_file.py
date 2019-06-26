@@ -14,12 +14,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -53,17 +57,17 @@ print ("""<html>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Conversion'))
+print(_("Conversion"))
 print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
 <div class="w3-row">
   <div class="w3-col w3-light-grey s12 w3-center">
 <p><h3>""")
-print(_('Traitement en cours. Veuillez patienter'))
+print(_("Working... Please wait"))
 print('</h3></p>')
 
-print(_('La liste des cases appara&icirc;tra une fois la conversion termin&eacute;e (environ 1 seconde/case)'))
+print(_("Converted Waypoints will appear below (Approx. 1 sec/waypoint)"))
 print("""
 </div>
 </div>

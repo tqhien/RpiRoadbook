@@ -12,12 +12,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -43,23 +47,23 @@ print("""
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
   <h1>""")
-print(_('Mise &agrave; jour Firmware'))
+print(_("Firmware update"))
 print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue w3-center">
    <h3>""")
-print(_('Attention : une mauvaise mise &agrave; jour peut rendre votre RpiRoadbook non fonctionnel'))
+print(_("Warning : a wrong firmware can brick your RpiRoadbook"))
 print('</h3>   <h3>')
-print(_('Etes-vous s&ucirc;r de vouloir continuer ?'))
+print(_("Continue ?"))
 print("""</h3>
     <div class="w3-bar w3-margin">
       <a class="w3-bar-item w3-button w3-black w3-hover-blue w3-margin-right" href="index.py">""")
-print(_("Annuler et revenir &agrave; l'accueil"))
+print(_("Cancel and go back to Home"))
 print("""</a>
       <a class="w3-bar-item w3-button w3-red w3-hover-orange w3-margin-left" href="ota.py" onclick="return confirm(' """)
-print(_('Etes-vous s&ucirc;r ?'))
+print(_("Are you sure ?"))
 print(""" ');"> """)
-print(_('Continuer'))
+print(_("Continue"))
 print("""</a>
     </div>
 </div>

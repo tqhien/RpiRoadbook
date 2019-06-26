@@ -15,12 +15,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -286,7 +290,7 @@ print("""
 <!-- Entete -->
 <div class="w3-container w3-center w3-section w3-hide-small">
    <h1>""")
-print(_('Annotations'))
+print(_("Notes"))
 print("""</h1>
 </div>
 
@@ -305,11 +309,11 @@ print("""
 
 <div class="w3-bar w3-grey w3-center">
       <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">""")
-print(_('Sauvegarder '))
+print(_("Save"))
 print("""
 </a>
       <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> """)
-print(_('RAZ Annot.'))
+print(_("Clear note"))
 print("""</a>
 </div>
 """)

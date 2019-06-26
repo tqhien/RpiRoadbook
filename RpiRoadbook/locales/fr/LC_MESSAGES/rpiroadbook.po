@@ -5,7 +5,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: RpiRoadbook\n"
-"Language: it\n"
+"Language: fr\n"
 
 #: RpiRoadbook.py:990
 msgid " Trip1"
@@ -17,19 +17,19 @@ msgstr " Trip2"
 
 #: RpiRoadbook.py:904
 msgid " Distance"
-msgstr " Distanza"
+msgstr " Totalisateur"
 
 #: RpiRoadbook.py:927
 msgid " Speed"
-msgstr " Velocita"
+msgstr " Vitesse"
 
 #: RpiRoadbook.py:1013
 msgid " Avg.Speed1"
-msgstr " Vel.media1"
+msgstr " Vmoy1"
 
 #: RpiRoadbook.py:1042
 msgid " MaxSpeed1"
-msgstr "Vel.max1"
+msgstr " Vmax1"
 
 #: RpiRoadbook.py:1078
 msgid " Stopwatch1"
@@ -37,11 +37,11 @@ msgstr " Chrono1"
 
 #: RpiRoadbook.py:1159
 msgid " Avg.Speed2"
-msgstr " Vel.media2"
+msgstr " Vmoy2"
 
 #: RpiRoadbook.py:1186
 msgid " MaxSpeed2"
-msgstr "Vel.max2"
+msgstr " Vmax2"
 
 #: RpiRoadbook.py:1220
 msgid " StopWatch2"
@@ -49,62 +49,62 @@ msgstr " Chrono2"
 
 #: RpiRoadbook.py:1298
 msgid " Countdown"
-msgstr " Countdown"
+msgstr " Decompte"
 
 #: RpiRoadbook.py:1318
 msgid " Time"
-msgstr " Orario"
+msgstr " Heure"
 
 #: RpiRoadbook.py:1656 RpiRoadbook.py:1663
 msgid "Select a roadbook :"
-msgstr "Selezione roadbook : "
+msgstr "Selectionnez un roadbook :"
 
 #: RpiRoadbook.py:1655 RpiRoadbook.py:1662
 msgid "AutoStart in 5s..."
-msgstr "Riavvio in 5s..."
+msgstr "Demarrage automatique dans 5s..."
 
 #: RpiRoadbook.py:1726
 msgid "(prev)"
-msgstr "(Precedente)"
+msgstr "(prec)"
 
 #: RpiRoadbook.py:1735
 msgid " (Current)"
-msgstr " (Attuale)"
+msgstr " (En cours)"
 
 #: RpiRoadbook.py:1749
 msgid "(next)"
-msgstr "(Successivo)"
+msgstr "(suiv)"
 
 #: RpiRoadbook.py:1758
 msgid "AutoStart in {:1.0f}s..."
-msgstr "Riavvio in {:1.0f}s..."
+msgstr "Demarrage automatique dans {:1.0f}s..."
 
 #: RpiRoadbook.py:1801
 msgid "No Roadbook detected."
-msgstr "Roadbook non trovato"
+msgstr "Aucun Roadbook present"
 
 #: RpiRoadbook.py:1802
 msgid "Press a button to return"
-msgstr "Premi pulsante per ritornare"
+msgstr "Appuyez sur un bouton"
 
 #: RpiRoadbook.py:1803
 msgid "To Road Mode"
-msgstr "Modalita Stradale"
+msgstr "Pour allerau mode Route"
 
 #: RpiRoadbook.py:1848
 #, fuzzy
 msgid "Wheelsize :"
-msgstr "Dimensione Ruota"
+msgstr "Roue :"
 
 #: RpiRoadbook.py:1850
 msgid "Magnets :"
-msgstr "Magneti :"
+msgstr "Aimants :"
 
 #: RpiRoadbook.py:1853 RpiRoadbook.py:1950
 msgid "Reset"
-msgstr "Reset"
+msgstr "RAZ"
 
 #: RpiRoadbook.py:1852
 msgid "Factory Reset :"
-msgstr "Reset di fabbrica"
+msgstr "Reglages Usine"
 

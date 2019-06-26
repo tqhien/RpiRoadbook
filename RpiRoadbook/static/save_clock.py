@@ -15,12 +15,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -52,11 +56,11 @@ print ("""
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_("R&eacute;glage de l'horloge"))
+print(_("Clock setup"))
 print("""</h1>
 </div>
 <h3>""")
-print(_('R&eacute;glage sauvegard&eacute; :'))
+print(_("Settings saved :"))
 print('</h3>')
 
 if 'user_date' in form:
@@ -76,7 +80,7 @@ print("""
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>""")
-print(_('Configuration'))
+print(_("Setup"))
 print("""</a>
 </div>
 </body>

@@ -19,12 +19,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -51,7 +55,7 @@ print ("""
 <!-- Entete -->
   <div class="w3-container w3-center w3-section">
   <h1>""")
-print(_('Mise &agrave; jour de firmware'))
+print(_("Firmware Update"))
 print("""</h1>
   </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
@@ -69,13 +73,13 @@ if 'filename' in form:
     # On attend au moins 5 secondes, le temps que le cache btrfs soit mis sur disque
     time.sleep (6.0)
     print('<h3>')
-    print(_('Firmware t&eacute;l&eacute;charg&eacute;.'))
+    print(_("Firmware Uploaded."))
     print('</h3><br>')
     print('<h3>')
-    print(_('Red&eacute;marrez le RpiRoadbook'))
+    print(_("Restart the RpiRoadbook"))
     print('</h3><br>')
     print('<h3>')
-    print(_('pour appliquer la mise &agrave; jour.'))
+    print(_("to apply new firmware"))
     print('</h3><br>')
 print("""
 </div>

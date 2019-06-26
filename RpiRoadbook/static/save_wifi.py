@@ -14,12 +14,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -61,13 +65,13 @@ print ("""<html>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Configuration g&eacute;n&eacute;rale'))
+print(_("Main Settings"))
 print("""</h1>
 </div>
 
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>""")
-print(_('Configuration WIFI sauvegard&eacute;e :'))
+print(_("WIFI settings saved :"))
 print('</h3>')
 
 if 'user_ssid' in form:
@@ -76,7 +80,7 @@ if 'user_ssid' in form:
 
 if 'user_passphrase' in form:
   wificonfig['dummy_section']['wpa_passphrase'] = form['user_passphrase'].value
-  print (_('Mot de passe : {}').format(wificonfig['dummy_section']['wpa_passphrase']))
+  print (_("Password : {}").format(wificonfig['dummy_section']['wpa_passphrase']))
   print('<br>')
 
 for attempt in range(5):
@@ -100,7 +104,7 @@ print ("""
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i>""")
-print(_('Configurer'))
+print(_("Setup"))
 print("""</a>
 </div>
 </body>

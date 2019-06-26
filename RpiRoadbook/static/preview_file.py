@@ -20,12 +20,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -55,7 +59,7 @@ if 'filename' in form:
   <!-- Entete -->
   <div class="w3-container w3-center w3-section">
   <h1>""")
-  print(_('Ajout de roadbooks'))
+  print(_("Add a roadbook"))
   print("""</h1>
   </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-red">
@@ -70,9 +74,9 @@ if 'filename' in form:
     fn = re.sub(r"[\s-]","_",fn)
     filedir = os.path.splitext(fn)[0]
     open('/mnt/piusb/' + fn, 'wb').write(fileitem.file.read())
-    message = _('Apercu du fichier {}').format(fn)
+    message = _("Previewing file {}").format(fn)
   else:
-    message = _('Aucun fichier t&eacute;l&eacute;charg&eacute;')
+    message = _("No file uploaded")
   print('<p><h3>{}</h3></p>'.format(message))
   # Taille en Postcript point, soit en 72 dpi donc /72*2.54 pour avoir la taille en cm puis ou /72*150 pour avoir le nb de pixel si on extrait a 150dpi
   # pour une page A4, on a donc 595x842 pts, soit une image de 1240x1754px (595/72*150,842/72*150)
@@ -100,19 +104,19 @@ if 'filename' in form:
     """)
   print('<input type="hidden" name="fn" value="{}">'.format(fn))
   print('<div><label>')
-  print(_('NB Colonnes'))
+  print(_("Columns"))
   print('</label><input type="number" class="w3-input w3-border w3-margin" name="nb_colonnes" id="nb_colonnes" value="2" onchange="init()" min="1" step="1" oninput="validity.valid||(value="");"></div>')
   print('<div><label>')
-  print(_('NB Lignes par colonne'))
+  print(_("Rows per column"))
   print('</label><input type="number" class="w3-input w3-border w3-margin" name="nb_lignes" id="nb_lignes" value="8" onchange="init()" min="1" step="1" oninput="validity.valid||(value="");"></div>')
   print('<div><label>')
-  print(_('Marge haute (mm)'))
+  print(_("Upper margin (mm)"))
   print('</label><input type="number" class="w3-input w3-border w3-margin" name="margin_up" id="margin_up" value="30" onchange="init()" min="0" step="1" oninput="validity.valid||(value="");"></div>')
   print('<div><label>')
-  print(_('Marge basse (mm)'))
+  print(_("Bottom margin (mm)"))
   print('</label><input type="number" class="w3-input w3-border w3-margin" name="margin_down" id="margin_down" value="27" onchange="init()" min="0" step="1" oninput="validity.valid||(value="");"></div>')
   print('<div><label>')
-  print(_('Lecture de bas en haut'))
+  print(_("Read from bottom up"))
   print('</label><input type="checkbox" class="w3-check w3-margin" name="lecture" id="lecture" value="rb" checked onchange="init()"></div>')
   print("""
 </div>
@@ -126,11 +130,11 @@ if 'filename' in form:
 
 <div class="w3-bar w3-grey">
     <button class="w3-submit w3-btn w3-red w3-hover-teal" type="submit">""")
-  print(_('Valider'))
+  print(_("OK"))
   print('</button>')
 
   print('<a href="cancel_file.py?fn={}" class="w3-bar-item w3-button w3-hover-blue"> '.format(fn))
-  print(_('Annuler'))
+  print(_("Cancel"))
   print('</a>')
   print("""
 </div>
@@ -144,7 +148,7 @@ if 'filename' in form:
 <div class="w3-row">
 	<div class="w3-col w3-light-grey s12 w3-center">
 <p><h3>""")
-  print(_('Apercu de la 1&egrave;re case'))
+  print(_("First waypoint preview"))
   print("""</h3></p>
 </div>
 <div>

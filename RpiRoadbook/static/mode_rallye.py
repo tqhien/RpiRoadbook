@@ -16,12 +16,16 @@ setupconfig = configparser.ConfigParser()
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -51,12 +55,12 @@ print ("""<html>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Changement de mode'))
+print(_("Mode change"))
 print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>""")
-print(_('Nouveau mode :'))
+print(_("New mode :"))
 print('</h3>')
 
 rbconfig['Mode']['mode'] = 'Rallye'
@@ -74,8 +78,9 @@ for attempt in range(5):
 else :
   print('Write Error RpiRoadbook.cfg after 5 tries')
 
+time.sleep(6)
 
-print(_('Attendez 5 secondes et red&eacute;marrez le RpiRoadbook'))
+print(_("Please restart the RpiRoadbook"))
 print("""
 </div>
 
@@ -83,9 +88,9 @@ print("""
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-hover-blue w3-right"><i class="w3-xlarge fa fa-wrench"></i>""")
-print(_('Configurer'))
+print(_("Setup"))
 print('</a>  <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> ')
-print(_('Personnaliser les affichages'))
+print(_("Screen Setup"))
 print("""</a>
 </div>
 </body>

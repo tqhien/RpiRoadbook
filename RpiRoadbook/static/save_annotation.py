@@ -14,12 +14,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -60,9 +64,9 @@ if 'imagedata' in form:
     #imageData = bytearray([imageData])
     #print (form['imageData'].value)
     open('/mnt/piusb/Annotations/{}/annotation{}.png'.format(filedir,num), 'wb').write(imageData)
-    print(_('Image sauvegard&eacute;e'))
+    print(_("Note saved"))
 else :
-    print (_('Erreur pas de donn&eacute;es image'))
+    print (_("Error no note to save"))
 #print('Image sauvegardee')
 
 print("""

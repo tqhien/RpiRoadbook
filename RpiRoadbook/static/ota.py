@@ -12,12 +12,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -43,17 +47,17 @@ print("""
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
   <h1>""")
-print(_('Mise &agrave; jour Firmware'))
+print(_("Firmware update"))
 print("""</h1>
 </div>
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-blue">
    <form enctype="multipart/form-data" action="save_ota.py" method = "post">
    <h3>""")
-print(_('S&eacute;lectionnez le firmware &agrave; t&eacute;l&eacute;charger : '))
+print(_("Select a firmware file to upload : "))
 print("""</h3>
    <input class="w3-input w3-button " type="file" name="filename" />
    <input class="w3-input w3-teal w3-button w3-hover-blue w3-left-align w3-margin" type="submit" value=" """)
-print(_('T&eacute;l&eacute;charger le firmware...'))
+print(_("Upload firmware"))
 print(""" " />
    </form>
 </div>

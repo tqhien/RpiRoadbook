@@ -1,627 +1,619 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-26 02:04+CEST\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
-"Generated-By: pygettext.py 1.5\n"
-
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: static\n"
+"Language: fr\n"
 
 #: static/add_case.py:64
 msgid "Waypoint inserted"
-msgstr ""
+msgstr "Case Ins&eacute;r&eacute;e"
 
 #: static/add_case.py:66
 msgid "Error no data"
-msgstr ""
+msgstr "Erreur, pas de donn&eacute;es"
 
 #: static/annotation.py:293 static/text_editor.py:422
 msgid "Notes"
-msgstr ""
-
-#: static/annotation.py:312 static/text_editor.py:497
-msgid "Save"
-msgstr ""
+msgstr "Annotations"
 
 #: static/annotation.py:316
 msgid "Clear note"
-msgstr ""
+msgstr "RAZ Annot."
 
 #: static/cancel_file.py:52 static/preview_file.py:137
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: static/cancel_file.py:57
 msgid "Download canceled :"
-msgstr ""
+msgstr "T&eacute;l&eacute;chargement annul&eacute;"
 
 #: static/cancel_file.py:85
 msgid "No Selection"
-msgstr ""
-
-#: static/clock_setup.py:57
-msgid "Clock setting"
-msgstr ""
+msgstr "Pas de s&eacute;lection"
 
 #: static/clock_setup.py:66
 msgid "Date:"
-msgstr ""
+msgstr "Date:"
 
 #: static/clock_setup.py:74
 msgid "Time:"
-msgstr ""
+msgstr "Heure:"
 
 #: static/clock_setup.py:85 static/preview_file.py:133
 #: static/screen_setup.py:273 static/setup.py:166 static/wifi_setup.py:93
 msgid "OK"
-msgstr ""
+msgstr "Valider"
 
 #: static/clock_setup.py:97 static/index.py:130 static/mode_rallye.py:91
 #: static/mode_route.py:94 static/mode_zoom.py:90 static/raz.py:83
 #: static/save_clock.py:83 static/save_screen.py:95 static/save_wifi.py:107
 #: static/screen_setup.py:283 static/wifi_setup.py:104
 msgid "Setup"
-msgstr ""
+msgstr "Configurer"
 
 #: static/convert_case.py:103
 msgid "Waypoint {} / {}<br>"
-msgstr ""
+msgstr "Case {}/{}<br>"
 
 #: static/convert_file.py:60
 msgid "Conversion"
-msgstr ""
+msgstr "Conversion"
 
 #: static/convert_file.py:67
 msgid "Working... Please wait"
-msgstr ""
-
-#: static/convert_file.py:70
-msgid "Converted Waypoints will appear below (Approx. 1 sec/waypoint)"
-msgstr ""
+msgstr "En cours... Veuillez patienter"
 
 #: static/index.py:62
 msgid "RpiRoadbook Control Center"
-msgstr ""
+msgstr "Gestionnaire du RpiRoadbook"
 
 #: static/index.py:70 static/mode_route.py:58 static/mode_zoom.py:57
 msgid "Mode Change"
-msgstr ""
+msgstr "Changement de Mode"
 
 #: static/index.py:78
 msgid "Rallye"
-msgstr ""
+msgstr "Rallye"
 
 #: static/index.py:82
 msgid "Zoom"
-msgstr ""
+msgstr "Zoom"
 
 #: static/index.py:86 static/mode_route.py:77
 msgid "Road"
-msgstr ""
+msgstr "Route"
 
 #: static/index.py:99
 msgid "Roadbook (click to note)"
-msgstr ""
+msgstr "Roadbooks (cliquez pour annoter)"
 
 #: static/index.py:113 static/upload.py:50
 msgid "Add a Roadbook"
-msgstr ""
+msgstr "Ajouter un Roadbook"
 
 #: static/index.py:116
 msgid "Are you sure you want to remove ?"
-msgstr ""
+msgstr "Etes-vous s&ucirc;r de vouloir supprimer ?"
 
 #: static/index.py:118
 msgid "Remove selected roadbooks"
-msgstr ""
+msgstr "Supprimer les roadbooks s&eacute;lectionn&eacute;s"
 
 #: static/index.py:127 static/mode_rallye.py:93 static/save_screen.py:97
 msgid "Screen Setup"
-msgstr ""
+msgstr "Configuration des &eacute;crans"
 
 #: static/mode_rallye.py:58
 msgid "Mode change"
-msgstr ""
+msgstr "Changement de mode"
 
 #: static/mode_rallye.py:63 static/mode_route.py:63 static/mode_zoom.py:62
 msgid "New mode :"
-msgstr ""
+msgstr "Nouveau mode :"
 
 #: static/mode_rallye.py:83 static/mode_route.py:85 static/mode_zoom.py:82
 msgid "Please restart the RpiRoadbook"
-msgstr ""
+msgstr "Veuillez red&eacute;marrer le RpiRoadbook"
+
+#: static/save_setup.py:75
+msgid "Orientation : {}"
+msgstr "Orientation : {}"
+
+#: static/screen_setup.py:220 static/screen_setup.py:222
+msgid "Trip1"
+msgstr "Trip1"
+
+#: static/screen_setup.py:224 static/screen_setup.py:226
+msgid "Trip2"
+msgstr "Trip2"
+
+#: static/setup.py:90
+msgid "Orientation"
+msgstr "Orientation"
+
+#: static/setup.py:95 static/setup.py:98
+msgid "Portrait"
+msgstr "Portrait"
+
+#: static/setup.py:153 static/setup.py:156
+msgid "Pull-Up"
+msgstr "Pull-Up"
+
+#: static/setup.py:154 static/setup.py:157
+msgid "Pull-Down"
+msgstr "Pull-Down"
+
+#: static/text_editor.py:484
+msgid "Transparent"
+msgstr "Transparent"
 
 #: static/ota.py:50 static/set_de.py:75 static/set_en.py:76
 #: static/set_es.py:75 static/set_fr.py:75 static/set_it.py:75
 #: static/warning_ota.py:50
 msgid "Firmware update"
-msgstr ""
+msgstr "MAJ Firmware"
 
 #: static/ota.py:56
 msgid "Select a firmware file to upload : "
-msgstr ""
+msgstr "S&eacute;lectionnez un firmware &agrave; t&eacute;l&eacute;charger : "
 
 #: static/ota.py:60
 msgid "Upload firmware"
-msgstr ""
+msgstr "T&eacute;l&eacute;charger un firmware"
 
 #: static/preview_file.py:62
 msgid "Add a roadbook"
-msgstr ""
+msgstr "Ajouter un roadbook"
 
 #: static/preview_file.py:77
 msgid "Previewing file {}"
-msgstr ""
+msgstr "Pr&eacute;visualisation du fichier {}"
 
 #: static/preview_file.py:79
 msgid "No file uploaded"
-msgstr ""
+msgstr "Aucun fichier"
 
 #: static/preview_file.py:107
 msgid "Columns"
-msgstr ""
+msgstr "Colonnes"
 
 #: static/preview_file.py:110
 msgid "Rows per column"
-msgstr ""
+msgstr "Lignes par colonne"
 
 #: static/preview_file.py:113
 msgid "Upper margin (mm)"
-msgstr ""
+msgstr "Marge sup&eacute;rieure (mm)"
 
 #: static/preview_file.py:116
 msgid "Bottom margin (mm)"
-msgstr ""
+msgstr "Marge inf&eacute;rieure (mm)"
 
 #: static/preview_file.py:119
 msgid "Read from bottom up"
-msgstr ""
+msgstr "Lecture de bas en haut"
 
 #: static/preview_file.py:151
 msgid "First waypoint preview"
-msgstr ""
-
-#: static/raz.py:51 static/set_de.py:73 static/set_en.py:74
-#: static/set_es.py:73 static/set_fr.py:73 static/set_it.py:73
-#: static/warning_raz.py:49
-msgid "Factory reset"
-msgstr ""
+msgstr "Pr&eacute;visualisation de la premi&egrave;re case"
 
 #: static/raz.py:56
 msgid "Deleted files :"
-msgstr ""
+msgstr "Fichiers supprim&eacute;s :"
 
 #: static/rm_case.py:67
 msgid "Waypoint deleted"
-msgstr ""
+msgstr "Case supprim&eacute;e"
 
 #: static/rm_case.py:73
 msgid "Note deleted"
-msgstr ""
+msgstr "Annotation supprim&eacute;e"
 
 #: static/rm_rb.py:52
 msgid "Delete roadbook"
-msgstr ""
+msgstr "Supprimer un roadbook"
 
 #: static/rm_rb.py:57
 msgid "Roadbook deleted :"
-msgstr ""
-
-#: static/rm_rb.py:84
-msgid "No selection"
-msgstr ""
+msgstr "Roadbook supprim&eacute; :"
 
 #: static/save_annotation.py:67
 msgid "Note saved"
-msgstr ""
+msgstr "Annotation sauvegard&eacute;e"
 
 #: static/save_annotation.py:69
 msgid "Error no note to save"
-msgstr ""
-
-#: static/save_clock.py:59
-msgid "Clock setup"
-msgstr ""
+msgstr "Erreur pas d'annotation &agrave; sauvegarder"
 
 #: static/save_clock.py:63 static/save_setup.py:60
 msgid "Settings saved :"
-msgstr ""
+msgstr "Configuration sauvegard&eacute;e"
 
 #: static/save_ota.py:58 static/save_setup.py:129 static/setup.py:184
 msgid "Firmware Update"
-msgstr ""
+msgstr "MAJ Firmware"
 
 #: static/save_ota.py:76
 msgid "Firmware Uploaded."
-msgstr ""
+msgstr "Firmware t&eacute;l&eacute;charg&eacute;"
 
 #: static/save_ota.py:79
 msgid "Restart the RpiRoadbook"
-msgstr ""
+msgstr "Red&eacute;marrez le RpiRoadbook"
 
 #: static/save_ota.py:82
 msgid "to apply new firmware"
-msgstr ""
+msgstr "pour appliquer le nouveau firmware"
 
 #: static/save_screen.py:60
 msgid "Screen Settings"
-msgstr ""
+msgstr "Configuration des &ecute;crans"
 
 #: static/save_screen.py:84
 msgid "Settings saved !"
-msgstr ""
+msgstr "Configuration sauvegard&eacute;e !"
 
 #: static/save_setup.py:54 static/save_wifi.py:68
 msgid "Main Settings"
-msgstr ""
+msgstr "R&eacute;glages principaux"
 
 #: static/save_setup.py:65
 msgid "Wheelsize : {} mm"
-msgstr ""
+msgstr "Roue : {} mm"
 
 #: static/save_setup.py:70
 msgid "Magnets : {}"
-msgstr ""
-
-#: static/save_setup.py:75
-msgid "Orientation : {}"
-msgstr ""
+msgstr "Aimants : {} "
 
 #: static/save_setup.py:80
 msgid "Reading : {}"
-msgstr ""
+msgstr "Lecture : {}"
 
 #: static/save_setup.py:85
 msgid "Trip Buttons, mode : {}"
-msgstr ""
+msgstr "Boutons Trip, mode : {}"
 
 #: static/save_setup.py:90
 msgid "RB Buttons, mode : {}"
-msgstr ""
+msgstr "Boutons RB, mode : {}"
 
 #: static/save_setup.py:95
 msgid "Pull Buttons : {}"
-msgstr ""
+msgstr "Boutons Pull : {}"
 
 #: static/save_setup.py:123 static/set_de.py:69 static/set_en.py:70
 #: static/set_es.py:69 static/set_fr.py:69 static/set_it.py:69
 #: static/setup.py:177
 msgid "Screen setup"
-msgstr ""
+msgstr "Configuration des &eacute;crans"
 
 #: static/save_setup.py:125 static/set_de.py:71 static/set_en.py:72
 #: static/set_es.py:71 static/set_fr.py:71 static/set_it.py:71
 msgid "Time adjust"
-msgstr ""
+msgstr "R&eacute;glage de l'heure"
 
 #: static/save_setup.py:127 static/setup.py:182
 msgid "Factory Reset"
-msgstr ""
+msgstr "Config. Usine"
 
 #: static/save_wifi.py:74
 msgid "WIFI settings saved :"
-msgstr ""
+msgstr "R&eacute;glages Wifi sauvegard&eacute;s"
 
 #: static/save_wifi.py:83
 msgid "Password : {}"
-msgstr ""
+msgstr "Mot de passe : {}"
 
 #: static/screen_setup.py:111
 msgid "Screen settings"
-msgstr ""
+msgstr "Configuration des &eacute;crans"
 
 #: static/screen_setup.py:116
 msgid "Choose a screen to setup"
-msgstr ""
+msgstr "S&ecaute;lectionnez un &eacute;cran &agrave; personnaliser"
 
 #: static/screen_setup.py:122
 msgid "Screen 1"
-msgstr ""
+msgstr "Ecran 1"
 
 #: static/screen_setup.py:127
 msgid "Screen 2"
-msgstr ""
+msgstr "Ecran 2"
 
 #: static/screen_setup.py:132
 msgid "Screen 3"
-msgstr ""
+msgstr "Ecran 3"
 
 #: static/screen_setup.py:137
 msgid "Screen 4"
-msgstr ""
+msgstr "Ecran 4"
 
 #: static/screen_setup.py:160
 msgid "Day/Night"
-msgstr ""
+msgstr "Jour/Nuit"
 
 #: static/screen_setup.py:166 static/screen_setup.py:168
 msgid "Day"
-msgstr ""
+msgstr "Jour"
 
 #: static/screen_setup.py:170 static/screen_setup.py:172
 msgid "Night"
-msgstr ""
+msgstr "Nuit"
 
 #: static/screen_setup.py:178
 msgid "Layout"
-msgstr ""
+msgstr "Disposition"
 
 #: static/screen_setup.py:183 static/screen_setup.py:185
 msgid "3 Lines"
-msgstr ""
+msgstr "3 Champs"
 
 #: static/screen_setup.py:187 static/screen_setup.py:189
 msgid "4 Lines"
-msgstr ""
+msgstr "4 Champs"
 
 #: static/screen_setup.py:191 static/screen_setup.py:193
 msgid "5 Lines"
-msgstr ""
+msgstr "5 Champs"
 
 #: static/screen_setup.py:195 static/screen_setup.py:197
 msgid "6 Lines"
-msgstr ""
+msgstr "6 Champs"
 
 #: static/screen_setup.py:216 static/screen_setup.py:218
 msgid "Distance"
-msgstr ""
-
-#: static/screen_setup.py:220 static/screen_setup.py:222
-msgid "Trip1"
-msgstr ""
-
-#: static/screen_setup.py:224 static/screen_setup.py:226
-msgid "Trip2"
-msgstr ""
+msgstr "Totalisateur"
 
 #: static/screen_setup.py:228 static/screen_setup.py:230
 msgid "Speed"
-msgstr ""
+msgstr "Vitesse"
 
 #: static/screen_setup.py:232 static/screen_setup.py:234
 msgid "Avg.Speed1"
-msgstr ""
+msgstr "Vmoy1"
 
 #: static/screen_setup.py:236 static/screen_setup.py:238
 msgid "Avg.Speed2"
-msgstr ""
+msgstr "Vmoy2"
 
 #: static/screen_setup.py:240 static/screen_setup.py:242
 msgid "StopWatch1"
-msgstr ""
+msgstr "Chrono1"
 
 #: static/screen_setup.py:244 static/screen_setup.py:246
 msgid "StopWatch2"
-msgstr ""
+msgstr "Chrono2"
 
 #: static/screen_setup.py:248 static/screen_setup.py:250
 msgid "Countdown"
-msgstr ""
+msgstr "D&eacute;compte"
 
 #: static/screen_setup.py:252 static/screen_setup.py:254
 msgid "Max.Speed1"
-msgstr ""
+msgstr "VMax1"
 
 #: static/screen_setup.py:256 static/screen_setup.py:258
 msgid "Max.Speed2"
-msgstr ""
+msgstr "VMax2"
 
 #: static/screen_setup.py:260 static/screen_setup.py:262
 msgid "Time"
-msgstr ""
+msgstr "Heure"
 
 #: static/set_de.py:51 static/set_en.py:52 static/set_es.py:51
 #: static/set_fr.py:51 static/set_it.py:51
 msgid "Language setting"
-msgstr ""
+msgstr "Choix de la langue"
 
 #: static/set_de.py:57 static/set_en.py:58 static/set_es.py:57
 #: static/set_fr.py:57 static/set_it.py:57
 msgid "New language : {}."
-msgstr ""
+msgstr "Nouvelle langue : {}"
 
 #: static/set_de.py:58 static/set_en.py:59 static/set_es.py:58
 #: static/set_fr.py:58 static/set_it.py:58
 msgid "Going back to Home in 5 secondes"
-msgstr ""
+msgstr "Retour &agrave; l'Accueil dans 5 secondes"
+
+#: static/raz.py:51 static/set_de.py:73 static/set_en.py:74
+#: static/set_es.py:73 static/set_fr.py:73 static/set_it.py:73
+#: static/warning_raz.py:49
+msgid "Factory reset"
+msgstr "R&eacute;glages Usine"
 
 #: static/setup.py:64
 msgid "Main settings"
-msgstr ""
+msgstr "R&eacute;glages"
 
 #: static/setup.py:76
 msgid "Wheelsize (mm)"
-msgstr ""
+msgstr "Roue (mm)"
 
 #: static/setup.py:83
 msgid "Magnet(s)"
-msgstr ""
-
-#: static/setup.py:90
-msgid "Orientation"
-msgstr ""
+msgstr "Aimant(s)"
 
 #: static/setup.py:94 static/setup.py:97
 msgid "Landscape"
-msgstr ""
-
-#: static/setup.py:95 static/setup.py:98
-msgid "Portrait"
-msgstr ""
+msgstr "Paysage"
 
 #: static/setup.py:104
 msgid "Reading"
-msgstr ""
+msgstr "Lecture"
 
 #: static/setup.py:108
 msgid "From Bottom To Top"
-msgstr ""
+msgstr "De Bas En Haut"
 
 #: static/setup.py:109 static/setup.py:112
 msgid "From Top To Bottom"
-msgstr ""
+msgstr "De Haut En Bas"
 
 #: static/setup.py:111
 msgid "From Bottom to Top"
-msgstr ""
+msgstr "De Bas En Haut"
 
 #: static/setup.py:121
 msgid "Trip Buttons"
-msgstr ""
+msgstr "Boutons Trip"
 
 #: static/setup.py:125 static/setup.py:128
 msgid "Left/OK/Right"
-msgstr ""
+msgstr "Gauche/OK/Droite"
 
 #: static/setup.py:126 static/setup.py:129
 msgid "Left/Right/OK"
-msgstr ""
+msgstr "Gauche/Droite/OK"
 
 #: static/setup.py:135
 msgid "RB Buttons"
-msgstr ""
+msgstr "Boutons RB"
 
 #: static/setup.py:139 static/setup.py:142
 msgid "Up/Down"
-msgstr ""
+msgstr "Haut/Bas"
 
 #: static/setup.py:140 static/setup.py:143
 msgid "Down/Up"
-msgstr ""
+msgstr "Bas/Haut"
 
 #: static/setup.py:149
 msgid "Pullup/down Buttons"
-msgstr ""
-
-#: static/setup.py:153 static/setup.py:156
-msgid "Pull-Up"
-msgstr ""
-
-#: static/setup.py:154 static/setup.py:157
-msgid "Pull-Down"
-msgstr ""
+msgstr "Boutons Pullup/down"
 
 #: static/setup.py:179
 msgid "Time Adjust"
-msgstr ""
+msgstr "R&eacute;glage Horloge"
 
 #: static/text_editor.py:431
 msgid "Goto..."
-msgstr ""
+msgstr "Aller..."
 
 #: static/text_editor.py:458
 msgid "Width"
-msgstr ""
+msgstr "Epaisseur"
 
 #: static/text_editor.py:467
 msgid "Transparency"
-msgstr ""
+msgstr "Transparence"
 
 #: static/text_editor.py:476
 msgid "Font Size"
-msgstr ""
+msgstr "Taille Police"
 
 #: static/text_editor.py:478
 msgid "Background Color :"
-msgstr ""
+msgstr "Couleur Fond"
 
 #: static/text_editor.py:480
 msgid "Black"
-msgstr ""
+msgstr "Noir"
 
 #: static/text_editor.py:482
 msgid "White"
-msgstr ""
+msgstr "Blanc"
 
-#: static/text_editor.py:484
-msgid "Transparent"
-msgstr ""
+#: static/annotation.py:312 static/text_editor.py:497
+msgid "Save"
+msgstr "Sauvegarder"
 
 #: static/text_editor.py:499
 msgid "Clear Note"
-msgstr ""
+msgstr "RAZ Annot."
 
 #: static/text_editor.py:501
 msgid "Insert"
-msgstr ""
+msgstr "Ins&eacute;rer"
 
 #: static/text_editor.py:509
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 #: static/text_editor.py:527
 msgid "Delete ?"
-msgstr ""
+msgstr "Supprimer ?"
 
 #: static/text_editor.py:604 static/text_editor.py:609
 msgid "Width :"
-msgstr ""
+msgstr "Epaisseur :"
 
 #: static/text_editor.py:623 static/text_editor.py:629
 msgid "Transparency :"
-msgstr ""
+msgstr "Transparence :"
 
 #: static/text_editor.py:644 static/text_editor.py:649
 msgid "Font Size :"
-msgstr ""
+msgstr "Taille Police :"
 
 #: static/upload.py:56
 msgid "Select a file to upload : "
-msgstr ""
+msgstr "S&eacute;lectionnez un fichier &agrave; t&eacute;l&eacute;charger : "
 
 #: static/upload.py:60
 msgid "Preview..."
-msgstr ""
+msgstr "Pr&eacute;visualiser..."
 
 #: static/warning_ota.py:55
 msgid "Warning : a wrong firmware can brick your RpiRoadbook"
-msgstr ""
+msgstr "Attention : un mauvais firmware peut bloquer votre RpiRoadbook"
 
 #: static/warning_ota.py:57 static/warning_raz.py:60
 msgid "Continue ?"
-msgstr ""
+msgstr "Continuer ?"
 
 #: static/warning_ota.py:61 static/warning_raz.py:64
 msgid "Cancel and go back to Home"
-msgstr ""
+msgstr "Annuler et revenir &agrave; l'accueil"
 
 #: static/warning_ota.py:64 static/warning_raz.py:67
 msgid "Are you sure ?"
-msgstr ""
+msgstr "Etes-vous s&ucirc; ?"
 
 #: static/warning_ota.py:66 static/warning_raz.py:69
 msgid "Continue"
-msgstr ""
+msgstr "Continuer"
 
 #: static/warning_raz.py:54
 msgid "Factory reset will delete your settings"
-msgstr ""
+msgstr "Le r&eacute;glage usine effacera vos r&eacute;glages"
 
 #: static/warning_raz.py:56
 msgid "(General and screen settings)"
-msgstr ""
+msgstr "(principaux et &eacute;crans)"
 
 #: static/warning_raz.py:58
 msgid "But Roadbooks are kept !"
-msgstr ""
+msgstr "Mais les Roadbooks sont conserv&eacute;s !"
 
 #: static/wifi_setup.py:66
 msgid "Main Setup"
-msgstr ""
+msgstr "R&eacute;glages principaux"
 
 #: static/wifi_setup.py:78
 msgid "Wifi network (SSID) :"
-msgstr ""
+msgstr "R&eacute;seaux WIFI (SSID) :"
 
 #: static/wifi_setup.py:85
 msgid "Password : "
-msgstr ""
+msgstr "Mot de passe : "
+
+#: static/clock_setup.py:57
+msgid "Clock setting"
+msgstr "R&eacute;glage de l'horloge"
+
+#: static/rm_rb.py:84
+msgid "No selection"
+msgstr "Pas de s&eacute;lection"
+
+#: static/save_clock.py:59
+msgid "Clock setup"
+msgstr "R&eacute;glage de l'horloge"
+
+#: static/convert_file.py:70
+msgid "Converted Waypoints will appear below (Approx. 1 sec/waypoint)"
+msgstr "Les cases converties appara&icirc;tront ci-dessous (env. 1 sec/case)"
 

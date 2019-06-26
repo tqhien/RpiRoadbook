@@ -15,12 +15,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -415,7 +419,7 @@ print("""
   <!-- Entete -->
   <div class="w3-container w3-center w3-section w3-hide-small">
      <h1>""")
-print(_('Annotations'))
+print(_("Notes"))
 print("""</h1>
   </div>
 
@@ -424,7 +428,7 @@ print("""</h1>
 print('<a href="text_editor.py?fn={}&num=0" class="w3-button"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>'.format(filename) if num > 0 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-backward"></i> </a>')
 print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-backward"></i> </a>'.format(filename,num-10) if num-10>=0 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-backward"></i> </a>')
 print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>'.format(filename,num-1) if num-1 >= 0 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-left"></i> </a>')
-print('    <input type="text" id="myPos" value="{}"><input type="button" value="'.format(num+1),_('Aller...'),'" onClick="gopage()">')
+print('    <input type="text" id="myPos" value="{}"><input type="button" value="'.format(num+1),_("Goto..."),'" onClick="gopage()">')
 print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>'.format(filename,num+1) if nmax > num+1 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-chevron-right"></i> </a>')
 print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-forward"></i> </a>'.format(filename,num+10) if nmax > num+10 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-forward"></i> </a>')
 print('<a href="text_editor.py?fn={}&num={}" class="w3-button"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>'.format(filename,nmax-1) if num <nmax-1 else '<a href="#" class="w3-button w3-disabled"> <i class="w3-xlarge fa fa-fast-forward"></i> </a>')
@@ -451,7 +455,7 @@ print("""
     <div class="w3-bar slidecontainer">
       <input type="range" min="1" max="20" value="5" class="slider" id="myWidth">
       <div id="demo1" class="w3-bar-item">""")
-print(_('Epaisseur'))
+print(_("Width"))
 print(' : 5 px</div>')
 print("""
     </div>
@@ -460,7 +464,7 @@ print("""
     <div class="w3-bar slidecontainer">
       <input type="range" min="0" max="100" value="50" class="slider" id="myAlpha">
       <div id="demo2" class="w3-bar-item">""")
-print(_('Transparence'))
+print(_("Transparency"))
 print(' : 50 %</div>')
 print("""
     </div>
@@ -469,15 +473,15 @@ print("""
     <div class="w3-bar slidecontainer">
       <input type="range" min="6" max="100" value="30" class="slider" id="myPolice">
       <div id="demo3" class="w3-bar-item">""")
-print(_('Taille Police'))
+print(_("Font Size"))
 print(' : 30 px</div>')
-print(_('Couleur du Fond :'))
+print(_("Background Color :"))
 print('    <button class="w3-button w3-border w3-black Text" onclick="setbgcolor(0,0,0,1);">')
-print(_('Noir'))
+print(_("Black"))
 print('</button>    <button class="w3-button w3-border w3-white Text" onclick="setbgcolor(255,255,255,1);">')
-print(_('Blanc'))
+print(_("White"))
 print('</button>    <button class="w3-button w3-border w3-light-grey Text" onclick="setbgcolor(255,255,255,0.5);">')
-print(_('Transparent'))
+print(_("Transparent"))
 print("""</button>
     </div>
   </div>
@@ -490,11 +494,11 @@ print("""
 
 <div class="w3-bar">
   <a href="#" class="w3-bar-item w3-button w3-red w3-hover-blue" id="save_canvas" name="save_canvas">""")
-print(_('Sauvegarder'))
+print(_("Save"))
 print(' </a>  <a href="#" class="w3-bar-item w3-button w3-hover-blue" onclick="erase()" id="raz_canvas" name="raz_canvas"> ')
-print(_('RAZ Annot.'))
+print(_("Clear Note"))
 print('</a>  <a href="#" class="w3-bar-item w3-button" id="add_case"><i class="w3-xlarge fa fa-indent"></i> ')
-print(_('Ins&eacute;rer'))
+print(_("Insert"))
 print("""</a>
   <form action="rm_case.py" method="POST">
   """)
@@ -502,7 +506,7 @@ print('    <input type="text" id="fn" name="fn" value="{}" style="display:none">
 print('    <input type="text" id="num" name="num" value="{}" style="display:none">'.format(num))
 print("""
   <button class="w3-bar-item w3-button" type="submit"><i class="w3-xlarge fa fa-remove"></i> """)
-print(_('Supprimer'))
+print(_("Delete"))
 print("""</button>
 </form>
 </div>
@@ -520,7 +524,7 @@ print("""
 
 <script>
   function erase() {""")
-print('var m = confirm("',_('Effacer ?'),'");')
+print('var m = confirm("',_("Delete ?"),'");')
 print("""
      if (m) {
          canvas.clear();
@@ -597,12 +601,12 @@ print("""
 
 var slider1 = document.getElementById("myWidth");
 var output1 = document.getElementById("demo1");""")
-print("output1.innerHTML = '",_('Epaisseur :'),"'+slider1.value + ' px';")
+print("output1.innerHTML = '",_("Width :"),"'+slider1.value + ' px';")
 print(""" // Display the default slider value
 
 // Update the current slider value (each time you drag the slider handle)
 slider1.oninput = function() { """)
-print("  output1.innerHTML = '",_('Epaisseur :'),"'+this.value + ' px';")
+print("  output1.innerHTML = '",_("Width :"),"'+this.value + ' px';")
 print("""
   canvas.freeDrawingBrush.width = this.value;
   if (canvas.getActiveObject()) {
@@ -616,13 +620,13 @@ print("""
 
 var slider2 = document.getElementById("myAlpha");
 var output2 = document.getElementById("demo2"); """)
-print("output2.innerHTML = '",_('Transparence :'),"'+slider2.value + ' %';")
+print("output2.innerHTML = '",_("Transparency :"),"'+slider2.value + ' %';")
 print(""" // Display the default slider value
 var alpha = 1- slider2.value/100 ;
 
 // Update the current slider value (each time you drag the slider handle)
 slider2.oninput = function() { """)
-print("  output2.innerHTML = '",_('Transparence :'),"'+this.value + ' %';")
+print("  output2.innerHTML = '",_("Transparency :"),"'+this.value + ' %';")
 print("""
   alpha = 1 - this.value/100 ;
   current_alpha_color = current_color.replace(")",","+alpha+")") ;
@@ -637,12 +641,12 @@ print("""
 
 var slider3 = document.getElementById("myPolice");
 var output3 = document.getElementById("demo3");""")
-print("output3.innerHTML = '",_('Taille Police :'),"'+slider3.value + ' px';")
+print("output3.innerHTML = '",_("Font Size :"),"'+slider3.value + ' px';")
 print(""" // Display the default slider value
 
 // Update the current slider value (each time you drag the slider handle)
 slider3.oninput = function() {""")
-print("  output3.innerHTML = '",_('Taille Police :'),"'+this.value + ' px';")
+print("  output3.innerHTML = '",_("Font Size :"),"'+this.value + ' px';")
 print("""
   if (canvas.getActiveObject()) {
     canvas.getActiveObject().fontSize = this.value ;

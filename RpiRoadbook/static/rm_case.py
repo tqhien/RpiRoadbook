@@ -14,12 +14,16 @@ _ = gettext.gettext
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -60,13 +64,13 @@ a = a.replace('jpg','png')
 
 try:
     os.remove(os.path.join(DIR,f))
-    print(_('Case supprim&eacute;e'))
+    print(_("Waypoint deleted"))
 except :
     pass
 
 try:
     os.remove("/mnt/piusb/Annotations/{}/{}".format(filedir,a))
-    print(_('Annotation supprim&eacute;e'))
+    print(_("Note deleted"))
 except :
     pass
 

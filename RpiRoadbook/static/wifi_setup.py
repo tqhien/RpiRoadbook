@@ -14,12 +14,16 @@ setupconfig = configparser.ConfigParser()
 candidates = ['/home/hien/Developpement/RpiRoadbook/RpiRoadbook/setup.cfg','/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_setup.cfg']
 setupconfig.read(candidates)
 
+fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
 it = gettext.translation('static', localedir='locales', languages=['it'])
 de = gettext.translation('static', localedir='locales', languages=['de'])
 es = gettext.translation('static', localedir='locales', languages=['es'])
 langue = setupconfig['Parametres']['langue']
-if langue == 'EN' :
+if langue == 'FR' :
+    fr.install()
+    _ = fr.gettext # Francais
+elif langue == 'EN' :
     en.install()
     _ = en.gettext # English
 elif langue == 'IT' :
@@ -59,7 +63,7 @@ print("""<html>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Configuration g&eacute;n&eacute;rale'))
+print(_("Main Setup"))
 print("""</h1>
 </div>
 
@@ -71,14 +75,14 @@ print("""</h1>
 """)
 print('   <div class="w3-half">')
 print('    <label>')
-print(_('R&eacute;seau wifi (SSID) :'))
+print(_("Wifi network (SSID) :"))
 print('</label>')
 print('    <input type="text" id="roue" name="user_ssid" value="{}" class="w3-input w3-border" placeholder="rpirb_custom">'.format(ssid))
 print('  </div>')
 
 print('   <div class="w3-half">')
 print('    <label for="passphrase">')
-print(_('Mot de passe : '))
+print(_("Password : "))
 print('</label>')
 print('    <input type="text" id="user_passphrase" name="user_passphrase" value={} class="w3-input w3-border" placeholder="rpiroadbook">'.format(wpa_passphrase))
 print('  </div>')
@@ -86,7 +90,7 @@ print('  </div>')
 print("""
 <div class="w3-bar">
         <button class="w3-submit w3-btn w3-red w3-hover-teal w3-margin" type="submit">""")
-print(_('Valider'))
+print(_("OK"))
 print("""</button>
 </div>
 </div>
@@ -97,7 +101,7 @@ print("""</button>
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="setup.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-wrench"></i>""")
-print(_('Configurer'))
+print(_("Setup"))
 print("""</a>
 </div>
 

@@ -49,14 +49,14 @@ print ("""<html>
 <!-- Entete -->
 <div class="w3-container w3-center w3-section">
 <h1>""")
-print(_('Configuration de la langue'))
+print(_("Language setting"))
 print("""</h1>
 </div>
 
 <div class="w3-container w3-section w3-topbar w3-bottombar w3-border-grey w3-margin">
 <h3>""")
-print(_('Langue modifi&eacute;e : {}.').format(setupconfig['Parametres']['langue']))
-print(_("Retour &agrave; l'accueil dans 5 secondes"))
+print(_("New language : {}.").format(setupconfig['Parametres']['langue']))
+print(_("Going back to Home in 5 secondes"))
 print('</h3>')
 
 print ("""
@@ -67,13 +67,13 @@ print ("""
 <div class="w3-bar w3-black">
   <a class="w3-bar-item w3-button w3-hover-blue" href="index.py"><i class="w3-xlarge fa fa-home"></i></a>
   <a href="screen_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge material-icons">web</i> """)
-print(_('Personnaliser les affichages'))
+print(_("Screen setup"))
 print('</a>  <a href="clock_setup.py" class="w3-bar-item w3-button w3-hover-blue"><i class="w3-xlarge fa fa-clock-o"></i> ')
-print(_("Ajuster l'horloge"))
+print(_("Time adjust"))
 print('</a>  <a href="warning_raz.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge fa fa-undo"></i> ')
-print(_('Config. Usine'))
+print(_("Factory reset"))
 print('</a>  <a href="warning_ota.py" class="w3-bar-item w3-button w3-right w3-hover-red"><i class="w3-xlarge material-icons">system_update</i> ')
-print(_('MAJ Firmware'))
+print(_("Firmware update"))
 print("""</a>
 </div>
 </body>
