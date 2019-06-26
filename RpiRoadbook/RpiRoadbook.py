@@ -1072,8 +1072,8 @@ class chrono1_widget(rb_widget):
         else:
              t = 0
         m,s = divmod (t,60)
-        if m >= 100 :
-            h,m = divmod (m,100)
+        if m >= 60 :
+            h,m = divmod (m,60)
         ss = (s*100) % 100
         blit_text(scr,_(" Stopwatch1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
@@ -1214,8 +1214,8 @@ class chrono2_widget(rb_widget):
         else:
              t=0
         m,s = divmod (t,60)
-        if m >= 100:
-            h,m = divmod (m,100)
+        if m >= 60:
+            h,m = divmod (m,60)
         ss = (s*100) % 100
         blit_text(scr,_(" StopWatch2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
