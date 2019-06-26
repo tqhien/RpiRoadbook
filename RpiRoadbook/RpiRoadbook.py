@@ -200,15 +200,23 @@ gotoConfig = GPIO.input(GPIO_LEFT) != GPIO.input(GPIO_RIGHT)
 #------------------------- Les callbacks des interruptions GPIO et fonctions utiles --------------------#
 #*******************************************************************************************************#
 def input_roue_callback(channel):
-    global totalisateur,distance,developpe
+    global totalisateur,old_totalisateur,distance,developpe
     global distance1,chrono_delay1,chrono_time1
     global distance2,chrono_delay2,chrono_time2
     global chronoconfig
+    global speed
+    global save_t_moy,save_t
 
     totalisateur += developpe
     distance += developpe
     distance1 += developpe
     distance2 += developpe
+
+    save_t = time.time()
+    if ( save_t - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+        speed = (totalisateur-old_totalisateur)*3.6/(save_t-save_t_moy)/1000;
+        save_t_moy = save_t
+        old_totalisateur = totalisateur
 
     # gestion du demarrage du chrono1
     # Valeur > 1 : on attend de faire suffisamment de tours de roue
@@ -218,7 +226,7 @@ def input_roue_callback(channel):
     if chrono_delay1 < 0 :
         chrono_delay1 = 0
     # Test si on doit demarrer le chrono1
-    if chrono_delay1 == 1 :
+    elif chrono_delay1 == 1 :
         chrono_time1 = time.time()
         chrono_delay1 = 0
         chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
@@ -230,7 +238,7 @@ def input_roue_callback(channel):
     if chrono_delay2 < 0 :
         chrono_delay2 = 0
     # Test si on doit demarrer le chrono2
-    if chrono_delay2 == 1 :
+    elif chrono_delay2 == 1 :
         chrono_time2 = time.time()
         chrono_delay2 = 0
         chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
@@ -915,15 +923,8 @@ class odo_widget (rb_widget):
 class speed_widget (rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-    def update(self):
-        global totalisateur,speed,save_t_moy,old_totalisateur
-        k = time.time()
-        if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-            speed = (totalisateur-old_totalisateur)*3.6/(k-save_t_moy)/1000;
-            save_t_moy = k
-            old_totalisateur = totalisateur
     def render(self,scr):
-        global angle
+        global angle,speed
         blit_text(scr,_(" Speed"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
             blit_text(scr,'{:3.0f} '.format(speed),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
@@ -1025,16 +1026,7 @@ class vmax1_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def update(self):
-        global speed,vmax1,totalisateur,save_t_moy,old_totalisateur
-        temps = time.time() - chrono_time1
-        if temps <= 2 :
-            speed = 0
-        else :
-            k = time.time()
-            if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-                speed = (totalisateur-old_totalisateur)*3.6/(k-save_t_moy)/1000;
-                save_t_moy = k
-                old_totalisateur = totalisateur
+        global speed,vmax1
         if speed > vmax1 :
             vmax1 = speed
     def render(self,scr):
@@ -1169,16 +1161,7 @@ class vmax2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def update(self):
-        global speed,vmax2,totalisateur,save_t_moy,old_totalisateur
-        temps = time.time() - chrono_time2
-        if temps <= 2 :
-            speed = 0
-        else :
-            k = time.time()
-            if ( k - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-                speed = (totalisateur-old_totalisateur)*3.6/(k-save_t_moy)/1000;
-                save_t_moy = k
-                old_totalisateur = totalisateur
+        global speed,vmax2
         if speed > vmax2 :
             vmax2 = speed
     def render(self,scr):
