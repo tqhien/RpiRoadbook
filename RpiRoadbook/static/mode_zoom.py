@@ -4,6 +4,7 @@ import cgi, os
 import cgitb; cgitb.enable()
 import re
 import configparser
+import time
 
 setupconfig = configparser.ConfigParser()
 # Pour l'internationalisation

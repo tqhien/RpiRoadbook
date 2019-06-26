@@ -3,6 +3,7 @@
 import cgi, os
 import cgitb; cgitb.enable()
 import re
+import time
 
 import configparser
 setupconfig = configparser.ConfigParser()
