@@ -204,19 +204,13 @@ def input_roue_callback(channel):
     global distance1,chrono_delay1,chrono_time1
     global distance2,chrono_delay2,chrono_time2
     global chronoconfig
-    global speed
+    global speed,vmax1,vmax2
     global save_t_moy,save_t
 
     totalisateur += developpe
     distance += developpe
     distance1 += developpe
     distance2 += developpe
-
-    save_t = time.time()
-    if ( save_t - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
-        speed = (totalisateur-old_totalisateur)*3.6/(save_t-save_t_moy)/1000;
-        save_t_moy = save_t
-        old_totalisateur = totalisateur
 
     # gestion du demarrage du chrono1
     # Valeur > 1 : on attend de faire suffisamment de tours de roue
@@ -923,6 +917,13 @@ class odo_widget (rb_widget):
 class speed_widget (rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
+    def update(self):
+        global speed,save_t_moy,old_totalisateur
+        save_t = time.time()
+        if ( save_t - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+            speed = (totalisateur-old_totalisateur)*3.6/(save_t-save_t_moy)/1000;
+            save_t_moy = save_t
+            old_totalisateur = totalisateur
     def render(self,scr):
         global angle,speed
         blit_text(scr,_(" Speed"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -982,6 +983,7 @@ class trip1_widget (rb_widget):
         odoconfig['Odometre']['Distance1'] = str(distance1)
         chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
         chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+        chronoconfig['Chronometre1']['vmax'] = str(vmax1)
         save_odoconfig()
         save_chronoconfig()
         save_t_moy = time.time()
@@ -1025,10 +1027,6 @@ class vmoy1_widget(rb_widget):
 class vmax1_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-    def update(self):
-        global speed,vmax1
-        if speed > vmax1 :
-            vmax1 = speed
     def render(self,scr):
         global angle
         blit_text(scr,_(" MaxSpeed1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -1046,15 +1044,17 @@ class chrono1_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global distance1,chrono_delay1,chrono_time1
+        global distance1,chrono_delay1,chrono_time1,vmax1
         global odoconfig,chronoconfig
         distance1 = 0
         chrono_delay1 = 5 * aimants
         chrono_time1 = 0
+        vmax1 = 0
         odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
         odoconfig['Odometre']['Distance1'] = str(distance1)
         chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
         chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+        chronoconfig['Chronometre1']['vmax'] = str(vmax1)
         save_odoconfig()
         save_chronoconfig()
     def render(self,scr):
@@ -1114,6 +1114,7 @@ class trip2_widget (rb_widget):
         distance2 = 0
         old_distance2 = distance2
         vmoy2 = 0
+        speed = 0
         vmax2 = 0
         chrono_delay2 = 5 * aimants
         chrono_time2 = 0
@@ -1121,6 +1122,7 @@ class trip2_widget (rb_widget):
         odoconfig['Odometre']['Distance2'] = str(distance2)
         chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
         chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+        chronoconfig['Chronometre2']['vmax'] = str(vmax2)
         save_odoconfig()
         save_chronoconfig()
         save_t_moy = time.time()
@@ -1160,10 +1162,6 @@ class vmoy2_widget(rb_widget):
 class vmax2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
-    def update(self):
-        global speed,vmax2
-        if speed > vmax2 :
-            vmax2 = speed
     def render(self,scr):
         global angle
         blit_text(scr,_(" MaxSpeed2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
@@ -1179,15 +1177,17 @@ class chrono2_widget(rb_widget):
     def __init__(self,layout='1',widget=0):
         rb_widget.__init__(self,layout,widget)
     def reset(self):
-        global distance2,chrono_delay2,chrono_time2
+        global distance2,chrono_delay2,chrono_time2,vmax2
         global odoconfig,chronoconfig
         distance2 = 0
         chrono_delay2 = 5 * aimants
         chrono_time2 = 0
+        vmax2 = 0
         odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
         odoconfig['Odometre']['Distance2'] = str(distance2)
         chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
         chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+        chronoconfig['Chronometre2']['vmax'] = str(vmax2)
         save_odoconfig()
         save_chronoconfig()
     def render(self,scr):
@@ -1448,8 +1448,10 @@ def check_configfile():
     save_chronoconfig()
     chrono_delay1 = int (chronoconfig['Chronometre1']['chrono_delay'])
     chrono_time1 = float(chronoconfig['Chronometre1']['chrono_time'])
+    vmax1 = float(chronoconfig['Chronometre1']['vmax'])
     chrono_delay2 = int (chronoconfig['Chronometre2']['chrono_delay'])
     chrono_time2 = float(chronoconfig['Chronometre2']['chrono_time'])
+    vmax2 = float(chronoconfig['Chronometre2']['vmax'])
     start_decompte = chronoconfig['Decompte']['start_decompte'] == 'True'
     chrono_decompte = float(chronoconfig['Decompte']['chrono_decompte'])
 
@@ -2074,6 +2076,7 @@ class RoadbookScene(SceneBase):
         global sprites,old_sprites,rbconfig,chronoconfig,odoconfig,lecture
         global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
         global widgets,force_refresh,widget_select_t,current_widget,widget_isselected,default_widget,widget_iscountdown
+        global speed,vmax1,vmax2,save_t_moy,old_totalisateur
 
         # MAJ des cases du rb
         if (self.case != self.oldcase) or force_refresh :
@@ -2102,6 +2105,15 @@ class RoadbookScene(SceneBase):
                 current_widget = default_widget
 
         # MAJ des infos des widgets
+        save_t = time.time()
+        if ( save_t - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+            speed = (totalisateur-old_totalisateur)*3.6/(save_t-save_t_moy)/1000;
+            save_t_moy = save_t
+            old_totalisateur = totalisateur
+        if speed > vmax1 :
+            vmax1 = speed
+        if speed > vmax2 :
+            vmax2 = speed
         for j in list(widgets.keys()):
             widgets[j].update()
 
@@ -2115,8 +2127,10 @@ class RoadbookScene(SceneBase):
             save_t_odo = time.time()
             chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
             chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+            chronoconfig['Chronometre1']['vmax'] = str(vmax1)
             chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
             chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+            chronoconfig['Chronometre2']['vmax'] = str(vmax2)
             save_chronoconfig()
 
 
@@ -2126,7 +2140,7 @@ class RoadbookScene(SceneBase):
         update_sprites(screen)
         for j in list(widgets.keys()):
             widgets[j].render(screen)
-        #update_labels(screen)
+        #update_labels(screen)1
 
 
 
@@ -2194,8 +2208,18 @@ class OdometerScene(SceneBase):
         global chronoconfig,odoconfig
         global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
         global widgets
+        global speed,vmax1,vmax2,save_t_moy,old_totalisateur
 
         # MAJ des infos des widgets
+        save_t = time.time()
+        if ( save_t - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+            speed = (totalisateur-old_totalisateur)*3.6/(save_t-save_t_moy)/1000;
+            save_t_moy = save_t
+            old_totalisateur = totalisateur
+        if speed > vmax1 :
+            vmax1 = speed
+        if speed > vmax2 :
+            vmax2 = speed
         for j in list(widgets.keys()):
             widgets[j].update()
 
@@ -2209,8 +2233,10 @@ class OdometerScene(SceneBase):
             save_t_odo = time.time()
             chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
             chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+            chronoconfig['Chronometre1']['vmax'] = str(vmax1)
             chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
             chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+            chronoconfig['Chronometre2']['vmax'] = str(vmax2)
             save_chronoconfig()
 
     def Render(self, screen):
