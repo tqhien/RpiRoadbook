@@ -79,16 +79,17 @@ if 'filename' in form:
     message = _("No file uploaded")
   print('<p><h3>{}</h3></p>'.format(message))
   # Taille en Postcript point, soit en 72 dpi donc /72*2.54 pour avoir la taille en cm puis ou /72*150 pour avoir le nb de pixel si on extrait a 150dpi
-  # pour une page A4, on a donc 595x842 pts, soit une image de 1240x1754px (595/72*150,842/72*150)
+  # pour une page A4 en portrait, on a donc 595x842 pts, soit une image de 1240x1754px (595/72*150,842/72*150)
+  # pour une page A4 en paysage, on a donc 842x595 pts, soit une image de 1754x1240 (842/72*150,595/72*150)
   width, height = page_size ('/mnt/piusb/'+fn)
   width_px = math.floor(width/72*150)
   height_px = math.floor(height/72*150)
   width_mm = width/72*25.4
   height_mm = height/72*25.4
-  if 300 / width_px * height_px > 425 :
+  if 425 / width_px * height_px > 425 :
     ratio = 425 / height_px
   else :
-    ratio = 300 / width_px
+    ratio = 425 / width_px
   #print(width,height,width_mm,height_mm)
   page = convert_from_path('/mnt/piusb/'+fn, output_folder='/mnt/piusb/thumbnail/',first_page = 1, last_page=1, dpi=150, singlefile='{:03}'.format(0), fmt='jpg')
   print("""
@@ -123,8 +124,8 @@ if 'filename' in form:
 
 <div class="w3-half" id="mycanvas" style="float:left;position:relative;height:425px">
    <div class="w3-margin">
-      <canvas id="imageView" width="300" height="425" style="position: absolute; top: 0; z-index: 0;"></canvas>
-      <canvas id="annotation" width="300" height="425" style="position: absolute; top: 0;z-index: 1;"></canvas>
+      <canvas id="imageView" width="425" height="425" style="position: absolute; top: 0; z-index: 0;"></canvas>
+      <canvas id="annotation" width="425" height="425" style="position: absolute; top: 0;z-index: 1;"></canvas>
         </div>
 </div>
 
@@ -212,8 +213,8 @@ if 'filename' in form:
             y = marge_up+(i-1)*hauteur;
         }
         """)
-  print('ctx2.strokeRect(0, y/{}*425, 300/nb_colonnes,hauteur/{}*425);'.format(height_mm,height_mm))
-  print('ctx2.fillText(i, 300/nb_colonnes/2, y/{}*425+2*hauteur/{}*425/3);'.format(height_mm,height_mm))
+  print('ctx2.strokeRect(0, y*{}/{}, {}/nb_colonnes,hauteur*{}/{});'.format(height_px*ratio,height_mm,width_px*ratio,height_px*ratio,height_mm))
+  print('ctx2.fillText(i, {}/nb_colonnes/2, (y+hauteur)*{}/{});'.format(width_px*ratio,height_px*ratio,height_mm))
   print("""
     }
     if (lecture) {
