@@ -2382,7 +2382,7 @@ class RoadbookZoomScene(SceneBase):
                     if self.case < self.nb_cases-1 :
                         sprites['2'] = (pygame.transform.rotozoom(get_image(self.case+1,angle,mode_jour),0,.5),(0,480-2*self.nh))
                     else :
-                        sprites['2'] = (pygame.transform.rotozoom(get_image(0,angle,mode_jour),0,.5),(0,480-.5*self.nh))
+                        sprites['2'] = (pygame.transform.rotozoom(get_image(0,angle,mode_jour),0,.5),(0,480-2*self.nh))
             else :
                 for n in range(self.ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh,0))
