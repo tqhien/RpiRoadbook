@@ -1391,7 +1391,7 @@ def save_screenconfig(mode='Route'):
 
 def check_configfile():
     global guiconfig,setupconfig,mode_jour,rbconfig,odoconfig,chronoconfig,screenconfig
-    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture,langue
+    global totalisateur,old_totalisateur,distance1,distance2,developpe,aimants,chrono_delay1,chrono_time1,chrono_delay2,chrono_time2,orientation,lecture,langue,vmax1,vmax2
     global widgets,nb_widgets,ncases,current_screen,mode_jour,default_widget,current_widget
     global chrono_decompte,start_decompte,en,_
     global boutonsTrip,boutonsRB
