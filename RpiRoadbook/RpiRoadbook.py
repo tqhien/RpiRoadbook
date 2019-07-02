@@ -733,6 +733,9 @@ widget_layouts = {
         {'x':180,'y':0,'w':150,'h':240,'label_font':ROUGE25,'value_font':BLANC4,'unit_font':BLANC25,'over_font':ROUGE4,'inside_font':VERT4,'selected_font':BLANC4inv,'x1':1,'y1':235,'x2':30,'y2':200,'x3':100,'y3':70},
         {'x':330,'y':0,'w':300,'h':480,'label_font':ROUGE25,'value_font':BLANC200,'unit_font':BLANC25,'over_font':BLANC200,'inside_font':BLANC200,'selected_font':BLANC200,'x1':1,'y1':475,'x2':40,'y2':400,'x3':1,'y3':70},
         {'x':630,'y':0,'w':170,'h':480,'label_font':ROUGE25,'value_font':BLANC100,'unit_font':BLANC25,'over_font':BLANC100,'inside_font':BLANC200,'selected_font':BLANC200,'x1':1,'y1':480,'x2':40,'y2':400,'x3':1,'y3':70}],
+    'Z' : [
+        {'x':400,'y':0,'w':400,'h':120,'label_font':ROUGE25,'value_font':BLANC100,'unit_font':BLANC25,'over_font':BLANC100,'inside_font':BLANC100,'selected_font':BLANC100,'x1':1,'y1':1,'x2':70,'y2':1,'x3':1,'y3':80},
+    ],
 }
 
 
@@ -741,7 +744,7 @@ class rb_widget():
         global angle,widget_iscountdown
         self.widget_order = widget
         widget_iscountdown = False
-        angle = 0 if layout in ('0','1','2','3','4','11') else 90
+        angle = 0 if layout in ('0','1','2','3','4','11','Z') else 90
         a = widget_layouts[layout][widget]
         setup_alphabet(a['label_font'])
         setup_alphabet(a['value_font'])
@@ -2250,20 +2253,32 @@ class OdometerScene(SceneBase):
 #*******************************************************************************************************#
 class RoadbookZoomScene(SceneBase):
     def __init__(self, fname = ''):
-        global image_cache,filedir,fichiers,rb_ratio,sprites, old_sprites,angle
+        global image_cache,filedir,fichiers,rb_ratio,sprites, old_sprites,angle,widgets
+        global roue,aimants,developpe,old_distance1, distance1
+        global current_widget, old_widget,default_widget
         SceneBase.__init__(self,fname)
         filedir = os.path.splitext(self.filename)[0]
         check_configfile()
         sprites = {}
         old_sprites = {}
         image_cache = {}
+        widgets = {}
+
+        self.test = True
 
         self.orientation = setupconfig['Parametres']['orientation']
         angle = 90 if self.orientation == 'Portrait' else 0
         self.ncases = 6 if self.orientation == 'Portrait' else 2
+        if self.test :
+            self.ncases = 1
+            widgets[(0)] = trip1_widget('Z',0)
 
         (self.imgtmp_w,self.imgtmp_h) = (480,800) if self.orientation == 'Portrait' else (800,480)
         self.pages = {}
+
+        roue = int(setupconfig['Parametres']['roue'])
+        aimants = int(setupconfig['Parametres']['aimants'])
+        developpe = 1.0*roue / aimants
 
         #Chargement des images
         fichiers = sorted([name for name in os.listdir('/mnt/piusb/Conversions/'+filedir) if os.path.isfile(os.path.join('/mnt/piusb/Conversions/'+filedir, name))])
@@ -2285,13 +2300,46 @@ class RoadbookZoomScene(SceneBase):
             pygame.display.get_surface().fill(NOIR)
         pygame.display.update()
 
+        current_widget = 0
+        old_widget = 0
+        default_widget = 0
+
     def ProcessInput(self, events, pressed_keys):
+        global distance1,old_distance1,vmoy,vmax,save_t_moy,save_t_odo,chrono_delay1
+        global widgets,current_widget,nb_widgets,widget_select_t,widget_isselected
         for event in events:
             if event.type == pygame.QUIT:
                 self.Terminate()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.Terminate()
+
+                # les actions sur le widget courant
+                elif event.key == BOUTON_RIGHT:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
+                    widgets[(current_widget)].down()
+                elif event.key == BOUTON_LEFT:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
+                    widgets[(current_widget)].up()
+                elif event.key == BOUTON_BACKSPACE:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
+                    widgets[(current_widget)].reset()
+                elif event.key == BOUTON_HOME:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
+                    widgets[(current_widget)].upup()
+                elif event.key == BOUTON_END:
+                    widgets[(current_widget)].select()
+                    widget_select_t = time.time()
+                    widget_isselected = True
+                    widgets[(current_widget)].downdown()
                 elif event.key == BOUTON_UP:
                     self.oldcase = self.case
                     self.case -= 1
@@ -2310,22 +2358,69 @@ class RoadbookZoomScene(SceneBase):
             self.case = 0
 
     def Update(self):
-        global sprites,old_sprites,rbconfig,mode_jour
-        if self.case != self.oldcase :
+        global save_t_odo,angle,totalisateur,distance1,distance2
+        global sprites,old_sprites,rbconfig,chronoconfig,odoconfig,lecture
+        global chrono_delay1,chrono_time1,chrono_delay2,chrono_time2
+        global widgets,force_refresh,widget_select_t,current_widget,widget_isselected,default_widget,widget_iscountdown
+        global speed,vmax1,vmax2,save_t_moy,old_totalisateur
+
+        # MAJ des cases du rb
+        if (self.case != self.oldcase) or force_refresh :
             # On sauvegarde la nouvelle position
             rbconfig['Roadbooks']['case'] = str(self.case)
             save_rbconfig()
             if angle == 0 :
-                for n in range(self.ncases):
-                    sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh))
+                if not self.test :
+                    for n in range(self.ncases):
+                        sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(0,480-(n+1)*self.nh))
+                else :
+                    if self.case > 0 :
+                        sprites['0'] = (pygame.transform.rotozoom(get_image(self.case-1,angle,mode_jour),0,.5),(0,480-.5*self.nh))
+                    else :
+                        sprites['0'] = (pygame.transform.rotozoom(get_image(self.nb_cases-1,angle,mode_jour),0,.5),(0,480-.5*self.nh))
+                    sprites['1'] = (get_image(self.case,angle,mode_jour),(0,480-1.5*self.nh))
+                    if self.case < self.nb_cases-1 :
+                        sprites['2'] = (pygame.transform.rotozoom(get_image(self.case+1,angle,mode_jour),0,.5),(0,480-2*self.nh))
+                    else :
+                        sprites['2'] = (pygame.transform.rotozoom(get_image(0,angle,mode_jour),0,.5),(0,480-.5*self.nh))
             else :
                 for n in range(self.ncases):
                     sprites['{}'.format(n)] = (get_image(self.case+n,angle,mode_jour),(800-(n+1)*self.nh,0))
             self.oldcase = self.case
+        widgets[(0)].update()
+
+        # MAJ des infos des widgets
+        save_t = time.time()
+        if ( save_t - save_t_moy >= 1) : # Vitesse moyenne sur 1 seconde
+            speed = (totalisateur-old_totalisateur)*3.6/(save_t-save_t_moy)/1000;
+            save_t_moy = save_t
+            old_totalisateur = totalisateur
+        if speed > vmax1 :
+            vmax1 = speed
+        if speed > vmax2 :
+            vmax2 = speed
+
+        # Sauvegarde de l'odometre, distances et temps de depart de chrono toutes les 5 secondes
+        k = time.time()
+        if k - save_t_odo >= 5 : # On sauvegarde l'odometre toutes les 5 secondes
+            odoconfig['Odometre']['Totalisateur'] = str(totalisateur)
+            odoconfig['Odometre']['Distance1'] = str(distance1)
+            odoconfig['Odometre']['Distance2'] = str(distance2)
+            save_odoconfig()
+            save_t_odo = time.time()
+            chronoconfig['Chronometre1']['chrono_delay'] = str(chrono_delay1)
+            chronoconfig['Chronometre1']['chrono_time'] = str(chrono_time1)
+            chronoconfig['Chronometre1']['vmax'] = str(vmax1)
+            chronoconfig['Chronometre2']['chrono_delay'] = str(chrono_delay2)
+            chronoconfig['Chronometre2']['chrono_time'] = str(chrono_time2)
+            chronoconfig['Chronometre2']['vmax'] = str(vmax2)
+            save_chronoconfig()
 
     def Render(self, screen):
-        # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
+        global widgets
         update_sprites(screen)
+        # Positionnement des différents éléments d'affichage, s'ils ont été modifiés
+        widgets[(0)].render(screen)
 
 #*******************************************************************************************************#
 #------------------------- Definition des routes Flask   -----------------------------------------------#
