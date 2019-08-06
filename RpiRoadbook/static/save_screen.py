@@ -71,6 +71,7 @@ for k in range (1,nb_screens+1) :
         champkj = 'champ{}{}'.format(k,j)
         if champkj in form:
             screenconfig['Affichage{}'.format(k)]['ligne{}'.format(j)] = form[champkj].value
+            print(screenconfig['Affichage{}'.format(k)]['ligne{}'.format(j)])
 
 for attempt in range(5):
   try :

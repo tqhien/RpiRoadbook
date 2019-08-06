@@ -211,7 +211,7 @@ for j in range (1,nb_screens+1):
         print('<td>Widget {} : </td>'.format(i))
         print('<td>')
         print('<select id="champ{}{}" name="champ{}{}" style="width:110px;">'.format(j,i,j,i))
-        print('<option selected="" value=""></option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == '' else '<option value=""></option>')
+        print('<option selected="Aucun" value="Aucun"></option>' if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == '' else '<option value="Aucun"></option>')
         if screenconfig['Affichage{}'.format(j)]['ligne{}'.format(i)] == 'Totalisateur' :
             print('<option selected="Totalisateur" value="Totalisateur">',_("Distance"),'</option>')
         else :
