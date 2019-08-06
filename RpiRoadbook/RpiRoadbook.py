@@ -1018,9 +1018,9 @@ class vmoy1_widget(rb_widget):
         global angle
         blit_text(scr,_(" Avg.Speed1"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:3.0f}   '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+            blit_text(scr,'{:3.0f} '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
-            blit_text(scr,'{:3.0f}   '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:3.0f} '.format(vmoy1),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
@@ -1155,9 +1155,9 @@ class vmoy2_widget(rb_widget):
         global angle
         blit_text(scr,_(" Avg.Speed2"),(self.x+self.x1,self.y+self.y1), self.label_font,angle)
         if self.selected:
-            blit_text(scr,'{:03.0f}   '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
+            blit_text(scr,'{:03.0f} '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.selected_font, angle)
         else:
-            blit_text(scr,'{:03.0f}   '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
+            blit_text(scr,'{:03.0f} '.format(vmoy2),(self.x+self.x2,self.y+self.y2),self.value_font, angle)
         blit_text(scr,'km/h',(self.x+self.x3,self.y+self.y3),self.unit_font,angle)
         r = pygame.draw.rect(scr,GRIS,(self.x,self.y,self.w,self.h),1)
         pygame.display.update(r)
@@ -2290,7 +2290,7 @@ class RoadbookZoomScene(SceneBase):
 
         samplepage = pygame.image.load (os.path.join('/mnt/piusb/Conversions/'+filedir,fichiers[0]))
         (w,h) = samplepage.get_rect().size
-        rb_ratio = 480/w if self.orientation == 'Portrait' else 800/w
+        rb_ratio = 480/w if self.orientation == 'Portrait' else min(800/w,240/h)
         # Mise à l'échelle des images
         self.nh = h * rb_ratio
 
