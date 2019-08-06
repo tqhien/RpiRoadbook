@@ -90,11 +90,6 @@ if 'user_rb' in form:
   print (_("RB Buttons, mode : {}").format(setupconfig['Parametres']['boutonsRB']))
   print('<br>')
 
-if 'user_pull' in form:
-  setupconfig['Parametres']['boutonsPull'] = form['user_pull'].value
-  print (_("Pull Buttons : {}").format(setupconfig['Parametres']['boutonsPull']))
-  print('<br>')
-
 for attempt in range(5):
   try :
     with open('/mnt/piusb/.conf/RpiRoadbook_setup.cfg', 'w') as configfile:

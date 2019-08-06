@@ -157,7 +157,8 @@ candidates = ['/home/rpi/RpiRoadbook/setup.cfg','/mnt/piusb/.conf/RpiRoadbook_se
 setupconfig.read(candidates)
 boutonsTrip = setupconfig['Parametres']['boutonsTrip']
 boutonsRB = setupconfig['Parametres']['boutonsRB']
-boutonsPull = setupconfig['Parametres']['boutonsPull']
+# boutonsPull = setupconfig['Parametres']['boutonsPull']
+boutonsPull = 'Up'
 
 # Logfile pour debogage
 def logdebug (st) :

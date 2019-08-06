@@ -21,7 +21,6 @@ orientation = setupconfig['Parametres']['orientation']
 lecture = setupconfig['Parametres']['lecture']
 boutonsTrip = setupconfig['Parametres']['boutonsTrip']
 boutonsRB = setupconfig['Parametres']['boutonsRB']
-boutonsPull = setupconfig['Parametres']['boutonsPull']
 
 fr = gettext.translation('static', localedir='locales', languages=['fr'])
 en = gettext.translation('static', localedir='locales', languages=['en'])
@@ -141,20 +140,6 @@ if boutonsRB == '1' :
 else:
   print('    <option value="1">',_("Up/Down"),'</option>')
   print('    <option selected="2" value="2">',_("Down/Up"),'</option>')
-print('     </select>')
-print('  </div>')
-
-print('   <div class="w3-col m3">')
-print('    <label for="boutonsPull">')
-print(_("Pullup/down Buttons"))
-print('</label>')
-print('    <select id="boutonsPull" name="user_pull" class="w3-select">')
-if boutonsPull == 'Up' :
-  print('    <option selected="Up" value="Up">',_("Pull-Up"),'</option>')
-  print('    <option value="Down">',_("Pull-Down"),'</option>')
-else:
-  print('    <option value="Up">',_("Pull-Up"),'</option>')
-  print('    <option selected="Down" value="Down">',_("Pull-Down"),'</option>')
 print('     </select>')
 print('  </div>')
 
